@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#e7ede5">
     <title>Project Brian</title>
     <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="./styles.css?v=20260823-22">
+    <link rel="stylesheet" href="./styles.css?v=20260823-23">
   </head>
   <body>
     <main class="app-shell">
@@ -82,10 +82,7 @@
             <p id="phase-label" class="eyebrow">Opening roll</p>
             <h1 id="game-title">Roll to begin</h1>
           </div>
-          <div class="game-header-actions">
-            <button id="main-menu-button" class="text-button" type="button">Main menu</button>
-            <button id="new-game-button" class="text-button" type="button">New game</button>
-          </div>
+          <button id="new-game-button" class="text-button" type="button">New game</button>
         </header>
 
         <div id="board" class="board" aria-live="polite"></div>
@@ -104,12 +101,13 @@
             <button id="skip-turn-button" class="secondary" type="button" hidden>Skip turn</button>
             <button id="replay-move-button" class="secondary" type="button" hidden>Replay last move</button>
             <button id="end-game-button" class="secondary" type="button" hidden>End game</button>
+            <button id="main-menu-button" class="text-button" type="button">Main menu</button>
           </div>
           <p id="turn-status" class="sr-only" aria-live="polite">Each player rolls both dice. Highest total goes first.</p>
         </div>
       </section>
     </main>
 
-    <script type="module" src="./src/app.js?v=20260823-22"></script>
+    <script type="module" src="./src/app.js?v=20260823-23"></script>
   </body>
 </html>

@@ -17,7 +17,7 @@ export function getDicePresentation(state, viewerUid = null) {
   const uid = liveRoll ? state.turnUid : dice ? state.lastAction.uid : state?.turnUid;
   const player = state?.players?.find((candidate) => candidate.uid === uid);
   const owner = uid === viewerUid ? "Your" : `${player?.name ?? "Player"}'s`;
-  const context = state?.phase === "opening-roll"
+  const context = state?.lastAction?.type === "opening-roll"
     ? "opening roll"
     : liveRoll ? "roll" : dice ? "last roll" : "next roll";
 

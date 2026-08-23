@@ -1,5 +1,5 @@
 import { PLAYERS, renderBoard } from "./board.js?v=20260823-19";
-import { getDicePresentation, rollDice } from "./dice.js?v=20260823-22";
+import { getDicePresentation, rollDice } from "./dice.js?v=20260823-23";
 import { loadTurnReplay, saveTurnReplay } from "./replay.js?v=20260823-19";
 import {
   applyMove,
@@ -443,8 +443,10 @@ function renderGame() {
     ? legalMoves.filter(({ pieceId }) => pieceId === selectedMarbleId).map(({ destination }) => destination)
     : [];
 
+  const openingWinner = gameState.phase === "roll" && gameState.lastAction?.type === "opening-roll";
   phaseLabel.textContent = gameState.phase === "opening-roll"
     ? `Opening roll ${gameState.opening.round}`
+    : openingWinner ? "Opening winner"
     : gameState.phase === "finished" ? "Winner"
     : gameState.phase === "ended" ? "Game ended" : "Current turn";
   gameTitle.textContent = gameState.phase === "finished"

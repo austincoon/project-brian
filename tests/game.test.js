@@ -105,7 +105,7 @@ test("Web Crypto die sampling is unbiased and always returns 1 through 6", () =>
 
 test("dice presentation identifies live, previous, and upcoming rollers", () => {
   let state = activeGame();
-  assert.equal(getDicePresentation(state, "a").label, "Blair's last roll");
+  assert.equal(getDicePresentation(state, "a").label, "Blair's opening roll");
   state.lastAction = { type: "skip" };
   assert.equal(getDicePresentation(state, "a").label, "Your next roll");
 

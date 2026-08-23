@@ -294,13 +294,6 @@ legend {
   white-space: nowrap;
 }
 
-.game-header-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 0.35rem;
-}
-
 #game-title {
   margin: 0;
   color: var(--active-color, var(--ink));
