@@ -26,7 +26,7 @@ import {
   skipTurn,
   startGame,
 } from "../src/game.js";
-import { rollDie } from "../src/dice.js";
+import { getDicePresentation, rollDie } from "../src/dice.js";
 import { loadTurnReplay, saveTurnReplay } from "../src/replay.js";
 
 const players = [
@@ -101,6 +101,20 @@ test("Web Crypto die sampling is unbiased and always returns 1 through 6", () =>
 
   const bytes = [255, 5];
   assert.equal(rollDie((buffer) => { buffer[0] = bytes.shift(); }), 6);
+});
+
+test("dice presentation identifies live, previous, and upcoming rollers", () => {
+  let state = activeGame();
+  assert.equal(getDicePresentation(state, "a").label, "Blair's last roll");
+  state.lastAction = { type: "skip" };
+  assert.equal(getDicePresentation(state, "a").label, "Your next roll");
+
+  state = applyRoll(state, "a", [6, 2]);
+  assert.equal(getDicePresentation(state, "b").label, "Alex's roll");
+
+  state = applyMove(state, "a", "a:0", "track:2", 6);
+  state = applyMove(state, "a", "a:0", "track:4", 2);
+  assert.equal(getDicePresentation(state, "b").label, "Alex's last roll");
 });
 
 test("database rules enforce the room security boundary", () => {

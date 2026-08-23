@@ -8,3 +8,18 @@ export function rollDie(randomValues = crypto.getRandomValues.bind(crypto)) {
 export function rollDice() {
   return [rollDie(), rollDie()];
 }
+
+export function getDicePresentation(state, viewerUid = null) {
+  const liveRoll = state?.phase === "move" && Array.isArray(state.dice);
+  const dice = liveRoll
+    ? state.dice
+    : Array.isArray(state?.lastAction?.dice) ? state.lastAction.dice : null;
+  const uid = liveRoll ? state.turnUid : dice ? state.lastAction.uid : state?.turnUid;
+  const player = state?.players?.find((candidate) => candidate.uid === uid);
+  const owner = uid === viewerUid ? "Your" : `${player?.name ?? "Player"}'s`;
+  const context = state?.phase === "opening-roll"
+    ? "opening roll"
+    : liveRoll ? "roll" : dice ? "last roll" : "next roll";
+
+  return { dice, uid, color: player?.color ?? null, label: `${owner} ${context}` };
+}

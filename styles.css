@@ -294,6 +294,13 @@ legend {
   white-space: nowrap;
 }
 
+.game-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.35rem;
+}
+
 #game-title {
   margin: 0;
   color: var(--active-color, var(--ink));
@@ -553,6 +560,31 @@ legend {
   padding: 0.45rem 0 0.65rem;
 }
 
+.dice-owner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto 0.25rem;
+  padding: 0.45rem 0.8rem;
+  border: 0.08rem solid var(--dice-owner-color, #8d7b5f);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--ink);
+}
+
+.dice-owner-swatch {
+  width: 0.8rem;
+  aspect-ratio: 1;
+  flex: none;
+  border: 0.12rem solid white;
+  border-radius: 50%;
+  background: var(--dice-owner-color, #8d7b5f);
+  box-shadow: 0 0 0 0.08rem var(--dice-owner-color, #8d7b5f);
+}
+
 .dice .die-button {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -562,7 +594,7 @@ legend {
   aspect-ratio: 1;
   padding: 0.55rem;
   place-items: center;
-  border: 0.12rem solid #8d7b5f;
+  border: 0.12rem solid var(--dice-owner-color, #8d7b5f);
   border-radius: 0.82rem;
   color: #20251f;
   background: linear-gradient(145deg, #fffef9, #e9e2d3);

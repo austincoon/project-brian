@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#e7ede5">
     <title>Project Brian</title>
     <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="./styles.css?v=20260823-10">
+    <link rel="stylesheet" href="./styles.css?v=20260823-22">
   </head>
   <body>
     <main class="app-shell">
@@ -82,12 +82,19 @@
             <p id="phase-label" class="eyebrow">Opening roll</p>
             <h1 id="game-title">Roll to begin</h1>
           </div>
-          <button id="new-game-button" class="text-button" type="button">New game</button>
+          <div class="game-header-actions">
+            <button id="main-menu-button" class="text-button" type="button">Main menu</button>
+            <button id="new-game-button" class="text-button" type="button">New game</button>
+          </div>
         </header>
 
         <div id="board" class="board" aria-live="polite"></div>
 
         <div class="game-controls panel">
+          <div class="dice-owner" aria-live="polite">
+            <span class="dice-owner-swatch" aria-hidden="true"></span>
+            <strong id="dice-owner-label">Waiting for a roll</strong>
+          </div>
           <div class="dice" aria-label="Dice have not been rolled">
             <span id="die-1" class="die-button" role="img" aria-label="First die">-</span>
             <span id="die-2" class="die-button" role="img" aria-label="Second die">-</span>
@@ -103,6 +110,6 @@
       </section>
     </main>
 
-    <script type="module" src="./src/app.js?v=20260823-21"></script>
+    <script type="module" src="./src/app.js?v=20260823-22"></script>
   </body>
 </html>

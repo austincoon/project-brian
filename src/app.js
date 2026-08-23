@@ -1,5 +1,5 @@
 import { PLAYERS, renderBoard } from "./board.js?v=20260823-19";
-import { rollDice } from "./dice.js?v=20260823-9";
+import { getDicePresentation, rollDice } from "./dice.js?v=20260823-22";
 import { loadTurnReplay, saveTurnReplay } from "./replay.js?v=20260823-19";
 import {
   applyMove,
@@ -37,9 +37,12 @@ const startButton = document.querySelector("#start-game-button");
 const leaveButton = document.querySelector("#leave-room-button");
 const phaseLabel = document.querySelector("#phase-label");
 const gameTitle = document.querySelector("#game-title");
+const mainMenuButton = document.querySelector("#main-menu-button");
 const newGameButton = document.querySelector("#new-game-button");
 const board = document.querySelector("#board");
+const gameControls = document.querySelector(".game-controls");
 const diceDisplay = document.querySelector(".dice");
+const diceOwnerLabel = document.querySelector("#dice-owner-label");
 const dieOne = document.querySelector("#die-1");
 const dieTwo = document.querySelector("#die-2");
 const dieDisplays = [dieOne, dieTwo];
@@ -140,6 +143,20 @@ function forgetOnlineRoom() {
   setRoomUrl(null);
 }
 
+function returnToMainMenu() {
+  if (gameMode === "online") forgetOnlineRoom();
+  else {
+    gameMode = null;
+    gameState = null;
+    pendingMoveReplay = null;
+    lastTurnReplay = [];
+  }
+  selectedMarbleId = null;
+  statusMessage = "";
+  homeError.textContent = "";
+  showScreen("home");
+}
+
 function playerName(uid) {
   return gameState?.players.find((player) => player.uid === uid)?.name ?? "Unknown player";
 }
@@ -207,6 +224,10 @@ async function watchRoom(code) {
     setRoomUrl(code);
     homeError.textContent = "";
     if (room.status === "playing" && room.game) {
+      if (room.game.phase === "ended") {
+        returnToMainMenu();
+        return;
+      }
       const previousGame = gameMode === "online" ? gameState : null;
       const action = room.game.lastAction;
       const gameId = room.restartedAt ?? room.startedAt;
@@ -372,12 +393,19 @@ function drawDie(button, value) {
 }
 
 function renderDice() {
-  const dice = gameState?.dice ?? gameState?.lastAction?.dice;
+  const presentation = getDicePresentation(
+    gameState,
+    gameMode === "online" ? firebaseUser?.uid : null,
+  );
+  const { dice } = presentation;
+  const ownerColor = PLAYERS[presentation.color]?.color ?? "#8d7b5f";
+  gameControls.style.setProperty("--dice-owner-color", ownerColor);
+  diceOwnerLabel.textContent = presentation.label;
   drawDie(dieOne, dice?.[0]);
   drawDie(dieTwo, dice?.[1]);
   diceDisplay.setAttribute(
     "aria-label",
-    dice ? `Dice show ${dice[0]} and ${dice[1]}` : "Dice have not been rolled",
+    dice ? `${presentation.label}: ${dice[0]} and ${dice[1]}` : presentation.label,
   );
 
   const counts = new Map();
@@ -426,7 +454,11 @@ function renderGame() {
   const titlePlayer = gameState.players.find(({ uid }) => uid === (gameState.winnerUid ?? player.uid));
   gameTitle.style.setProperty("--active-color", PLAYERS[titlePlayer.color].darkColor);
 
-  rollButton.textContent = gameState.phase === "opening-roll" ? "Opening roll" : "Roll dice";
+  rollButton.textContent = gameState.phase === "move"
+    ? "Dice in play"
+    : gameMode === "local" ? `Roll for ${player.name}`
+    : canAct ? (gameState.phase === "opening-roll" ? "Make your opening roll" : "Roll your dice")
+    : `Waiting for ${player.name}`;
   rollButton.disabled = actionLocked || replayInProgress || !canAct || !["opening-roll", "roll"].includes(gameState.phase);
   replayMoveButton.hidden = !lastTurnReplay.length;
   replayMoveButton.textContent = gameMode === "online" ? "Replay opponent move" : "Replay last move";
@@ -601,7 +633,17 @@ endGameButton.addEventListener("click", () => {
       await commitOnlineGame((state, uid) => endGame(state, uid), false);
     } else gameState = endGame(gameState, gameState.hostUid);
     selectedMarbleId = null;
+    returnToMainMenu();
   });
+});
+
+mainMenuButton.addEventListener("click", () => {
+  const active = ["opening-roll", "roll", "move"].includes(gameState?.phase);
+  const warning = gameMode === "online"
+    ? "Return to the main menu? Your seat will remain in the online game."
+    : "Return to the main menu? The current local game will be closed.";
+  if (active && !confirm(warning)) return;
+  returnToMainMenu();
 });
 
 newGameButton.addEventListener("click", () => {
