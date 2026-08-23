@@ -2,6 +2,8 @@
 
 A small, dependency-free web version of the marble board game for two to four players, using five marbles per player.
 
+Live site: <https://austincoon.github.io/project-brian/>
+
 ## Run locally
 
 The app uses native JavaScript modules, so serve it over HTTP rather than opening `index.html` directly.
