@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A private online marble race for two to four players.">
+    <meta name="theme-color" content="#e7ede5">
+    <title>Project Brian</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="./styles.css?v=20260823-10">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="screen" data-screen="home" aria-labelledby="home-title">
+        <h1 id="home-title">Project Brian</h1>
+
+        <form id="create-room-form" class="panel">
+          <h2>Create a room</h2>
+          <label for="host-name">Your name</label>
+          <input id="host-name" name="playerName" maxlength="24" autocomplete="nickname" required>
+          <button type="submit" disabled>Create room</button>
+        </form>
+
+        <form id="join-room-form" class="panel">
+          <h2>Join a room</h2>
+          <label for="join-name">Your name</label>
+          <input id="join-name" name="playerName" maxlength="24" autocomplete="nickname" required>
+          <label for="room-code">Invite code</label>
+          <input id="room-code" name="roomCode" minlength="6" maxlength="6" pattern="[A-HJ-NP-Z2-9]{6}" autocomplete="off" autocapitalize="characters" spellcheck="false" required>
+          <button type="submit" disabled>Join room</button>
+        </form>
+
+        <p id="home-error" class="error-message" aria-live="assertive"></p>
+        <button id="local-mode-button" class="text-button" type="button">Play together on one device</button>
+      </section>
+
+      <section class="screen" data-screen="local" aria-labelledby="local-title" hidden>
+        <p class="eyebrow">Local pass-and-play</p>
+        <h1 id="local-title">Local game</h1>
+        <p>Enter two to four players. Bring all five marbles Home first to win.</p>
+
+        <form id="local-game-form" class="panel">
+          <fieldset class="player-fields">
+            <legend>Players</legend>
+            <label for="player-1">Player 1 <span class="muted">(host)</span></label>
+            <input id="player-1" name="playerName" maxlength="24" autocomplete="nickname" required>
+
+            <label for="player-2">Player 2</label>
+            <input id="player-2" name="playerName" maxlength="24" autocomplete="off" required>
+
+            <label for="player-3">Player 3 <span class="muted">(optional)</span></label>
+            <input id="player-3" name="playerName" maxlength="24" autocomplete="off">
+
+            <label for="player-4">Player 4 <span class="muted">(optional)</span></label>
+            <input id="player-4" name="playerName" maxlength="24" autocomplete="off">
+          </fieldset>
+          <button type="submit">Start local game</button>
+          <button class="text-button" type="button" data-home>Back</button>
+        </form>
+      </section>
+
+      <section class="screen" data-screen="lobby" aria-labelledby="lobby-title" hidden>
+        <p class="eyebrow">Invite code</p>
+        <h1 id="lobby-title">Room <span id="lobby-code"></span></h1>
+        <div class="panel">
+          <label for="invite-link">Invite link</label>
+          <div class="invite-row">
+            <input id="invite-link" readonly>
+            <button id="copy-invite-button" class="secondary" type="button">Copy</button>
+          </div>
+          <h2>Players</h2>
+          <ol id="player-list" class="player-list"></ol>
+          <p id="lobby-status" class="muted" aria-live="polite">Waiting for players...</p>
+          <button id="start-game-button" type="button">Start game</button>
+          <button id="leave-room-button" class="text-button" type="button">Leave room</button>
+        </div>
+      </section>
+
+      <section class="screen screen-wide" data-screen="game" aria-labelledby="game-title" hidden>
+        <header class="game-header">
+          <div>
+            <p id="phase-label" class="eyebrow">Opening roll</p>
+            <h1 id="game-title">Roll to begin</h1>
+          </div>
+          <button id="new-game-button" class="text-button" type="button">New game</button>
+        </header>
+
+        <div id="board" class="board" aria-live="polite"></div>
+
+        <div class="game-controls panel">
+          <div class="dice" aria-label="Dice have not been rolled">
+            <span id="die-1" class="die-button" role="img" aria-label="First die">-</span>
+            <span id="die-2" class="die-button" role="img" aria-label="Second die">-</span>
+          </div>
+          <div class="control-buttons">
+            <button id="roll-button" type="button">Roll dice</button>
+            <button id="skip-turn-button" class="secondary" type="button" hidden>Skip turn</button>
+            <button id="replay-move-button" class="secondary" type="button" hidden>Replay last move</button>
+            <button id="end-game-button" class="secondary" type="button" hidden>End game</button>
+          </div>
+          <p id="turn-status" class="sr-only" aria-live="polite">Each player rolls both dice. Highest total goes first.</p>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="./src/app.js?v=20260823-21"></script>
+  </body>
+</html>
