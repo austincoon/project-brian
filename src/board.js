@@ -364,7 +364,7 @@ function drawHoles(svg, state) {
     "text-anchor": "middle",
     "aria-hidden": "true",
   });
-  centerLabel.textContent = "THE GAMBIT";
+  centerLabel.textContent = "";
   holes.append(centerLabel);
   svg.append(holes);
 }
