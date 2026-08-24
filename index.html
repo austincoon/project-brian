@@ -7,22 +7,35 @@
     <meta name="theme-color" content="#e7ede5">
     <title>Project Brian</title>
     <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="./styles.css?v=20260823-24">
+    <link rel="stylesheet" href="./styles.css?v=20260823-25">
   </head>
   <body>
     <main class="app-shell">
       <section class="screen" data-screen="home" aria-labelledby="home-title">
-        <h1 id="home-title">Project Brian</h1>
+        <header class="home-hero">
+          <p class="home-kicker">An extremely serious workplace initiative</p>
+          <h1 id="home-title"><span>Project</span> Brian</h1>
+          <p class="home-tagline">Five marbles. Two dice. One coworker to blame.</p>
+          <div class="home-game-pieces" aria-hidden="true">
+            <span class="home-die">⚄</span>
+            <span class="home-die">⚅</span>
+            <span class="home-marble home-marble-red"></span>
+            <span class="home-marble home-marble-blue"></span>
+            <span class="home-marble home-marble-yellow"></span>
+          </div>
+        </header>
 
-        <form id="create-room-form" class="panel">
+        <form id="create-room-form" class="panel home-panel home-panel-create">
           <h2>Create a room</h2>
+          <p class="home-panel-copy">Start a highly productive marble-related meeting.</p>
           <label for="host-name">Your name</label>
           <input id="host-name" name="playerName" maxlength="24" autocomplete="nickname" required>
           <button type="submit" disabled>Create room</button>
         </form>
 
-        <form id="join-room-form" class="panel">
+        <form id="join-room-form" class="panel home-panel home-panel-join">
           <h2>Join a room</h2>
+          <p class="home-panel-copy">Enter the evidence code. Deny everything.</p>
           <label for="join-name">Your name</label>
           <input id="join-name" name="playerName" maxlength="24" autocomplete="nickname" required>
           <label for="room-code">Invite code</label>
