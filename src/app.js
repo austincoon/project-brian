@@ -48,7 +48,7 @@ const dieTwo = document.querySelector("#die-2");
 const dieDisplays = [dieOne, dieTwo];
 const rollButton = document.querySelector("#roll-button");
 const replayMoveButton = document.querySelector("#replay-move-button");
-const skipButton = document.querySelector("#skip-turn-button");
+
 const endGameButton = document.querySelector("#end-game-button");
 const turnStatus = document.querySelector("#turn-status");
 
@@ -189,8 +189,6 @@ function describeLastAction() {
       return `${name} used ${action.die} and moved to ${action.destination}.${capture}${remaining}`;
     }
     case "opening-skip":
-    case "skip":
-      return `${playerName(action.skippedUid)}'s turn was skipped by the host.`;
     case "ended":
       return `${name} ended the game.`;
     default:
@@ -467,8 +465,7 @@ function renderGame() {
   replayMoveButton.disabled = actionLocked || replayInProgress;
   const hostUid = gameMode === "online" ? onlineRoom.hostUid : gameState.hostUid;
   const isHost = gameMode === "online" ? firebaseUser.uid === hostUid : true;
-  skipButton.hidden = ["finished", "ended"].includes(gameState.phase) || !isHost || !player || player.uid === hostUid;
-  skipButton.disabled = actionLocked || replayInProgress;
+
   endGameButton.hidden = !isHost || !["opening-roll", "roll", "move"].includes(gameState.phase);
   endGameButton.disabled = actionLocked || replayInProgress;
   newGameButton.hidden = gameMode === "online" && (firebaseUser.uid !== hostUid || !["finished", "ended"].includes(gameState.phase));
@@ -615,17 +612,7 @@ setupForm.addEventListener("submit", (event) => {
 for (const input of playerInputs) input.addEventListener("input", () => input.setCustomValidity(""));
 rollButton.addEventListener("click", () => runGameAction(handleRoll));
 replayMoveButton.addEventListener("click", replayLastTurn);
-skipButton.addEventListener("click", () => {
-  const skipped = currentPlayer();
-  if (!skipped || !confirm(`Skip ${skipped.name}'s turn?`)) return;
-  runGameAction(async () => {
-    if (gameMode === "online") {
-      skipTurn(gameState, firebaseUser.uid);
-      await commitOnlineGame((state, uid) => skipTurn(state, uid), false);
-    } else gameState = skipTurn(gameState, gameState.hostUid);
-    selectedMarbleId = null;
-  });
-});
+
 
 endGameButton.addEventListener("click", () => {
   if (!confirm("End this game for everyone?")) return;
