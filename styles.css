@@ -176,7 +176,6 @@ legend {
 }
 
 .home-kicker,
-.home-tagline,
 #home-title {
   position: relative;
   z-index: 1;
@@ -209,13 +208,6 @@ legend {
   letter-spacing: 0.22em;
   line-height: 1;
   text-transform: uppercase;
-}
-
-.home-tagline {
-  margin: 1.35rem 0 0;
-  color: #f2f6f0;
-  font-size: clamp(1rem, 2.4vw, 1.3rem);
-  font-weight: 650;
 }
 
 .home-game-pieces {
@@ -833,10 +825,6 @@ legend {
 
   .home-kicker {
     max-width: 18rem;
-  }
-
-  .home-tagline {
-    max-width: 13rem;
   }
 
   .home-game-pieces {
