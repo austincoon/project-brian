@@ -139,7 +139,7 @@ legend {
   grid-template-areas:
     "board header"
     "board controls";
-  grid-template-columns: minmax(0, 1fr) clamp(19rem, 24vw, 23rem);
+  grid-template-columns: minmax(0, 1fr) clamp(23rem, 30vw, 30rem);
   grid-template-rows: auto 1fr;
   align-items: start;
   width: 100%;
@@ -887,7 +887,7 @@ legend {
 
 .board {
   grid-area: board;
-  place-self: center;
+  place-self: center end;
   width: min(100%, calc(100dvh - clamp(1.5rem, 4vw, 3rem)));
   max-width: none;
   aspect-ratio: 1;
@@ -895,7 +895,7 @@ legend {
   padding: clamp(0.35rem, 0.7vw, 0.65rem);
   border: 0.38rem solid #111;
   border-radius: clamp(0.8rem, 2vw, 1.5rem);
-  background: #17131f;
+  background: #f1ead8;
   box-shadow: 0.9rem 0.9rem 0 #111, -0.55rem -0.55rem 0 #fff900;
   transform: rotate(-0.35deg);
 }
@@ -945,10 +945,8 @@ legend {
 }
 
 .base-label {
-  fill: #fff;
-  stroke: #111;
-  stroke-width: 4px;
-  paint-order: stroke fill;
+  fill: #111;
+  stroke: none;
 }
 
 .center-label {
@@ -1265,6 +1263,7 @@ legend {
 
   .board {
     width: min(100%, 42rem);
+    place-self: center;
   }
 
   .game-controls {
