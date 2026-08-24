@@ -129,26 +129,16 @@ const homeHoles = PLAYER_ORDER.flatMap((color) => {
   }));
 });
 
-export const STAR_ROUTE = Object.freeze(
-  Array.from({ length: 4 }, (_, index) => `star:${index}`),
-);
-
-const starAccess = [
-  { id: "star:0", track: "track:6", exit: "track:6" },
-  { id: "star:1", track: "track:18", exit: "track:18" },
-  { id: "star:2", track: "track:30", exit: "track:30" },
-  { id: "star:3", track: "track:42", exit: "track:42" },
+const centerAccess = [
+  { track: "track:6", exit: "track:6" },
+  { track: "track:18", exit: "track:18" },
+  { track: "track:30", exit: "track:30" },
+  { track: "track:42", exit: "track:42" },
 ];
-
-const starHoles = starAccess.map(({ id }, index) => ({
-  id,
-  kind: "star",
-  ...rotateCounterClockwise({ x: 560, y: 560 }, index),
-}));
 
 export const CENTER_SHORTCUT = Object.freeze({
   id: "center",
-  access: Object.freeze(starAccess.map(({ id, track, exit }) => ({ id, track, exit }))),
+  access: Object.freeze(centerAccess),
 });
 
 const centerHole = { id: CENTER_SHORTCUT.id, kind: "center", x: CENTER, y: CENTER };
@@ -157,7 +147,6 @@ export const BOARD_HOLES = Object.freeze([
   ...trackHoles,
   ...baseHoles,
   ...homeHoles,
-  ...starHoles,
   centerHole,
 ]);
 
@@ -188,7 +177,7 @@ for (const color of PLAYER_ORDER) {
   });
 }
 
-for (const { track, exit } of starAccess) {
+for (const { track, exit } of centerAccess) {
   connections[track].push(CENTER_SHORTCUT.id);
   connections[CENTER_SHORTCUT.id].push(exit);
 }
@@ -240,7 +229,6 @@ function accessibleHoleName(hole, playerNames = {}) {
   if (hole.kind === "track") return hole.player
     ? `${playerNames[hole.player] ?? PLAYERS[hole.player].label} Start, track ${hole.id.split(":")[1]}`
     : `Track ${hole.id.split(":")[1]}`;
-  if (hole.kind === "star") return `Gambit access ${Number(hole.id.split(":")[1]) + 1}`;
   return `${playerNames[hole.player] ?? PLAYERS[hole.player].label} ${hole.kind} ${Number(hole.id.split(":")[2]) + 1}`;
 }
 
@@ -259,10 +247,10 @@ function drawRoutes(svg) {
     }));
   }
 
-  for (const { id, track } of CENTER_SHORTCUT.access) {
+  for (const { track } of CENTER_SHORTCUT.access) {
     routes.append(svgElement("polyline", {
       class: "route-line route-line--gambit",
-      points: points([track, id, CENTER_SHORTCUT.id]),
+      points: points([track, CENTER_SHORTCUT.id]),
     }));
   }
 
@@ -342,19 +330,6 @@ function drawHoles(svg, state) {
     }
 
     holes.append(circle);
-
-    if (hole.kind === "star") {
-      const star = svgElement("text", {
-        class: "star-mark",
-        x: hole.x,
-        y: hole.y + 0.5,
-        "text-anchor": "middle",
-        "dominant-baseline": "middle",
-        "aria-hidden": "true",
-      });
-      star.textContent = "\u2605";
-      holes.append(star);
-    }
   }
 
   const centerLabel = svgElement("text", {
@@ -472,7 +447,7 @@ export function renderBoard(container, options = {}) {
   const title = svgElement("title", { id: "board-title" });
   title.textContent = "Project Brian game board";
   const description = svgElement("desc", { id: "board-description" });
-  description.textContent = "A four-player board with five Base and Home positions per player, a shared track, four star access points, and the center Gambit.";
+  description.textContent = "A four-player board with five Base and Home positions per player, a shared track, and the center Gambit.";
   svg.append(
     title,
     description,
