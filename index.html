@@ -8,8 +8,19 @@
     <title>Project Brian</title>
     <link rel="icon" href="data:,">
     <link rel="stylesheet" href="./styles.css?v=20260823-29">
+    
+    <!-- Dark Mode Init Script -->
+    <script>
+      const savedTheme = localStorage.getItem('theme');
+      const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (savedTheme === 'dark' || (!savedTheme && systemDark)) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    </script>
   </head>
   <body>
+    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode">🌓</button>
+
     <main class="app-shell">
       <section class="screen" data-screen="home" aria-labelledby="home-title">
         <header class="home-hero">
@@ -43,16 +54,16 @@
         </form>
 
         <p id="home-error" class="error-message" aria-live="assertive"></p>
-        <button id="local-mode-button" class="text-button" type="button">Play together on one device</button>
+        <button id="local-mode-button" class="text-button local-mode-btn" type="button">Play together on one device</button>
         <footer class="home-signature">Created by Austin Coon</footer>
       </section>
 
       <section class="screen" data-screen="local" aria-labelledby="local-title" hidden>
         <p class="eyebrow">Local pass-and-play</p>
         <h1 id="local-title">Local game</h1>
-        <p>Enter two to four players. Bring all five marbles Home first to win.</p>
+        <p class="local-desc">Enter two to four players. Bring all five marbles Home first to win.</p>
 
-        <form id="local-game-form" class="panel">
+        <form id="local-game-form" class="panel local-panel">
           <fieldset class="player-fields">
             <legend>Players</legend>
             <label for="player-1">Player 1 <span class="muted">(host)</span></label>
@@ -75,11 +86,11 @@
       <section class="screen" data-screen="lobby" aria-labelledby="lobby-title" hidden>
         <p class="eyebrow">Invite code</p>
         <h1 id="lobby-title">Room <span id="lobby-code"></span></h1>
-        <div class="panel">
+        <div class="panel lobby-panel">
           <label for="invite-link">Invite link</label>
           <div class="invite-row">
             <input id="invite-link" readonly>
-            <button id="copy-invite-button" class="secondary" type="button">Copy</button>
+            <button id="copy-invite-button" class="secondary lobby-btn" type="button">Copy</button>
           </div>
           <h2>Players</h2>
           <ol id="player-list" class="player-list"></ol>
@@ -95,7 +106,7 @@
             <p id="phase-label" class="eyebrow">Opening roll</p>
             <h1 id="game-title">Roll to begin</h1>
           </div>
-          <button id="new-game-button" class="text-button" type="button">New game</button>
+          <button id="new-game-button" class="text-button new-game-btn" type="button">New game</button>
         </header>
 
         <div id="board" class="board" aria-live="polite"></div>
@@ -121,6 +132,17 @@
       </section>
     </main>
 
+    <!-- Theme Toggle Script -->
+    <script>
+      const toggleBtn = document.getElementById('theme-toggle');
+      toggleBtn.addEventListener('click', () => {
+        const root = document.documentElement;
+        const currentTheme = root.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+      });
+    </script>
     <script type="module" src="./src/app.js?v=20260823-23"></script>
   </body>
 </html>
