@@ -235,7 +235,7 @@ legend {
   margin: 0;
   color: #fff900;
   font-family: Impact, Haettenschweiler, "Arial Black", sans-serif;
-  font-size: clamp(5.3rem, 14vw, 10rem);
+  font-size: clamp(2.65rem, 7vw, 5rem);
   font-weight: 900;
   line-height: 0.72;
   letter-spacing: -0.045em;
