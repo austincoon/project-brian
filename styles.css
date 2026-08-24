@@ -1,15 +1,9 @@
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #172019;
+  background: #e7ede5;
   font-synthesis: none;
-
-  /* Theme Color Variables */
-  --bg-main: #e7ede5;
-  --bg-gradient-1: rgba(255, 255, 255, 0.95);
-  --bg-gradient-2: rgba(196, 215, 192, 0.72);
-  --bg-gradient-start: #eef3ec;
-  --bg-gradient-end: #dfe8dd;
-
   --ink: #172019;
   --muted: #667067;
   --green: #244f31;
@@ -18,54 +12,6 @@
   --line: #c7d1c5;
   --paper: rgba(255, 255, 255, 0.86);
   --shadow: 0 1rem 3rem rgba(24, 40, 27, 0.12);
-
-  /* Brutalist UI Colors */
-  --brutal-black: #111111;
-  --brutal-white: #ffffff;
-  --brutal-yellow: #fff900;
-  --brutal-green: #7dff00;
-  --brutal-pink: #ff2bd6;
-  --brutal-cyan: #00e5ff;
-  --brutal-purple: #5b24ff;
-  --brutal-red: #d90000;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --bg-main: #0f1410;
-    --bg-gradient-1: rgba(30, 42, 33, 0.95);
-    --bg-gradient-2: rgba(18, 28, 20, 0.82);
-    --bg-gradient-start: #141a15;
-    --bg-gradient-end: #0a0d0a;
-
-    --ink: #e4ebe5;
-    --muted: #8d9b8e;
-    --green: #377049;
-    --green-dark: #224d31;
-    --gold: #e09822;
-    --line: #2b362c;
-    --paper: rgba(20, 27, 21, 0.88);
-    --shadow: 0 1rem 3rem rgba(0, 0, 0, 0.5);
-  }
-}
-
-[data-theme="dark"] {
-  color-scheme: dark;
-  --bg-main: #0f1410;
-  --bg-gradient-1: rgba(30, 42, 33, 0.95);
-  --bg-gradient-2: rgba(18, 28, 20, 0.82);
-  --bg-gradient-start: #141a15;
-  --bg-gradient-end: #0a0d0a;
-
-  --ink: #e4ebe5;
-  --muted: #8d9b8e;
-  --green: #377049;
-  --green-dark: #224d31;
-  --gold: #e09822;
-  --line: #2b362c;
-  --paper: rgba(20, 27, 21, 0.88);
-  --shadow: 0 1rem 3rem rgba(0, 0, 0, 0.5);
 }
 
 * {
@@ -74,8 +20,7 @@
 
 html {
   min-height: 100%;
-  background: var(--bg-main);
-  color: var(--ink);
+  background: #e7ede5;
 }
 
 body {
@@ -83,11 +28,10 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   margin: 0;
-  color: var(--ink);
   background:
-    radial-gradient(circle at 8% 12%, var(--bg-gradient-1), transparent 28rem),
-    radial-gradient(circle at 92% 88%, var(--bg-gradient-2), transparent 30rem),
-    linear-gradient(145deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+    radial-gradient(circle at 8% 12%, rgba(255, 255, 255, 0.95), transparent 28rem),
+    radial-gradient(circle at 92% 88%, rgba(196, 215, 192, 0.72), transparent 30rem),
+    linear-gradient(145deg, #eef3ec 0%, #dfe8dd 100%);
 }
 
 button,
@@ -134,10 +78,10 @@ input {
   width: 100%;
   min-height: 2.9rem;
   padding: 0.7rem 0.82rem;
-  border: 0.08rem solid var(--line);
+  border: 0.08rem solid #aebaae;
   border-radius: 0.72rem;
   color: var(--ink);
-  background: var(--paper);
+  background: rgba(255, 255, 255, 0.94);
   box-shadow: inset 0 0.08rem 0.2rem rgba(23, 32, 25, 0.06);
 }
 
@@ -166,7 +110,7 @@ h2 {
 
 label,
 legend {
-  color: var(--ink);
+  color: #354138;
   font-size: 0.88rem;
   font-weight: 700;
 }
@@ -206,18 +150,18 @@ legend {
 
 .app-shell:has([data-screen="home"]:not([hidden])) {
   background:
-    radial-gradient(circle at 8% 18%, var(--brutal-yellow) 0 5rem, transparent 5.1rem),
-    radial-gradient(circle at 92% 82%, var(--brutal-green) 0 7rem, transparent 7.1rem),
-    repeating-linear-gradient(135deg, var(--brutal-pink) 0 1.5rem, #ff5f00 1.5rem 3rem);
+    radial-gradient(circle at 8% 18%, #fff900 0 5rem, transparent 5.1rem),
+    radial-gradient(circle at 92% 82%, #7dff00 0 7rem, transparent 7.1rem),
+    repeating-linear-gradient(135deg, #ff2bd6 0 1.5rem, #ff5f00 1.5rem 3rem);
 }
 
 .app-shell:has([data-screen="local"]:not([hidden])),
 .app-shell:has([data-screen="lobby"]:not([hidden])),
 .app-shell:has([data-screen="game"]:not([hidden])) {
   background:
-    radial-gradient(circle at 12% 84%, var(--brutal-green) 0 6rem, transparent 6.1rem),
-    radial-gradient(circle at 88% 12%, var(--brutal-yellow) 0 7rem, transparent 7.1rem),
-    repeating-conic-gradient(from 45deg, var(--brutal-pink) 0 25%, var(--brutal-purple) 0 50%) 50% / 6rem 6rem;
+    radial-gradient(circle at 12% 84%, #7dff00 0 6rem, transparent 6.1rem),
+    radial-gradient(circle at 88% 12%, #fff900 0 7rem, transparent 7.1rem),
+    repeating-conic-gradient(from 45deg, #ff2bd6 0 25%, #5b24ff 0 50%) 50% / 6rem 6rem;
 }
 
 .home-hero {
@@ -226,14 +170,14 @@ legend {
   min-height: 21rem;
   padding: clamp(1.8rem, 5vw, 3.8rem);
   overflow: hidden;
-  border: 0.38rem solid var(--brutal-black);
+  border: 0.38rem solid #111;
   border-radius: 0.7rem 2.8rem 0.9rem 2rem;
   color: white;
   background:
-    radial-gradient(circle, var(--brutal-yellow) 0 0.22rem, transparent 0.24rem) 0 0 / 1.25rem 1.25rem,
+    radial-gradient(circle, #fff900 0 0.22rem, transparent 0.24rem) 0 0 / 1.25rem 1.25rem,
     linear-gradient(105deg, rgba(255, 43, 214, 0.94) 0 61%, rgba(125, 255, 0, 0.94) 61%),
-    var(--brutal-pink);
-  box-shadow: 0.9rem 0.9rem 0 var(--brutal-cyan), -0.75rem -0.75rem 0 var(--brutal-yellow), 1.5rem 1.5rem 0 var(--brutal-black);
+    #ff2bd6;
+  box-shadow: 0.9rem 0.9rem 0 #00e5ff, -0.75rem -0.75rem 0 #fff900, 1.5rem 1.5rem 0 #111;
   transform: rotate(-0.7deg);
 }
 
@@ -242,8 +186,8 @@ legend {
   z-index: 0;
   inset: auto -8% 1.1rem;
   height: 3.2rem;
-  border-block: 0.3rem solid var(--brutal-black);
-  background: repeating-linear-gradient(135deg, var(--brutal-black) 0 1rem, #fff 1rem 2rem);
+  border-block: 0.3rem solid #111;
+  background: repeating-linear-gradient(135deg, #111 0 1rem, #fff 1rem 2rem);
   content: "";
   transform: rotate(-4deg);
 }
@@ -253,13 +197,13 @@ legend {
   z-index: 0;
   right: -1.5rem;
   top: -5rem;
-  color: var(--brutal-cyan);
+  color: #00e5ff;
   content: "✦";
   font-family: Georgia, serif;
   font-size: 25rem;
   font-weight: 900;
   line-height: 1;
-  -webkit-text-stroke: 0.35rem var(--brutal-black);
+  -webkit-text-stroke: 0.35rem #111;
   transform: rotate(14deg);
 }
 
@@ -274,10 +218,10 @@ legend {
   display: table;
   margin: 0 0 1.5rem;
   padding: 0.55rem 0.8rem;
-  border: 0.24rem solid var(--brutal-black);
-  color: var(--brutal-black);
-  background: var(--brutal-green);
-  box-shadow: 0.35rem 0.35rem 0 var(--brutal-black);
+  border: 0.24rem solid #111;
+  color: #111;
+  background: #7dff00;
+  box-shadow: 0.35rem 0.35rem 0 #111;
   font-family: Impact, Haettenschweiler, "Arial Black", sans-serif;
   font-size: clamp(0.8rem, 2vw, 1.1rem);
   font-weight: 900;
@@ -289,15 +233,15 @@ legend {
 
 #home-title {
   margin: 0;
-  color: var(--brutal-yellow);
+  color: #fff900;
   font-family: Impact, Haettenschweiler, "Arial Black", sans-serif;
   font-size: clamp(5.3rem, 14vw, 10rem);
   font-weight: 900;
   line-height: 0.72;
   letter-spacing: -0.045em;
   text-transform: uppercase;
-  -webkit-text-stroke: clamp(0.12rem, 0.4vw, 0.28rem) var(--brutal-black);
-  text-shadow: 0.45rem 0.45rem 0 var(--brutal-cyan), 0.8rem 0.8rem 0 var(--brutal-black);
+  -webkit-text-stroke: clamp(0.12rem, 0.4vw, 0.28rem) #111;
+  text-shadow: 0.45rem 0.45rem 0 #00e5ff, 0.8rem 0.8rem 0 #111;
   transform: skew(-6deg) rotate(-1deg);
   animation: home-title-jolt 2.7s steps(1, end) infinite;
 }
@@ -308,8 +252,8 @@ legend {
   padding: 0.25rem 0.5rem;
   border: 0.2rem solid #fff;
   color: #fff;
-  background: var(--brutal-black);
-  box-shadow: 0.3rem 0.3rem 0 var(--brutal-pink);
+  background: #111;
+  box-shadow: 0.3rem 0.3rem 0 #ff2bd6;
   font-size: 0.25em;
   letter-spacing: 0.24em;
   line-height: 1;
@@ -332,9 +276,9 @@ legend {
   inset: -1.4rem -1.7rem auto auto;
   width: 10rem;
   aspect-ratio: 1;
-  border: 1rem solid var(--brutal-yellow);
+  border: 1rem solid #fff900;
   border-radius: 50%;
-  box-shadow: 0 0 0 0.35rem var(--brutal-black), inset 0 0 0 0.35rem var(--brutal-black);
+  box-shadow: 0 0 0 0.35rem #111, inset 0 0 0 0.35rem #111;
   content: "";
 }
 
@@ -348,11 +292,11 @@ legend {
   place-items: center;
   clip-path: polygon(50% 0, 61% 27%, 85% 9%, 75% 38%, 100% 42%, 73% 55%, 92% 82%, 61% 71%, 50% 100%, 39% 71%, 8% 82%, 27% 55%, 0 42%, 25% 38%, 15% 9%, 39% 27%);
   color: #fff;
-  background: var(--brutal-pink);
+  background: #ff2bd6;
   content: "!";
   font-family: Impact, Haettenschweiler, "Arial Black", sans-serif;
   font-size: 3.5rem;
-  -webkit-text-stroke: 0.16rem var(--brutal-black);
+  -webkit-text-stroke: 0.16rem #111;
   transform: rotate(-15deg);
 }
 
@@ -362,11 +306,11 @@ legend {
   width: 5rem;
   aspect-ratio: 1;
   place-items: center;
-  border: 0.3rem solid var(--brutal-black);
+  border: 0.3rem solid #111;
   border-radius: 0.75rem;
-  color: var(--brutal-black);
+  color: #111;
   background: #fff;
-  box-shadow: 0.55rem 0.55rem 0 var(--brutal-black);
+  box-shadow: 0.55rem 0.55rem 0 #111;
   font-size: 3.65rem;
   line-height: 1;
 }
@@ -381,7 +325,7 @@ legend {
 .home-die:nth-child(2) {
   right: 0;
   bottom: 0;
-  color: var(--brutal-pink);
+  color: #ff2bd6;
   transform: rotate(13deg);
   animation: home-die-two 2.1s ease-in-out infinite alternate;
 }
@@ -390,9 +334,9 @@ legend {
   position: absolute;
   width: 2.15rem;
   aspect-ratio: 1;
-  border: 0.25rem solid var(--brutal-black);
+  border: 0.25rem solid #111;
   border-radius: 50%;
-  box-shadow: inset -0.3rem -0.35rem 0.4rem rgba(0, 0, 0, 0.3), 0.3rem 0.35rem 0 var(--brutal-black);
+  box-shadow: inset -0.3rem -0.35rem 0.4rem rgba(0, 0, 0, 0.3), 0.3rem 0.35rem 0 #111;
   animation: home-marble-pop 1.1s ease-in-out infinite alternate;
 }
 
@@ -405,14 +349,14 @@ legend {
 .home-marble-blue {
   top: -0.6rem;
   right: 0.2rem;
-  background: var(--brutal-cyan);
+  background: #00e5ff;
   animation-delay: -0.45s;
 }
 
 .home-marble-yellow {
   top: 5.1rem;
   left: -0.4rem;
-  background: var(--brutal-yellow);
+  background: #fff900;
   animation-delay: -0.8s;
 }
 
@@ -421,20 +365,20 @@ legend {
   min-width: 0;
   align-content: start;
   margin-top: 0;
-  border: 0.3rem solid var(--brutal-black);
+  border: 0.3rem solid #111;
   border-radius: 0.6rem;
-  color: var(--brutal-black);
-  box-shadow: 0.75rem 0.75rem 0 var(--brutal-black);
+  color: #111;
+  box-shadow: 0.75rem 0.75rem 0 #111;
   backdrop-filter: none;
 }
 
 .home-panel.home-panel-create {
-  background: var(--brutal-yellow);
+  background: #fff900;
   transform: rotate(-1deg);
 }
 
 .home-panel.home-panel-join {
-  background: var(--brutal-cyan);
+  background: #00e5ff;
   transform: rotate(1deg);
 }
 
@@ -450,30 +394,30 @@ legend {
 .home-panel-copy {
   min-height: 2.5rem;
   margin: 0 0 0.2rem;
-  color: var(--brutal-black);
+  color: #111;
   line-height: 1.35;
 }
 
 .home-panel input {
-  border: 0.2rem solid var(--brutal-black);
+  border: 0.2rem solid #111;
   border-radius: 0;
   background: #fff;
-  box-shadow: 0.28rem 0.28rem 0 var(--brutal-black);
+  box-shadow: 0.28rem 0.28rem 0 #111;
 }
 
 .home-panel button {
-  border: 0.22rem solid var(--brutal-black);
+  border: 0.22rem solid #111;
   border-radius: 0;
   color: #fff;
-  background: var(--brutal-pink);
-  box-shadow: 0.35rem 0.35rem 0 var(--brutal-black);
+  background: #ff2bd6;
+  box-shadow: 0.35rem 0.35rem 0 #111;
   text-transform: uppercase;
 }
 
 .home-panel button:hover:not(:disabled) {
-  color: var(--brutal-black);
-  background: var(--brutal-green);
-  box-shadow: 0.5rem 0.5rem 0 var(--brutal-black);
+  color: #111;
+  background: #7dff00;
+  box-shadow: 0.5rem 0.5rem 0 #111;
   transform: translate(-0.1rem, -0.1rem);
 }
 
@@ -485,26 +429,26 @@ legend {
 
 [data-screen="home"] #home-error:not(:empty) {
   padding: 0.75rem 1rem;
-  border: 0.22rem solid var(--brutal-black);
+  border: 0.22rem solid #111;
   color: #fff;
-  background: var(--brutal-red);
-  box-shadow: 0.35rem 0.35rem 0 var(--brutal-black);
+  background: #d90000;
+  box-shadow: 0.35rem 0.35rem 0 #111;
 }
 
 [data-screen="home"] #local-mode-button {
   justify-self: center;
-  border: 0.22rem solid var(--brutal-black);
+  border: 0.22rem solid #111;
   border-radius: 0;
-  color: var(--brutal-black);
-  background: var(--brutal-green);
-  box-shadow: 0.35rem 0.35rem 0 var(--brutal-black);
+  color: #111;
+  background: #7dff00;
+  box-shadow: 0.35rem 0.35rem 0 #111;
   text-transform: uppercase;
   transform: rotate(-1deg);
 }
 
 [data-screen="home"] #local-mode-button:hover:not(:disabled) {
   color: #fff;
-  background: var(--brutal-pink);
+  background: #ff2bd6;
 }
 
 @keyframes home-title-jolt {
@@ -527,7 +471,7 @@ legend {
 
 .eyebrow {
   margin-bottom: 0.5rem;
-  color: var(--muted);
+  color: #4d6754;
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.16em;
@@ -539,7 +483,7 @@ legend {
   gap: 0.82rem;
   margin-top: 1.4rem;
   padding: 1.3rem;
-  border: 0.08rem solid var(--line);
+  border: 0.08rem solid rgba(168, 184, 167, 0.75);
   border-radius: 1rem;
   background: var(--paper);
   box-shadow: var(--shadow);
@@ -548,8 +492,8 @@ legend {
 
 .secondary {
   color: var(--green);
-  border-color: var(--line);
-  background: var(--paper);
+  border-color: #52735a;
+  background: rgba(255, 255, 255, 0.45);
   box-shadow: none;
 }
 
@@ -573,7 +517,7 @@ legend {
 .error-message {
   min-height: 1.5rem;
   margin: 0.75rem 0 0;
-  color: var(--brutal-red);
+  color: #a32f2f;
   font-weight: 650;
 }
 
@@ -581,10 +525,10 @@ legend {
   justify-self: center;
   margin-top: 1.5rem;
   padding: 0.45rem 0.75rem;
-  border: 0.18rem solid var(--brutal-black);
-  color: var(--brutal-black);
+  border: 0.18rem solid #111;
+  color: #111;
   background: #fff;
-  box-shadow: 0.28rem 0.28rem 0 var(--brutal-black);
+  box-shadow: 0.28rem 0.28rem 0 #111;
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.06em;
@@ -646,10 +590,10 @@ legend {
   display: table;
   margin: 0 0 0.8rem;
   padding: 0.45rem 0.7rem;
-  border: 0.2rem solid var(--brutal-black);
-  color: var(--brutal-black);
-  background: var(--brutal-green);
-  box-shadow: 0.3rem 0.3rem 0 var(--brutal-black);
+  border: 0.2rem solid #111;
+  color: #111;
+  background: #7dff00;
+  box-shadow: 0.3rem 0.3rem 0 #111;
   font-family: Impact, Haettenschweiler, "Arial Black", sans-serif;
   font-size: 0.9rem;
   transform: rotate(-3deg);
@@ -657,13 +601,13 @@ legend {
 
 #local-title {
   margin: 0 0 1rem;
-  color: var(--brutal-yellow);
+  color: #fff900;
   font-family: Impact, Haettenschweiler, "Arial Black", sans-serif;
   font-size: clamp(4.4rem, 12vw, 7rem);
   line-height: 0.82;
   text-transform: uppercase;
-  -webkit-text-stroke: 0.18rem var(--brutal-black);
-  text-shadow: 0.4rem 0.4rem 0 var(--brutal-cyan), 0.7rem 0.7rem 0 var(--brutal-black);
+  -webkit-text-stroke: 0.18rem #111;
+  text-shadow: 0.4rem 0.4rem 0 #00e5ff, 0.7rem 0.7rem 0 #111;
   transform: skew(-5deg);
 }
 
@@ -671,10 +615,10 @@ legend {
   display: table;
   margin: 0 0 1.2rem;
   padding: 0.55rem 0.75rem;
-  border: 0.18rem solid var(--brutal-black);
-  color: var(--brutal-black);
+  border: 0.18rem solid #111;
+  color: #111;
   background: #fff;
-  box-shadow: 0.28rem 0.28rem 0 var(--brutal-black);
+  box-shadow: 0.28rem 0.28rem 0 #111;
   font-weight: 750;
   transform: rotate(0.6deg);
 }
@@ -683,13 +627,13 @@ legend {
   gap: 1rem;
   margin-top: 0;
   padding: clamp(1.2rem, 4vw, 2rem);
-  border: 0.32rem solid var(--brutal-black);
+  border: 0.32rem solid #111;
   border-radius: 0.8rem 2rem 0.8rem 1.6rem;
-  color: var(--brutal-black);
+  color: #111;
   background:
     radial-gradient(circle, rgba(255, 43, 214, 0.55) 0 0.18rem, transparent 0.2rem) 0 0 / 1.2rem 1.2rem,
-    var(--brutal-yellow);
-  box-shadow: 0.85rem 0.85rem 0 var(--brutal-black), -0.5rem -0.5rem 0 var(--brutal-cyan);
+    #fff900;
+  box-shadow: 0.85rem 0.85rem 0 #111, -0.5rem -0.5rem 0 #00e5ff;
   backdrop-filter: none;
   transform: rotate(-0.5deg);
 }
@@ -698,8 +642,8 @@ legend {
   padding: 0.25rem 0.55rem;
   border: 0.16rem solid #fff;
   color: #fff;
-  background: var(--brutal-black);
-  box-shadow: 0.22rem 0.22rem 0 var(--brutal-pink);
+  background: #111;
+  box-shadow: 0.22rem 0.22rem 0 #ff2bd6;
   font-family: Impact, Haettenschweiler, "Arial Black", sans-serif;
   font-size: 1.8rem;
   letter-spacing: 0.04em;
@@ -707,31 +651,31 @@ legend {
 }
 
 [data-screen="local"] input {
-  border: 0.2rem solid var(--brutal-black);
+  border: 0.2rem solid #111;
   border-radius: 0;
   background: #fff;
-  box-shadow: 0.3rem 0.3rem 0 var(--brutal-black);
+  box-shadow: 0.3rem 0.3rem 0 #111;
 }
 
 [data-screen="local"] button {
-  border: 0.22rem solid var(--brutal-black);
+  border: 0.22rem solid #111;
   border-radius: 0;
   color: #fff;
-  background: var(--brutal-pink);
-  box-shadow: 0.35rem 0.35rem 0 var(--brutal-black);
+  background: #ff2bd6;
+  box-shadow: 0.35rem 0.35rem 0 #111;
   text-transform: uppercase;
 }
 
 [data-screen="local"] button:hover:not(:disabled) {
-  color: var(--brutal-black);
-  background: var(--brutal-green);
-  box-shadow: 0.5rem 0.5rem 0 var(--brutal-black);
+  color: #111;
+  background: #7dff00;
+  box-shadow: 0.5rem 0.5rem 0 #111;
   transform: translate(-0.1rem, -0.1rem);
 }
 
 [data-screen="local"] .text-button {
   justify-self: center;
-  color: var(--brutal-black);
+  color: #111;
   background: #fff;
 }
 
@@ -745,7 +689,7 @@ legend {
 .player-list li {
   padding: 0.55rem 0.65rem;
   border-radius: 0.6rem;
-  background: var(--paper);
+  background: rgba(235, 240, 233, 0.72);
 }
 
 .player-swatch {
@@ -767,10 +711,10 @@ legend {
   display: table;
   margin: 0 0 0.8rem;
   padding: 0.45rem 0.7rem;
-  border: 0.2rem solid var(--brutal-black);
-  color: var(--brutal-black);
-  background: var(--brutal-green);
-  box-shadow: 0.3rem 0.3rem 0 var(--brutal-black);
+  border: 0.2rem solid #111;
+  color: #111;
+  background: #7dff00;
+  box-shadow: 0.3rem 0.3rem 0 #111;
   font-family: Impact, Haettenschweiler, "Arial Black", sans-serif;
   font-size: 0.9rem;
   transform: rotate(-3deg);
@@ -778,13 +722,13 @@ legend {
 
 #lobby-title {
   margin: 0 0 1.4rem;
-  color: var(--brutal-yellow);
+  color: #fff900;
   font-family: Impact, Haettenschweiler, "Arial Black", sans-serif;
   font-size: clamp(4rem, 11vw, 7rem);
   line-height: 0.8;
   text-transform: uppercase;
-  -webkit-text-stroke: 0.18rem var(--brutal-black);
-  text-shadow: 0.4rem 0.4rem 0 var(--brutal-cyan), 0.7rem 0.7rem 0 var(--brutal-black);
+  -webkit-text-stroke: 0.18rem #111;
+  text-shadow: 0.4rem 0.4rem 0 #00e5ff, 0.7rem 0.7rem 0 #111;
   transform: skew(-5deg);
 }
 
@@ -792,9 +736,9 @@ legend {
   display: inline-block;
   padding: 0.12em 0.2em;
   color: #fff;
-  background: var(--brutal-black);
+  background: #111;
   -webkit-text-stroke: 0;
-  text-shadow: 0.14em 0.14em 0 var(--brutal-pink);
+  text-shadow: 0.14em 0.14em 0 #ff2bd6;
   transform: rotate(2deg);
 }
 
@@ -802,13 +746,13 @@ legend {
   gap: 1rem;
   margin-top: 0;
   padding: clamp(1.2rem, 4vw, 2rem);
-  border: 0.32rem solid var(--brutal-black);
+  border: 0.32rem solid #111;
   border-radius: 0.8rem 2rem 0.8rem 1.6rem;
-  color: var(--brutal-black);
+  color: #111;
   background:
     radial-gradient(circle, rgba(255, 249, 0, 0.7) 0 0.18rem, transparent 0.2rem) 0 0 / 1.2rem 1.2rem,
-    var(--brutal-cyan);
-  box-shadow: 0.85rem 0.85rem 0 var(--brutal-black), -0.5rem -0.5rem 0 var(--brutal-pink);
+    #00e5ff;
+  box-shadow: 0.85rem 0.85rem 0 #111, -0.5rem -0.5rem 0 #ff2bd6;
   backdrop-filter: none;
   transform: rotate(0.5deg);
 }
@@ -822,36 +766,36 @@ legend {
 }
 
 [data-screen="lobby"] input {
-  border: 0.2rem solid var(--brutal-black);
+  border: 0.2rem solid #111;
   border-radius: 0;
   background: #fff;
-  box-shadow: 0.3rem 0.3rem 0 var(--brutal-black);
+  box-shadow: 0.3rem 0.3rem 0 #111;
 }
 
 [data-screen="lobby"] button {
-  border: 0.22rem solid var(--brutal-black);
+  border: 0.22rem solid #111;
   border-radius: 0;
-  color: var(--brutal-black);
-  background: var(--brutal-yellow);
-  box-shadow: 0.35rem 0.35rem 0 var(--brutal-black);
+  color: #111;
+  background: #fff900;
+  box-shadow: 0.35rem 0.35rem 0 #111;
   text-transform: uppercase;
 }
 
 [data-screen="lobby"] button:hover:not(:disabled) {
   color: #fff;
-  background: var(--brutal-pink);
-  box-shadow: 0.5rem 0.5rem 0 var(--brutal-black);
+  background: #ff2bd6;
+  box-shadow: 0.5rem 0.5rem 0 #111;
   transform: translate(-0.1rem, -0.1rem);
 }
 
 [data-screen="lobby"] #start-game-button {
   color: #fff;
-  background: var(--brutal-pink);
+  background: #ff2bd6;
 }
 
 [data-screen="lobby"] #start-game-button:hover:not(:disabled) {
-  color: var(--brutal-black);
-  background: var(--brutal-green);
+  color: #111;
+  background: #7dff00;
 }
 
 [data-screen="lobby"] #leave-room-button {
@@ -866,14 +810,14 @@ legend {
 
 [data-screen="lobby"] .player-list li {
   padding: 0.7rem 0.85rem;
-  border: 0.18rem solid var(--brutal-black);
+  border: 0.18rem solid #111;
   border-radius: 0;
   background: #fff;
-  box-shadow: 0.25rem 0.25rem 0 var(--brutal-black);
+  box-shadow: 0.25rem 0.25rem 0 #111;
 }
 
 [data-screen="lobby"] .player-list li:nth-child(even) {
-  background: var(--brutal-yellow);
+  background: #fff900;
   transform: rotate(-1deg);
 }
 
@@ -881,10 +825,10 @@ legend {
   display: table;
   margin: 0.4rem auto;
   padding: 0.45rem 0.7rem;
-  border: 0.16rem solid var(--brutal-black);
-  color: var(--brutal-black);
-  background: var(--brutal-green);
-  box-shadow: 0.22rem 0.22rem 0 var(--brutal-black);
+  border: 0.16rem solid #111;
+  color: #111;
+  background: #7dff00;
+  box-shadow: 0.22rem 0.22rem 0 #111;
   font-weight: 850;
 }
 
@@ -895,11 +839,11 @@ legend {
   align-items: start;
   gap: 0.8rem;
   padding: 1.35rem;
-  border: 0.3rem solid var(--brutal-black);
+  border: 0.3rem solid #111;
   border-radius: 0.7rem 1.8rem 0.7rem 1.3rem;
-  color: var(--brutal-black);
-  background: var(--brutal-yellow);
-  box-shadow: 0.65rem 0.65rem 0 var(--brutal-black), -0.35rem -0.35rem 0 var(--brutal-pink);
+  color: #111;
+  background: #fff900;
+  box-shadow: 0.65rem 0.65rem 0 #111, -0.35rem -0.35rem 0 #ff2bd6;
   transform: rotate(0.6deg);
 }
 
@@ -910,11 +854,11 @@ legend {
 .game-header .text-button {
   min-height: 2.35rem;
   padding: 0.45rem 0.62rem;
-  border: 0.18rem solid var(--brutal-black);
+  border: 0.18rem solid #111;
   border-radius: 0;
-  color: var(--brutal-black);
-  background: var(--brutal-green);
-  box-shadow: 0.25rem 0.25rem 0 var(--brutal-black);
+  color: #111;
+  background: #7dff00;
+  box-shadow: 0.25rem 0.25rem 0 #111;
   white-space: nowrap;
 }
 
@@ -924,8 +868,8 @@ legend {
   padding: 0.28rem 0.48rem;
   border: 0.14rem solid #fff;
   color: #fff;
-  background: var(--brutal-black);
-  box-shadow: 0.2rem 0.2rem 0 var(--brutal-pink);
+  background: #111;
+  box-shadow: 0.2rem 0.2rem 0 #ff2bd6;
 }
 
 #game-title {
@@ -937,8 +881,8 @@ legend {
   letter-spacing: 0.01em;
   overflow-wrap: anywhere;
   text-transform: uppercase;
-  -webkit-text-stroke: 0.1rem var(--brutal-black);
-  text-shadow: 0.22rem 0.22rem 0 #fff, 0.4rem 0.4rem 0 var(--brutal-black);
+  -webkit-text-stroke: 0.1rem #111;
+  text-shadow: 0.22rem 0.22rem 0 #fff, 0.4rem 0.4rem 0 #111;
 }
 
 .board {
@@ -949,10 +893,10 @@ legend {
   aspect-ratio: 1;
   margin: 0;
   padding: clamp(0.35rem, 0.7vw, 0.65rem);
-  border: 0.38rem solid var(--brutal-black);
+  border: 0.38rem solid #111;
   border-radius: clamp(0.8rem, 2vw, 1.5rem);
   background: #f1ead8;
-  box-shadow: 0.9rem 0.9rem 0 var(--brutal-black), -0.55rem -0.55rem 0 var(--brutal-yellow);
+  box-shadow: 0.9rem 0.9rem 0 #111, -0.55rem -0.55rem 0 #fff900;
   transform: rotate(-0.35deg);
 }
 
@@ -965,7 +909,7 @@ legend {
 
 .board-surface {
   fill: #fffde5;
-  stroke: var(--brutal-black);
+  stroke: #111;
   stroke-width: 12;
 }
 
@@ -983,7 +927,7 @@ legend {
 }
 
 .route-line--gambit {
-  stroke: var(--brutal-pink);
+  stroke: #ff2bd6;
   stroke-dasharray: 5 10;
 }
 
@@ -1001,12 +945,12 @@ legend {
 }
 
 .base-label {
-  fill: var(--brutal-black);
+  fill: #111;
   stroke: none;
 }
 
 .center-label {
-  fill: var(--brutal-black);
+  fill: #111;
 }
 
 .base-label,
@@ -1018,7 +962,7 @@ legend {
 
 .board-hole {
   fill: #fff;
-  stroke: var(--brutal-black);
+  stroke: #111;
   stroke-width: 3;
   transition: filter 120ms ease, stroke-width 120ms ease;
 }
@@ -1033,38 +977,38 @@ legend {
 }
 
 .board-hole--star {
-  fill: var(--brutal-yellow);
-  stroke: var(--brutal-black);
+  fill: #fff900;
+  stroke: #111;
 }
 
 .board-hole--center {
-  fill: var(--brutal-black);
-  stroke: var(--brutal-pink);
+  fill: #111;
+  stroke: #ff2bd6;
   stroke-width: 5;
 }
 
 .board-hole.is-legal-move {
   cursor: pointer;
-  fill: var(--brutal-green);
-  filter: drop-shadow(0 0 9px #fff) drop-shadow(0 0 12px var(--brutal-pink));
-  stroke: var(--brutal-pink);
+  fill: #7dff00;
+  filter: drop-shadow(0 0 9px #fff) drop-shadow(0 0 12px #ff2bd6);
+  stroke: #ff2bd6;
   stroke-width: 7;
   animation: legal-pulse 1.35s ease-in-out infinite alternate;
 }
 
 .board-hole.is-legal-move:hover,
 .board-hole.is-legal-move:focus-visible {
-  filter: drop-shadow(0 0 12px #fff) drop-shadow(0 0 16px var(--brutal-pink));
+  filter: drop-shadow(0 0 12px #fff) drop-shadow(0 0 16px #ff2bd6);
   outline: none;
   stroke-width: 10;
 }
 
 @keyframes legal-pulse {
-  to { filter: drop-shadow(0 0 11px #fff) drop-shadow(0 0 15px var(--brutal-pink)); }
+  to { filter: drop-shadow(0 0 11px #fff) drop-shadow(0 0 15px #ff2bd6); }
 }
 
 .star-mark {
-  fill: var(--brutal-black);
+  fill: #111;
   font-size: 15px;
   pointer-events: none;
 }
@@ -1156,10 +1100,10 @@ legend {
   align-content: start;
   margin: 0;
   padding: 1.35rem;
-  border: 0.3rem solid var(--brutal-black);
+  border: 0.3rem solid #111;
   border-radius: 1.6rem 0.7rem 1.3rem 0.7rem;
-  background: var(--brutal-cyan);
-  box-shadow: 0.65rem 0.65rem 0 var(--brutal-black), -0.35rem -0.35rem 0 var(--brutal-green);
+  background: #00e5ff;
+  box-shadow: 0.65rem 0.65rem 0 #111, -0.35rem -0.35rem 0 #7dff00;
   backdrop-filter: none;
   transform: rotate(-0.6deg);
 }
@@ -1179,10 +1123,10 @@ legend {
 .game-error {
   margin: 0;
   padding: 0.8rem 0.9rem;
-  border: 0.2rem solid var(--brutal-black);
+  border: 0.2rem solid #111;
   border-radius: 0;
-  background: var(--brutal-red);
-  box-shadow: 0.25rem 0.25rem 0 var(--brutal-black);
+  background: #d90000;
+  box-shadow: 0.25rem 0.25rem 0 #111;
   color: #fff;
   line-height: 1.4;
 }
@@ -1196,28 +1140,28 @@ legend {
 .control-buttons button {
   flex: 1;
   min-height: 3.45rem;
-  border: 0.2rem solid var(--brutal-black);
+  border: 0.2rem solid #111;
   border-radius: 0;
   color: #fff;
-  background: var(--brutal-pink);
-  box-shadow: 0.3rem 0.3rem 0 var(--brutal-black);
+  background: #ff2bd6;
+  box-shadow: 0.3rem 0.3rem 0 #111;
   text-transform: uppercase;
 }
 
 .control-buttons button:hover:not(:disabled) {
-  color: var(--brutal-black);
-  background: var(--brutal-green);
-  box-shadow: 0.45rem 0.45rem 0 var(--brutal-black);
+  color: #111;
+  background: #7dff00;
+  box-shadow: 0.45rem 0.45rem 0 #111;
   transform: translate(-0.1rem, -0.1rem);
 }
 
 .control-buttons .secondary {
-  color: var(--brutal-black);
-  background: var(--brutal-yellow);
+  color: #111;
+  background: #fff900;
 }
 
 .control-buttons .text-button {
-  color: var(--brutal-black);
+  color: #111;
   background: #fff;
 }
 
@@ -1241,10 +1185,10 @@ legend {
   max-width: 100%;
   margin: 0 auto 0.25rem;
   padding: 0.45rem 0.8rem;
-  border: 0.2rem solid var(--brutal-black);
+  border: 0.2rem solid #111;
   border-radius: 0;
-  background: var(--brutal-yellow);
-  box-shadow: 0.25rem 0.25rem 0 var(--brutal-black);
+  background: #fff900;
+  box-shadow: 0.25rem 0.25rem 0 #111;
   color: var(--ink);
   text-transform: uppercase;
   transform: rotate(1deg);
@@ -1254,10 +1198,10 @@ legend {
   width: 0.8rem;
   aspect-ratio: 1;
   flex: none;
-  border: 0.14rem solid var(--brutal-black);
+  border: 0.14rem solid #111;
   border-radius: 50%;
   background: var(--dice-owner-color, #8d7b5f);
-  box-shadow: 0.12rem 0.12rem 0 var(--brutal-black);
+  box-shadow: 0.12rem 0.12rem 0 #111;
 }
 
 .dice .die-button {
@@ -1269,11 +1213,11 @@ legend {
   aspect-ratio: 1;
   padding: 0.55rem;
   place-items: center;
-  border: 0.24rem solid var(--brutal-black);
+  border: 0.24rem solid #111;
   border-radius: 0.65rem;
   color: #20251f;
   background: linear-gradient(145deg, #fffef9, #e9e2d3);
-  box-shadow: inset 0 0 0.3rem #fff, 0.38rem 0.38rem 0 var(--brutal-black);
+  box-shadow: inset 0 0 0.3rem #fff, 0.38rem 0.38rem 0 #111;
   font-weight: 800;
 }
 
