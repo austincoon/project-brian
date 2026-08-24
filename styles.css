@@ -200,6 +200,14 @@ legend {
   font-weight: 650;
 }
 
+.home-signature {
+  margin-top: 1.5rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
 [data-screen="home"] {
   max-width: 64rem;
 }
