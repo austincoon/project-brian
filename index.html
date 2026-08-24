@@ -29,7 +29,7 @@
           <p class="home-panel-copy">Create a new game and share the invite code.</p>
           <label for="host-name">Your name</label>
           <input id="host-name" name="playerName" maxlength="24" autocomplete="nickname" required>
-          <button type="submit" disabled>Create room</button>
+          <button type="submit">Create room</button>
         </form>
 
         <form id="join-room-form" class="panel home-panel home-panel-join">
@@ -39,7 +39,7 @@
           <input id="join-name" name="playerName" maxlength="24" autocomplete="nickname" required>
           <label for="room-code">Invite code</label>
           <input id="room-code" name="roomCode" minlength="6" maxlength="6" pattern="[A-HJ-NP-Z2-9]{6}" autocomplete="off" autocapitalize="characters" spellcheck="false" required>
-          <button type="submit" disabled>Join room</button>
+          <button type="submit">Join room</button>
         </form>
 
         <p id="home-error" class="error-message" aria-live="assertive"></p>
