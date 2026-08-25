@@ -1436,7 +1436,7 @@ legend {
   grid-template-rows: auto auto;
   align-items: center;
   gap: 0.15rem 0.8rem;
-  width: clamp(9rem, 24%, 12rem);
+  width: clamp(12rem, 38%, 17rem);
   min-width: 0;
   padding: 0.62rem 0.72rem;
   border: 0.18rem solid #111;
@@ -1458,10 +1458,14 @@ legend {
 }
 
 .player-dice-card.is-active {
+  z-index: 1;
   background: #fff900;
   box-shadow: 0.35rem 0.35rem 0 var(--turn-shadow, #111), 0 0 0 0.2rem var(--player-color);
+  filter: drop-shadow(0 0 0.55rem var(--player-color));
+  outline: 0.28rem solid var(--player-color);
+  outline-offset: 0.14rem;
   opacity: 1;
-  transform: translateX(-0.25rem);
+  transform: scale(1.03);
   animation: active-turn-card 1.4s ease-in-out infinite alternate;
 }
 
@@ -2433,7 +2437,7 @@ html[data-theme="pixel"] .victory-confetti {
   }
 
   .player-dice-card {
-    width: clamp(7rem, 30%, 11rem);
+    width: min(46%, 13rem);
     padding: 0.22rem 0.3rem;
     border-width: 0.12rem;
     border-left-width: 0.38rem;
