@@ -14,7 +14,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./styles.css?v=20260824-38">
+    <link rel="stylesheet" href="./styles.css?v=20260824-39">
   </head>
   <body>
     <main class="app-shell">
@@ -121,14 +121,12 @@
           <button id="new-game-button" class="text-button" type="button">New game</button>
         </header>
 
-        <div id="board" class="board" aria-live="polite"></div>
+        <div class="board-stage">
+          <div id="board" class="board" aria-live="polite"></div>
+          <div id="player-dice-grid" class="player-dice-grid" role="region" aria-label="Player dice"></div>
+        </div>
 
         <div class="game-controls panel">
-          <div class="turn-table-heading">
-            <strong>Turn table</strong>
-            <span>Clockwise play →</span>
-          </div>
-          <div id="player-dice-grid" class="player-dice-grid" role="region" aria-label="Player dice"></div>
           <div class="control-buttons">
             <button id="roll-button" type="button">Roll dice</button>
           
@@ -195,6 +193,6 @@
       </form>
     </dialog>
 
-    <script type="module" src="./src/app.js?v=20260824-28"></script>
+    <script type="module" src="./src/app.js?v=20260824-29"></script>
   </body>
 </html>

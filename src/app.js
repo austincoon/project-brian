@@ -1,4 +1,4 @@
-import { PLAYER_ORDER, PLAYERS, renderBoard } from "./board.js?v=20260824-21";
+import { PLAYER_ORDER, PLAYERS, renderBoard } from "./board.js?v=20260824-22";
 import { getPlayerDiceRows, randomIndex, rollDice } from "./dice.js?v=20260824-25";
 import { loadTurnReplay, saveTurnReplay } from "./replay.js?v=20260823-19";
 import { applyTheme, loadTheme } from "./theme.js?v=20260824-1";
@@ -277,6 +277,7 @@ async function watchRoom(code) {
         return;
       }
       const previousGame = gameMode === "online" ? gameState : null;
+      if (previousGame && JSON.stringify(previousGame) === JSON.stringify(room.game)) return;
       const action = room.game.lastAction;
       const gameId = room.restartedAt ?? room.startedAt;
       if (!previousGame) lastTurnReplay = loadTurnReplay(localStorage, code, gameId);
@@ -503,6 +504,7 @@ function renderDice() {
   playerDiceGrid.replaceChildren(...rows.map((row) => {
     const card = document.createElement("article");
     card.className = `player-dice-card${row.isActive ? " is-active" : ""}${row.isLastRoller ? " is-last-roller" : ""}`;
+    card.dataset.seat = PLAYERS[row.color].seat;
     card.style.setProperty("--player-color", PLAYERS[row.color].color);
 
     const identity = document.createElement("div");

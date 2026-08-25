@@ -1079,12 +1079,18 @@ legend {
   text-shadow: 0.22rem 0.22rem 0 #fff, 0.4rem 0.4rem 0 #111;
 }
 
-.board {
+.board-stage {
   grid-area: board;
+  position: relative;
   place-self: center end;
   width: min(100%, calc(100dvh - clamp(1.5rem, 4vw, 3rem)));
   max-width: none;
   aspect-ratio: 1;
+}
+
+.board {
+  width: 100%;
+  height: 100%;
   margin: 0;
   padding: clamp(0.35rem, 0.7vw, 0.65rem);
   border: 0.38rem solid #111;
@@ -1284,6 +1290,10 @@ legend {
   animation: capture-impact 700ms ease-out calc(var(--move-duration, 1600ms) - 350ms) both;
 }
 
+.board-hole.is-replay-path {
+  animation: replay-path-step 650ms ease-out var(--replay-step-delay, 0ms) both;
+}
+
 .board-hole.is-replay-destination {
   animation: replay-destination 850ms ease-out calc(var(--move-duration, 1600ms) - 500ms) both;
 }
@@ -1312,6 +1322,12 @@ legend {
   0% { opacity: 0.72; stroke-width: 2; }
   35% { opacity: 1; stroke: #fff; stroke-width: 10; }
   100% { opacity: 0.72; stroke: var(--player-color); stroke-width: 2; }
+}
+
+@keyframes replay-path-step {
+  0% { filter: none; stroke-width: 3; }
+  35% { filter: drop-shadow(0 0 9px #fff) drop-shadow(0 0 14px var(--gold)); stroke: var(--gold); stroke-width: 9; }
+  100% { filter: none; stroke-width: 3; }
 }
 
 @keyframes replay-destination {
@@ -1404,38 +1420,21 @@ legend {
   padding: 0.45rem 0 0.65rem;
 }
 
-.turn-table-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 0.8rem;
-  color: #111;
-  text-transform: uppercase;
-}
-
-.turn-table-heading strong {
-  font-size: 1.05rem;
-  letter-spacing: 0.08em;
-}
-
-.turn-table-heading span {
-  font-size: 0.72rem;
-  font-weight: 800;
-}
-
 .player-dice-grid {
-  display: grid;
-  gap: 0.7rem;
-  margin-bottom: 1rem;
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
 }
 
 .player-dice-card {
+  position: absolute;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   grid-template-rows: auto auto;
   align-items: center;
   gap: 0.15rem 0.8rem;
+  width: clamp(9rem, 24%, 12rem);
   min-width: 0;
   padding: 0.62rem 0.72rem;
   border: 0.18rem solid #111;
@@ -1446,6 +1445,11 @@ legend {
   opacity: 0.72;
   transition: opacity 160ms ease, transform 160ms ease, box-shadow 160ms ease;
 }
+
+.player-dice-card[data-seat="north"] { top: 1.4%; left: 1.4%; }
+.player-dice-card[data-seat="east"] { top: 1.4%; right: 1.4%; }
+.player-dice-card[data-seat="west"] { bottom: 1.4%; left: 1.4%; }
+.player-dice-card[data-seat="south"] { right: 1.4%; bottom: 1.4%; }
 
 .player-dice-card.is-last-roller {
   opacity: 0.9;
@@ -1992,10 +1996,6 @@ html[data-theme="medieval"] .game-controls {
   transform: none;
 }
 
-html[data-theme="medieval"] .turn-table-heading {
-  color: #f7ebc8;
-}
-
 html[data-theme="medieval"] .player-dice-card {
   --turn-shadow: #182317;
   border-color: #4b2e18;
@@ -2334,10 +2334,6 @@ html[data-theme="pixel"] .game-controls {
   transform: none;
 }
 
-html[data-theme="pixel"] .turn-table-heading {
-  color: var(--pixel-deep);
-}
-
 html[data-theme="pixel"] .player-dice-card {
   --turn-shadow: var(--pixel-deep);
   border-color: var(--pixel-deep);
@@ -2428,9 +2424,47 @@ html[data-theme="pixel"] .victory-confetti {
     min-height: 0;
   }
 
-  .board {
+  .board-stage {
     width: min(100%, 42rem);
     place-self: center;
+  }
+
+  .player-dice-card {
+    width: clamp(7rem, 30%, 11rem);
+    padding: 0.22rem 0.3rem;
+    border-width: 0.12rem;
+    border-left-width: 0.38rem;
+  }
+
+  .player-dice-identity {
+    gap: 0.24rem;
+  }
+
+  .player-dice-identity strong {
+    font-size: clamp(0.58rem, 2vw, 0.78rem);
+  }
+
+  .player-dice-swatch {
+    width: 0.55rem;
+  }
+
+  .player-dice-status {
+    display: none;
+  }
+
+  .player-dice-set {
+    gap: 0.16rem;
+  }
+
+  .player-dice-set .die-button {
+    width: clamp(1.1rem, 4vw, 1.8rem);
+    padding: 0.16rem;
+    border-width: 0.1rem;
+    box-shadow: 0.1rem 0.1rem 0 #111;
+  }
+
+  .player-dice-set .die-pip {
+    width: 0.17rem;
   }
 
   .game-controls {
@@ -2512,7 +2546,7 @@ html[data-theme="pixel"] .victory-confetti {
   }
 
   .player-dice-set .die-button {
-    width: 2.35rem;
+    width: clamp(1.1rem, 4vw, 1.35rem);
   }
 
   .victory-actions {
@@ -2532,5 +2566,19 @@ html[data-theme="pixel"] .victory-confetti {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+
+  .board-hole.is-replay-path {
+    animation: none !important;
+    filter: drop-shadow(0 0 8px var(--gold));
+    stroke: var(--gold);
+    stroke-width: 7;
+  }
+
+  .marble.is-replay-piece .marble-focus {
+    animation: none !important;
+    opacity: 1;
+    stroke: var(--gold);
+    stroke-width: 8;
   }
 }

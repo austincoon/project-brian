@@ -69,12 +69,14 @@ test("move replays start after the SVG is attached", () => {
   let attachedAtStart = false;
   const replayPaths = [];
   let captureCueSeen = false;
+  let pathCueCount = 0;
 
   class FakeElement {
     constructor() { this.attributes = {}; this.children = []; }
     setAttribute(name, value) {
       this.attributes[name] = String(value);
       if (name === "class" && String(value).includes("is-replay-capture")) captureCueSeen = true;
+      if (name === "class" && String(value).includes("is-replay-path")) pathCueCount += 1;
     }
     append(...children) { this.children.push(...children); }
     addEventListener() {}
@@ -120,6 +122,7 @@ test("move replays start after the SVG is attached", () => {
       ["track:4", "base:blue:0"],
     ].map((path) => path.map((id) => `${HOLES_BY_ID[id].x} ${HOLES_BY_ID[id].y}`).join(";")));
     assert.equal(captureCueSeen, true);
+    assert.equal(pathCueCount, 2);
   } finally {
     if (previousDocument === undefined) delete globalThis.document;
     else globalThis.document = previousDocument;

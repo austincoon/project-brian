@@ -295,9 +295,11 @@ function drawHoles(svg, state) {
     const classes = ["board-hole", `board-hole--${hole.kind}`];
     const styles = [];
     const legalDestination = state.legalDestinationIds.has(hole.id);
+    const replayStep = state.replayMove?.path?.indexOf(hole.id) ?? -1;
     if (hole.player) classes.push("board-hole--player");
     if (hole.kind === "track" && hole.player) classes.push("is-start");
     if (legalDestination) classes.push("is-legal-move");
+    if (replayStep >= 0) classes.push("is-replay-path");
     if (hole.id === state.replayMove?.destinationId) classes.push("is-replay-destination");
 
     const circle = svgElement("circle", {
@@ -314,6 +316,10 @@ function drawHoles(svg, state) {
     }
     if (hole.id === state.replayMove?.destinationId) {
       styles.push(`--move-duration: ${state.replayMove.durationMs ?? 1600}ms`);
+    }
+    if (replayStep >= 0) {
+      const stepMs = (state.replayMove.durationMs ?? 1600) / state.replayMove.path.length;
+      styles.push(`--replay-step-delay: ${replayStep * stepMs}ms`);
     }
     if (styles.length) circle.setAttribute("style", styles.join("; "));
 
@@ -381,6 +387,7 @@ function drawMarbles(svg, marbles, state) {
     if (marble.id === state.selectedMarbleId) classes.push("is-selected");
     if (state.legalMarbleIds.has(marble.id)) classes.push("is-legal-move");
     if (replaying) classes.push("is-replaying");
+    if (movingReplay) classes.push("is-replay-piece");
     if (capturedReplay) classes.push("is-replay-capture");
     if (movingReplay && state.replayMove?.captureId) classes.push("is-capture-attacker");
 
