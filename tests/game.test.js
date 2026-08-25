@@ -67,7 +67,7 @@ test("move replays start after the SVG is attached", () => {
   let container;
   let scheduledAnimation;
   let attachedAtStart = false;
-  let replayDestination;
+  const replayPaths = [];
   let captureCueSeen = false;
 
   class FakeElement {
@@ -81,36 +81,44 @@ test("move replays start after the SVG is attached", () => {
     replaceChildren(...children) { this.children = children; }
     beginElement() {
       attachedAtStart = container.children.length === 1;
-      replayDestination = this.attributes.to;
+      replayPaths.push(this.attributes.values);
     }
   }
 
   const previousDocument = globalThis.document;
   const previousMatchMedia = globalThis.matchMedia;
   const previousRequestAnimationFrame = globalThis.requestAnimationFrame;
+  const previousSetTimeout = globalThis.setTimeout;
   globalThis.document = { createElementNS: () => new FakeElement() };
   globalThis.matchMedia = () => ({ matches: true });
   globalThis.requestAnimationFrame = (callback) => { scheduledAnimation = callback; };
+  globalThis.setTimeout = (callback) => callback();
 
   try {
     container = new FakeElement();
     renderBoard(container, {
       marbles: [
-        { id: "a:0", ownerUid: "a", color: "red", number: 1, positionId: "track:6" },
+        { id: "a:0", ownerUid: "a", color: "red", number: 1, positionId: "track:4" },
         { id: "b:0", ownerUid: "b", color: "blue", number: 1, positionId: "base:blue:0" },
       ],
       replayMove: {
         pieceId: "a:0",
         fromPositionId: "track:2",
         destinationId: "track:4",
+        path: ["track:3", "track:4"],
         captureId: "b:0",
+        capturedFromPositionId: "track:4",
+        capturedDestinationId: "base:blue:0",
         forceMotion: true,
       },
     });
     assert.equal(attachedAtStart, false);
     scheduledAnimation();
     assert.equal(attachedAtStart, true);
-    assert.equal(replayDestination, `${HOLES_BY_ID["track:4"].x} ${HOLES_BY_ID["track:4"].y}`);
+    assert.deepEqual(replayPaths, [
+      ["track:2", "track:3", "track:4"],
+      ["track:4", "base:blue:0"],
+    ].map((path) => path.map((id) => `${HOLES_BY_ID[id].x} ${HOLES_BY_ID[id].y}`).join(";")));
     assert.equal(captureCueSeen, true);
   } finally {
     if (previousDocument === undefined) delete globalThis.document;
@@ -119,6 +127,7 @@ test("move replays start after the SVG is attached", () => {
     else globalThis.matchMedia = previousMatchMedia;
     if (previousRequestAnimationFrame === undefined) delete globalThis.requestAnimationFrame;
     else globalThis.requestAnimationFrame = previousRequestAnimationFrame;
+    globalThis.setTimeout = previousSetTimeout;
   }
 });
 

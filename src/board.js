@@ -293,6 +293,7 @@ function drawHoles(svg, state) {
 
   for (const hole of BOARD_HOLES) {
     const classes = ["board-hole", `board-hole--${hole.kind}`];
+    const styles = [];
     const legalDestination = state.legalDestinationIds.has(hole.id);
     if (hole.player) classes.push("board-hole--player");
     if (hole.kind === "track" && hole.player) classes.push("is-start");
@@ -309,8 +310,12 @@ function drawHoles(svg, state) {
       "aria-hidden": String(!legalDestination),
     });
     if (hole.player) {
-      circle.setAttribute("style", `--player-color: ${PLAYERS[hole.player].color}`);
+      styles.push(`--player-color: ${PLAYERS[hole.player].color}`);
     }
+    if (hole.id === state.replayMove?.destinationId) {
+      styles.push(`--move-duration: ${state.replayMove.durationMs ?? 1600}ms`);
+    }
+    if (styles.length) circle.setAttribute("style", styles.join("; "));
 
     const title = svgElement("title");
     title.textContent = accessibleHoleName(hole, state.playerNames);
@@ -350,28 +355,34 @@ function drawMarbles(svg, marbles, state) {
 
   for (const marble of marbles) {
     const actualPosition = HOLES_BY_ID[marble.positionId];
-    const replayDestination = marble.id === state.replayMove?.pieceId
+    const movingReplay = marble.id === state.replayMove?.pieceId;
+    const capturedReplay = marble.id === state.replayMove?.captureId;
+    const replayFrom = movingReplay
+      ? HOLES_BY_ID[state.replayMove.fromPositionId]
+      : capturedReplay ? HOLES_BY_ID[state.replayMove.capturedFromPositionId] : null;
+    const replayDestination = movingReplay
       ? HOLES_BY_ID[state.replayMove.destinationId]
-      : null;
-    const position = replayDestination ?? actualPosition;
+      : capturedReplay ? HOLES_BY_ID[state.replayMove.capturedDestinationId] : null;
+    const replaying = replayFrom
+      && replayDestination
+      && replayFrom.id !== replayDestination.id
+      && (state.replayMove.forceMotion
+        || !globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
+    const position = replaying ? replayFrom : actualPosition;
     if (!actualPosition || !position || !PLAYERS[marble.color]) {
       throw new Error(`Marble ${marble.id} has invalid board data.`);
     }
 
     const selectable = state.selectableMarbleIds.has(marble.id);
-    const replayFrom = marble.id === state.replayMove?.pieceId
-      ? HOLES_BY_ID[state.replayMove.fromPositionId]
-      : null;
-    const replaying = replayFrom
-      && replayFrom.id !== position.id
-      && (state.replayMove.forceMotion
-        || !globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
+    const durationMs = state.replayMove?.durationMs ?? 1600;
+    const captureDelayMs = Math.max(300, durationMs - 250);
     const classes = ["marble"];
     if (marble.color === state.activePlayer) classes.push("is-active-player");
     if (marble.id === state.selectedMarbleId) classes.push("is-selected");
     if (state.legalMarbleIds.has(marble.id)) classes.push("is-legal-move");
     if (replaying) classes.push("is-replaying");
-    if (marble.id === state.replayMove?.captureId) classes.push("is-replay-capture");
+    if (capturedReplay) classes.push("is-replay-capture");
+    if (movingReplay && state.replayMove?.captureId) classes.push("is-capture-attacker");
 
     const group = svgElement("g", {
       class: classes.join(" "),
@@ -379,10 +390,10 @@ function drawMarbles(svg, marbles, state) {
       tabindex: selectable ? "0" : "-1",
       "aria-disabled": String(!selectable),
       "aria-pressed": String(marble.id === state.selectedMarbleId),
-      "aria-label": marble.label ?? `${state.playerNames[marble.color] ?? PLAYERS[marble.color].label} marble ${marble.number} at ${accessibleHoleName(position, state.playerNames)}`,
+      "aria-label": marble.label ?? `${state.playerNames[marble.color] ?? PLAYERS[marble.color].label} marble ${marble.number} at ${accessibleHoleName(actualPosition, state.playerNames)}`,
       "data-marble-id": marble.id,
       "data-position-id": marble.positionId,
-      style: `--player-color: ${PLAYERS[marble.color].color}; --player-dark: ${PLAYERS[marble.color].darkColor}`,
+      style: `--player-color: ${PLAYERS[marble.color].color}; --player-dark: ${PLAYERS[marble.color].darkColor}; --move-duration: ${durationMs}ms; --capture-delay: ${captureDelayMs}ms`,
       transform: `translate(${position.x} ${position.y})`,
     });
 
@@ -394,19 +405,22 @@ function drawMarbles(svg, marbles, state) {
     );
 
     if (replaying) {
+      const path = movingReplay
+        ? [replayFrom, ...(state.replayMove.path ?? [state.replayMove.destinationId])
+          .map((id) => HOLES_BY_ID[id]).filter(Boolean)]
+        : [replayFrom, replayDestination];
       const animation = svgElement("animateTransform", {
         attributeName: "transform",
         type: "translate",
-        from: `${replayFrom.x} ${replayFrom.y}`,
-        to: `${position.x} ${position.y}`,
-        dur: "850ms",
+        values: path.map(({ x, y }) => `${x} ${y}`).join(";"),
+        keyTimes: path.map((_, index) => index / (path.length - 1)).join(";"),
+        dur: capturedReplay ? "900ms" : `${durationMs}ms`,
         begin: "indefinite",
-        calcMode: "spline",
-        keyTimes: "0;1",
-        keySplines: "0.22 0.8 0.24 1",
+        calcMode: "linear",
+        fill: "freeze",
       });
       group.append(animation);
-      replayAnimations.push(animation);
+      replayAnimations.push({ animation, delay: capturedReplay ? captureDelayMs : 0 });
     }
 
     if (selectable && state.onMarbleSelect) {
@@ -461,6 +475,9 @@ export function renderBoard(container, options = {}) {
   const replayAnimations = drawMarbles(svg, options.marbles ?? [], state);
   container.replaceChildren(svg);
   (globalThis.requestAnimationFrame ?? ((callback) => callback()))(() => {
-    for (const animation of replayAnimations) animation.beginElement();
+    for (const { animation, delay } of replayAnimations) {
+      if (delay) setTimeout(() => animation.beginElement(), delay);
+      else animation.beginElement();
+    }
   });
 }

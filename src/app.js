@@ -1,4 +1,4 @@
-import { PLAYER_ORDER, PLAYERS, renderBoard } from "./board.js?v=20260824-20";
+import { PLAYER_ORDER, PLAYERS, renderBoard } from "./board.js?v=20260824-21";
 import { getPlayerDiceRows, randomIndex, rollDice } from "./dice.js?v=20260824-25";
 import { loadTurnReplay, saveTurnReplay } from "./replay.js?v=20260823-19";
 import { applyTheme, loadTheme } from "./theme.js?v=20260824-1";
@@ -197,6 +197,24 @@ function formatRoll(dice) {
   return `${dice[0]} + ${dice[1]} = ${dice[0] + dice[1]}`;
 }
 
+function createMoveReplay(state, move) {
+  const path = move.path?.length ? [...move.path] : [move.destination];
+  return {
+    pieceId: move.pieceId,
+    fromPositionId: state.pieces[move.pieceId].positionId,
+    destinationId: move.destination,
+    path,
+    durationMs: Math.min(2400, 1300 + path.length * 160),
+    captureId: move.captureId ?? null,
+    capturedFromPositionId: move.captureId ? state.pieces[move.captureId].positionId : null,
+  };
+}
+
+function finishMoveReplay(replay, state) {
+  if (replay.captureId) replay.capturedDestinationId = state.pieces[replay.captureId].positionId;
+  return replay;
+}
+
 function describeLastAction() {
   const action = gameState?.lastAction;
   if (!action) return "Waiting for the game state.";
@@ -268,20 +286,26 @@ async function watchRoom(code) {
       }
       const previousPiece = previousGame?.pieces?.[action?.pieceId];
       const movedPiece = room.game.pieces?.[action?.pieceId];
+      const legalMove = action?.type === "move" && previousGame
+        ? getLegalMoves(previousGame, action.uid).find((move) => (
+          move.pieceId === action.pieceId
+          && move.destination === action.destination
+          && move.die === action.die
+        ))
+        : null;
       const replay = action?.type === "move"
-        && action.uid !== firebaseUser.uid
         && previousPiece
         && movedPiece
         && previousPiece.positionId !== movedPiece.positionId
-          ? {
-            pieceId: action.pieceId,
-            fromPositionId: previousPiece.positionId,
-            destinationId: movedPiece.positionId,
-            captureId: action.captureId ?? null,
-          }
+        ? finishMoveReplay(createMoveReplay(previousGame, legalMove ?? {
+          pieceId: action.pieceId,
+          destination: action.destination,
+          path: [action.destination],
+          captureId: action.captureId,
+        }), room.game)
         : null;
       pendingMoveReplay = replay;
-      if (replay) {
+      if (replay && action.uid !== firebaseUser.uid) {
         const continuesRoll = previousGame.lastAction?.type === "move"
           && previousGame.lastAction.uid === action.uid;
         lastTurnReplay = continuesRoll ? [...lastTurnReplay, replay] : [replay];
@@ -559,18 +583,14 @@ async function playBotTurn() {
   const moves = getLegalMoves(gameState, uid);
   if (!moves.length) return;
   const move = moves[randomIndex(moves.length)];
-  const replay = {
-    pieceId: move.pieceId,
-    fromPositionId: gameState.pieces[move.pieceId].positionId,
-    destinationId: move.destination,
-    captureId: move.captureId ?? null,
-  };
+  const replay = createMoveReplay(gameState, move);
   const continuesRoll = gameState.lastAction?.type === "move" && gameState.lastAction.uid === uid;
   const transition = (state) => applyMove(state, uid, move.pieceId, move.destination, move.die);
   transition(gameState);
   if (gameMode === "online") await commitOnlineGame(transition, true, uid);
   else {
     gameState = transition(gameState);
+    finishMoveReplay(replay, gameState);
     pendingMoveReplay = replay;
     lastTurnReplay = continuesRoll ? [...lastTurnReplay, replay] : [replay];
   }
@@ -735,12 +755,15 @@ async function runGameAction(action) {
   renderGame();
   try {
     await action();
-    if (gameMode === "local") statusMessage = describeLastAction();
+    if (gameMode === "local") {
+      statusMessage = describeLastAction();
+      renderGame();
+    }
   } catch (error) {
     selectedMarbleId = null;
     statusMessage = `Action not saved. ${error.message} The latest room state is shown; please retry.`;
   } finally {
-    const settleDelay = isBotUid(gameState?.lastAction?.uid) ? 900 : 300;
+    const settleDelay = gameState?.lastAction?.type === "move" ? 3300 : 300;
     await new Promise((resolve) => setTimeout(resolve, settleDelay));
     actionLocked = false;
     renderGame();
@@ -768,12 +791,7 @@ async function moveSelectedMarble(destination) {
   ));
   if (!move) throw new Error("That destination is no longer available.");
   const die = move.die;
-  const replay = {
-    pieceId,
-    fromPositionId: gameState.pieces[pieceId].positionId,
-    destinationId: destination,
-    captureId: move.captureId ?? null,
-  };
+  const replay = createMoveReplay(gameState, move);
   const continuesRoll = gameState.lastAction?.type === "move"
     && gameState.lastAction.uid === uid;
   const transition = (state, actingUid) => applyMove(state, actingUid, pieceId, destination, die);
@@ -783,6 +801,8 @@ async function moveSelectedMarble(destination) {
   if (gameMode === "online") await commitOnlineGame(transition);
   else {
     gameState = transition(gameState, uid);
+    finishMoveReplay(replay, gameState);
+    pendingMoveReplay = replay;
     lastTurnReplay = continuesRoll ? [...lastTurnReplay, replay] : [replay];
   }
 }
@@ -795,7 +815,10 @@ async function replayLastTurn() {
     for (const replay of [...lastTurnReplay]) {
       pendingMoveReplay = { ...replay, forceMotion: true };
       renderGame();
-      await new Promise((resolve) => setTimeout(resolve, 950));
+      await new Promise((resolve) => setTimeout(
+        resolve,
+        (replay.durationMs ?? 1600) + (replay.captureId ? 900 : 200),
+      ));
     }
   } finally {
     pendingMoveReplay = null;
