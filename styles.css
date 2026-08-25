@@ -137,9 +137,9 @@ legend {
 .screen-wide {
   display: grid;
   grid-template-areas:
-    "board header"
-    "board controls";
-  grid-template-columns: minmax(0, 1fr) clamp(23rem, 30vw, 30rem);
+    "dice board header"
+    "dice board controls";
+  grid-template-columns: minmax(14rem, 0.45fr) minmax(0, 1fr) clamp(23rem, 27vw, 30rem);
   grid-template-rows: auto 1fr;
   align-items: start;
   width: 100%;
@@ -1083,7 +1083,7 @@ legend {
   --dice-gutter: clamp(3.5rem, 5vw, 4.25rem);
   grid-area: board;
   position: relative;
-  place-self: center end;
+  place-self: center;
   width: min(100%, calc(100dvh - clamp(9rem, 12vw, 10.5rem)));
   max-width: none;
   aspect-ratio: 1;
@@ -1575,12 +1575,14 @@ legend {
 }
 
 .dice-roll-stage {
-  --die-size: clamp(3.5rem, 4.5vw, 4.4rem);
-  position: absolute;
-  top: 50%;
-  right: calc(100% + clamp(0.7rem, 1.2vw, 1.1rem));
+  --die-size: clamp(4rem, 5vw, 5.25rem);
+  grid-area: dice;
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
   z-index: 5;
-  width: clamp(12rem, 15vw, 15rem);
+  min-width: 0;
+  min-height: 0;
   padding: 0.65rem;
   border: 0.55rem ridge #75431e;
   border-radius: 1.15rem;
@@ -1590,7 +1592,6 @@ legend {
     #6b3b1a;
   box-shadow: 0.65rem 0.7rem 1rem #0008, inset 0 0 0 0.18rem #b97b3c;
   text-align: center;
-  transform: translateY(-50%);
 }
 
 .dice-roll-stage > strong {
@@ -1610,7 +1611,8 @@ legend {
 
 .dice-table-surface {
   position: relative;
-  height: clamp(14rem, 34vh, 20rem);
+  flex: 1;
+  min-height: 24rem;
   overflow: hidden;
   border: 0.3rem solid #24150b;
   border-radius: 0.7rem;
@@ -1625,11 +1627,31 @@ legend {
   perspective-origin: 50% 35%;
 }
 
+.dice-table-ready {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  color: #d8ebd1;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  opacity: 0.32;
+  text-transform: uppercase;
+  transform: translate(-50%, -50%) rotate(-7deg);
+}
+
 .rolling-die {
   position: absolute;
+  top: 0;
+  left: 0;
   width: var(--die-size);
   height: var(--die-size);
+  opacity: 0;
+  will-change: transform;
   transform-style: preserve-3d;
+}
+
+.rolling-die.is-in-play {
+  opacity: 1;
 }
 
 .rolling-die::after {
@@ -1642,16 +1664,6 @@ legend {
   transform: rotateX(70deg);
 }
 
-.rolling-die-1 {
-  left: 13%;
-  bottom: 17%;
-}
-
-.rolling-die-2 {
-  right: 13%;
-  bottom: 30%;
-}
-
 .die-cube {
   position: relative;
   display: block;
@@ -1659,6 +1671,11 @@ legend {
   height: 100%;
   transform: var(--die-final);
   transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.die-cube.is-settling {
+  transition: transform 350ms cubic-bezier(0.16, 0.8, 0.25, 1);
 }
 
 .die-face {
@@ -1683,7 +1700,7 @@ legend {
 .die-face-bottom { transform: rotateX(-90deg) translateZ(calc(var(--die-size) / 2)); }
 
 .die-face .die-pip {
-  width: clamp(0.42rem, 0.65vw, 0.58rem);
+  width: clamp(0.48rem, 0.72vw, 0.7rem);
 }
 
 .die-value-1 { --die-final: rotateX(-12deg) rotateY(15deg); }
@@ -1692,28 +1709,6 @@ legend {
 .die-value-4 { --die-final: rotateX(-12deg) rotateY(105deg); }
 .die-value-5 { --die-final: rotateX(78deg) rotateY(12deg); }
 .die-value-6 { --die-final: rotateX(-12deg) rotateY(195deg); }
-
-.dice-roll-stage.is-rolling .rolling-die-1 .die-cube {
-  animation: roll-cube-one 1.1s cubic-bezier(0.16, 0.72, 0.2, 1) both;
-}
-
-.dice-roll-stage.is-rolling .rolling-die-2 .die-cube {
-  animation: roll-cube-two 1.15s cubic-bezier(0.16, 0.72, 0.2, 1) both;
-}
-
-@keyframes roll-cube-one {
-  0% { transform: translate3d(-5rem, -11rem, 5rem) rotateX(-540deg) rotateY(-420deg) rotateZ(-180deg) scale(0.72); }
-  48% { transform: translate3d(1.3rem, -2.5rem, 3rem) rotateX(-245deg) rotateY(-190deg) rotateZ(-70deg) scale(1.05); }
-  72% { transform: translate3d(-0.6rem, -0.9rem, 1.2rem) rotateX(-95deg) rotateY(-80deg) rotateZ(-25deg) scale(0.96); }
-  100% { transform: var(--die-final); }
-}
-
-@keyframes roll-cube-two {
-  0% { transform: translate3d(5rem, -12rem, 6rem) rotateX(620deg) rotateY(480deg) rotateZ(210deg) scale(0.72); }
-  45% { transform: translate3d(-1.4rem, -3rem, 3.5rem) rotateX(280deg) rotateY(210deg) rotateZ(80deg) scale(1.06); }
-  74% { transform: translate3d(0.5rem, -1rem, 1.2rem) rotateX(110deg) rotateY(95deg) rotateZ(30deg) scale(0.96); }
-  100% { transform: var(--die-final); }
-}
 
 .victory-screen {
   position: relative;
@@ -2561,6 +2556,13 @@ html[data-theme="pixel"] .victory-confetti {
 }
 
 @media (max-width: 72rem) {
+  .screen-wide {
+    grid-template-areas:
+      "board header"
+      "board controls";
+    grid-template-columns: minmax(0, 1fr) clamp(20rem, 34vw, 25rem);
+  }
+
   .dice-roll-stage {
     display: none !important;
   }

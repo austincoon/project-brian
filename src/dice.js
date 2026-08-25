@@ -3,6 +3,48 @@ export const CUBE_FACES = [
   ["left", 4], ["top", 2], ["bottom", 5],
 ];
 
+export function stepDicePhysics(bodies, bounds, seconds) {
+  const maxX = bounds.width - bounds.size - bounds.padding;
+  const maxY = bounds.height - bounds.size - bounds.padding;
+  const bounce = 0.72;
+  const drag = Math.pow(0.22, seconds);
+
+  for (const body of bodies) {
+    body.x += body.vx * seconds;
+    body.y += body.vy * seconds;
+    body.vx *= drag;
+    body.vy *= drag;
+    if (body.x < bounds.padding) { body.x = bounds.padding; body.vx = Math.abs(body.vx) * bounce; }
+    if (body.x > maxX) { body.x = maxX; body.vx = -Math.abs(body.vx) * bounce; }
+    if (body.y < bounds.padding) { body.y = bounds.padding; body.vy = Math.abs(body.vy) * bounce; }
+    if (body.y > maxY) { body.y = maxY; body.vy = -Math.abs(body.vy) * bounce; }
+  }
+
+  const [first, second] = bodies;
+  if (!second) return bodies;
+  const dx = second.x - first.x;
+  const dy = second.y - first.y;
+  const distance = Math.hypot(dx, dy) || 1;
+  const minimum = bounds.size * 0.88;
+  if (distance >= minimum) return bodies;
+  const nx = dx / distance;
+  const ny = dy / distance;
+  const overlap = (minimum - distance) / 2;
+  first.x -= nx * overlap;
+  first.y -= ny * overlap;
+  second.x += nx * overlap;
+  second.y += ny * overlap;
+  const firstSpeed = first.vx * nx + first.vy * ny;
+  const secondSpeed = second.vx * nx + second.vy * ny;
+  if (firstSpeed > secondSpeed) {
+    first.vx += (secondSpeed - firstSpeed) * nx;
+    first.vy += (secondSpeed - firstSpeed) * ny;
+    second.vx += (firstSpeed - secondSpeed) * nx;
+    second.vy += (firstSpeed - secondSpeed) * ny;
+  }
+  return bodies;
+}
+
 export function rollDie(randomValues = crypto.getRandomValues.bind(crypto)) {
   const bytes = new Uint8Array(1);
   // 252 is divisible by six; rejecting 252–255 prevents modulo bias.

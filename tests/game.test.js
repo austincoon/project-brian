@@ -26,7 +26,7 @@ import {
   skipTurn,
   startGame,
 } from "../src/game.js";
-import { CUBE_FACES, getDicePresentation, getPlayerDiceRows, randomIndex, rollDie } from "../src/dice.js";
+import { CUBE_FACES, getDicePresentation, getPlayerDiceRows, randomIndex, rollDie, stepDicePhysics } from "../src/dice.js";
 import { loadTurnReplay, saveTurnReplay } from "../src/replay.js";
 import { applyTheme, loadTheme, normalizeTheme, THEME_STORAGE_KEY } from "../src/theme.js";
 
@@ -41,6 +41,22 @@ test("3D dice contain every face in opposite pairs", () => {
   assert.equal(faces.front + faces.back, 7);
   assert.equal(faces.left + faces.right, 7);
   assert.equal(faces.top + faces.bottom, 7);
+});
+
+test("thrown dice bounce off tray walls and each other", () => {
+  const bounds = { width: 300, height: 400, size: 50, padding: 10 };
+  const wall = [{ x: 245, y: 100, vx: 100, vy: 0 }];
+  stepDicePhysics(wall, bounds, 0.1);
+  assert.equal(wall[0].x, 240);
+  assert.ok(wall[0].vx < 0);
+
+  const pair = [
+    { x: 100, y: 100, vx: 100, vy: 0 },
+    { x: 130, y: 100, vx: 0, vy: 0 },
+  ];
+  stepDicePhysics(pair, bounds, 0);
+  assert.ok(pair[0].vx < pair[1].vx);
+  assert.ok(pair[1].x - pair[0].x >= bounds.size * 0.88);
 });
 
 test("visual themes persist and unknown values fall back to wacky", () => {

@@ -1,5 +1,5 @@
 import { PLAYER_ORDER, PLAYERS, renderBoard } from "./board.js?v=20260825-23";
-import { CUBE_FACES, getPlayerDiceRows, randomIndex, rollDice } from "./dice.js?v=20260825-26";
+import { CUBE_FACES, getPlayerDiceRows, randomIndex, rollDice, stepDicePhysics } from "./dice.js?v=20260825-27";
 import { loadTurnReplay, saveTurnReplay } from "./replay.js?v=20260823-19";
 import { applyTheme, loadTheme } from "./theme.js?v=20260824-1";
 import {
@@ -77,6 +77,9 @@ let lastTurnReplay = [];
 let botTimer = null;
 let lastDiceByUid = {};
 let lastDiceRollKey = null;
+let diceAnimationFrame = null;
+let diceSettleTimer = null;
+let diceInMotion = false;
 let moveUnlockDelayMs = 0;
 
 const activeTheme = applyTheme(document.documentElement, localStorage, loadTheme(localStorage));
@@ -92,9 +95,24 @@ function showScreen(name) {
 }
 
 function resetDiceDisplays() {
+  cancelAnimationFrame(diceAnimationFrame);
+  clearTimeout(diceSettleTimer);
+  diceAnimationFrame = null;
+  diceSettleTimer = null;
+  diceInMotion = false;
   lastDiceByUid = {};
   lastDiceRollKey = null;
-  diceRollStage.hidden = true;
+  const label = document.createElement("strong");
+  label.textContent = "Dice tray · Waiting for a roll";
+  const table = document.createElement("div");
+  table.className = "dice-table-surface";
+  table.setAttribute("aria-hidden", "true");
+  const ready = document.createElement("span");
+  ready.className = "dice-table-ready";
+  ready.textContent = "Roll 'em";
+  table.append(ready);
+  diceRollStage.replaceChildren(label, table);
+  diceRollStage.hidden = false;
 }
 
 function setOnlineBusy(busy) {
@@ -529,6 +547,80 @@ function createRollingDie(value, index) {
   return wrapper;
 }
 
+function animateDiceThrow(table, elements, onSettled) {
+  cancelAnimationFrame(diceAnimationFrame);
+  clearTimeout(diceSettleTimer);
+  diceAnimationFrame = null;
+  diceSettleTimer = null;
+  diceInMotion = false;
+  const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const width = table.clientWidth;
+  const height = table.clientHeight;
+  const size = elements[0]?.offsetWidth ?? 64;
+  if (width < 100 || height < 100) return;
+  const padding = Math.max(10, size * 0.15);
+  const bodies = elements.map((element, index) => ({
+    element,
+    cube: element.firstElementChild,
+    x: padding,
+    y: index ? height * 0.68 : height * 0.16,
+    vx: Math.max(440, width * (index ? 1.55 : 1.8)),
+    vy: height * (index ? -0.72 : 0.8),
+    rx: index ? 70 : -35,
+    ry: index ? -50 : 45,
+    rz: 0,
+  }));
+  const bounds = { width, height, size, padding };
+
+  for (const [index, body] of bodies.entries()) {
+    if (reducedMotion) {
+      body.x = width * (index ? 0.58 : 0.18);
+      body.y = height * (index ? 0.32 : 0.62);
+    }
+    body.element.style.transform = `translate3d(${body.x}px, ${body.y}px, 0)`;
+    body.element.classList.add("is-in-play");
+  }
+  if (reducedMotion) {
+    onSettled();
+    return;
+  }
+
+  diceInMotion = true;
+  let previous;
+  let elapsed = 0;
+  const frame = (now) => {
+    if (!previous) previous = now;
+    const seconds = Math.min((now - previous) / 1000, 0.032);
+    previous = now;
+    elapsed += seconds;
+    stepDicePhysics(bodies, bounds, seconds);
+    for (const [index, body] of bodies.entries()) {
+      const speed = Math.hypot(body.vx, body.vy);
+      body.rx += (speed * (index ? -1.15 : 1.25) + 260) * seconds;
+      body.ry += (speed * (index ? 1.2 : -1.05) + 330) * seconds;
+      body.rz += (index ? -190 : 170) * seconds;
+      body.element.style.transform = `translate3d(${body.x}px, ${body.y}px, 0)`;
+      body.cube.style.transform = `rotateX(${body.rx}deg) rotateY(${body.ry}deg) rotateZ(${body.rz}deg)`;
+    }
+    if (elapsed < 1.65) {
+      diceAnimationFrame = requestAnimationFrame(frame);
+      return;
+    }
+    diceAnimationFrame = null;
+    for (const body of bodies) {
+      body.cube.classList.add("is-settling");
+      body.cube.style.transform = "var(--die-final)";
+    }
+    diceSettleTimer = setTimeout(() => {
+      diceSettleTimer = null;
+      diceInMotion = false;
+      onSettled();
+      renderGame();
+    }, 380);
+  };
+  diceAnimationFrame = requestAnimationFrame(frame);
+}
+
 function renderDiceRoll() {
   const action = gameState.lastAction;
   if (!["opening-roll", "roll", "no-move"].includes(action?.type)) return;
@@ -540,17 +632,23 @@ function renderDiceRoll() {
 
   const player = gameState.players.find(({ uid }) => uid === action.uid);
   const label = document.createElement("strong");
-  label.textContent = `${player.name} rolled ${formatRoll(action.dice)}`;
+  label.textContent = `${player.name} is rolling…`;
   const table = document.createElement("div");
   table.className = "dice-table-surface";
   table.setAttribute("aria-hidden", "true");
-  table.append(...action.dice.map(createRollingDie));
+  const dice = action.dice.map(createRollingDie);
+  table.append(...dice);
+  cancelAnimationFrame(diceAnimationFrame);
+  clearTimeout(diceSettleTimer);
+  diceAnimationFrame = null;
+  diceSettleTimer = null;
+  diceInMotion = false;
   diceRollStage.style.setProperty("--player-color", PLAYERS[player.color].color);
   diceRollStage.replaceChildren(label, table);
   diceRollStage.hidden = false;
-  diceRollStage.classList.remove("is-rolling");
-  void diceRollStage.offsetWidth;
-  diceRollStage.classList.add("is-rolling");
+  diceAnimationFrame = requestAnimationFrame(() => animateDiceThrow(table, dice, () => {
+    label.textContent = `${player.name} rolled ${formatRoll(action.dice)}`;
+  }));
 }
 
 function renderDice() {
@@ -618,7 +716,7 @@ function scheduleBotTurn() {
   botTimer = null;
   const player = currentPlayer();
   const hostCanRunBot = gameMode === "local" || firebaseUser?.uid === onlineRoom?.hostUid;
-  if (!player || !isBotUid(player.uid) || !hostCanRunBot || actionLocked || replayInProgress) return;
+  if (!player || !isBotUid(player.uid) || !hostCanRunBot || actionLocked || replayInProgress || diceInMotion) return;
   const delay = gameState.lastAction?.type === "move" ? 1600 : 1300;
   botTimer = setTimeout(() => runGameAction(playBotTurn), delay);
 }
@@ -748,7 +846,7 @@ function renderGame() {
     : gameMode === "local" ? `Roll for ${player.name}`
     : canAct ? (gameState.phase === "opening-roll" ? "Make your opening roll" : "Roll your dice")
     : `Waiting for ${player.name}`;
-  rollButton.disabled = actionLocked || replayInProgress || !canAct || !["opening-roll", "roll"].includes(gameState.phase);
+  rollButton.disabled = actionLocked || replayInProgress || diceInMotion || !canAct || !["opening-roll", "roll"].includes(gameState.phase);
   replayMoveButton.hidden = !lastTurnReplay.length;
   replayMoveButton.textContent = gameMode === "online" ? "Replay opponent move" : "Replay last move";
   replayMoveButton.disabled = actionLocked || replayInProgress;
@@ -769,7 +867,7 @@ function renderGame() {
   turnStatus.classList.toggle("sr-only", !showError);
   turnStatus.classList.toggle("game-error", showError);
 
-  const selectableMarbles = actionLocked || replayInProgress || !canAct ? [] : movableMarbles;
+  const selectableMarbles = actionLocked || replayInProgress || diceInMotion || !canAct ? [] : movableMarbles;
   const replayMove = pendingMoveReplay;
   pendingMoveReplay = null;
   renderBoard(board, {
@@ -778,11 +876,11 @@ function renderGame() {
     playerNames: Object.fromEntries(gameState.players.map(({ color, name }) => [color, name])),
     selectedMarbleId,
     selectableMarbleIds: selectableMarbles,
-    legalMarbleIds: canAct && !replayInProgress ? movableMarbles : [],
-    legalDestinationIds: actionLocked || replayInProgress || !canAct ? [] : destinations,
+    legalMarbleIds: canAct && !replayInProgress && !diceInMotion ? movableMarbles : [],
+    legalDestinationIds: actionLocked || replayInProgress || diceInMotion || !canAct ? [] : destinations,
     replayMove,
     onMarbleSelect(marbleId) {
-      if (actionLocked || replayInProgress || !canControlTurn() || gameState.phase !== "move") return;
+      if (actionLocked || replayInProgress || diceInMotion || !canControlTurn() || gameState.phase !== "move") return;
       selectedMarbleId = selectedMarbleId === marbleId ? null : marbleId;
       statusMessage = selectedMarbleId
         ? "Choose one of the highlighted destinations."
@@ -790,7 +888,7 @@ function renderGame() {
       renderGame();
     },
     onDestinationSelect(destination) {
-      if (actionLocked || replayInProgress || !selectedMarbleId || !canControlTurn() || gameState.phase !== "move") return;
+      if (actionLocked || replayInProgress || diceInMotion || !selectedMarbleId || !canControlTurn() || gameState.phase !== "move") return;
       runGameAction(() => moveSelectedMarble(destination));
     },
   });
