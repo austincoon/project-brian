@@ -315,10 +315,10 @@ function drawHoles(svg, state) {
       styles.push(`--player-color: ${PLAYERS[hole.player].color}`);
     }
     if (hole.id === state.replayMove?.destinationId) {
-      styles.push(`--move-duration: ${state.replayMove.durationMs ?? 1600}ms`);
+      styles.push(`--move-duration: ${state.replayMove.durationMs ?? 800}ms`);
     }
     if (replayStep >= 0) {
-      const stepMs = (state.replayMove.durationMs ?? 1600) / state.replayMove.path.length;
+      const stepMs = (state.replayMove.durationMs ?? 800) / state.replayMove.path.length;
       styles.push(`--replay-step-delay: ${replayStep * stepMs}ms`);
     }
     if (styles.length) circle.setAttribute("style", styles.join("; "));
@@ -380,8 +380,8 @@ function drawMarbles(svg, marbles, state) {
     }
 
     const selectable = state.selectableMarbleIds.has(marble.id);
-    const durationMs = state.replayMove?.durationMs ?? 1600;
-    const captureDelayMs = Math.max(300, durationMs - 250);
+    const durationMs = state.replayMove?.durationMs ?? 800;
+    const captureDelayMs = Math.max(150, durationMs - 125);
     const classes = ["marble"];
     if (marble.color === state.activePlayer) classes.push("is-active-player");
     if (marble.id === state.selectedMarbleId) classes.push("is-selected");
@@ -421,7 +421,7 @@ function drawMarbles(svg, marbles, state) {
         type: "translate",
         values: path.map(({ x, y }) => `${x} ${y}`).join(";"),
         keyTimes: path.map((_, index) => index / (path.length - 1)).join(";"),
-        dur: capturedReplay ? "900ms" : `${durationMs}ms`,
+        dur: capturedReplay ? "450ms" : `${durationMs}ms`,
         begin: "indefinite",
         calcMode: "linear",
         fill: "freeze",

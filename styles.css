@@ -1275,29 +1275,29 @@ legend {
 }
 
 .marble.is-replaying .marble-focus {
-  animation: replay-ring var(--move-duration, 1600ms) ease-in-out;
+  animation: replay-ring var(--move-duration, 800ms) ease-in-out;
 }
 
 .marble.is-replay-capture .marble-disc {
   transform-box: fill-box;
   transform-origin: center;
-  animation: replay-capture 900ms ease-out var(--capture-delay, 1350ms) both;
+  animation: replay-capture 450ms ease-out var(--capture-delay, 675ms) both;
 }
 
 .marble.is-replay-capture .marble-focus {
-  animation: capture-burst 900ms ease-out var(--capture-delay, 1350ms) both;
+  animation: capture-burst 450ms ease-out var(--capture-delay, 675ms) both;
 }
 
 .marble.is-capture-attacker .marble-active-ring {
-  animation: capture-impact 700ms ease-out calc(var(--move-duration, 1600ms) - 350ms) both;
+  animation: capture-impact 350ms ease-out calc(var(--move-duration, 800ms) - 175ms) both;
 }
 
 .board-hole.is-replay-path {
-  animation: replay-path-step 650ms ease-out var(--replay-step-delay, 0ms) both;
+  animation: replay-path-step 325ms ease-out var(--replay-step-delay, 0ms) both;
 }
 
 .board-hole.is-replay-destination {
-  animation: replay-destination 850ms ease-out calc(var(--move-duration, 1600ms) - 500ms) both;
+  animation: replay-destination 425ms ease-out calc(var(--move-duration, 800ms) - 250ms) both;
 }
 
 @keyframes replay-ring {

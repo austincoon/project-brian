@@ -1,4 +1,4 @@
-import { PLAYER_ORDER, PLAYERS, renderBoard } from "./board.js?v=20260824-22";
+import { PLAYER_ORDER, PLAYERS, renderBoard } from "./board.js?v=20260825-23";
 import { getPlayerDiceRows, randomIndex, rollDice } from "./dice.js?v=20260824-25";
 import { loadTurnReplay, saveTurnReplay } from "./replay.js?v=20260823-19";
 import { applyTheme, loadTheme } from "./theme.js?v=20260824-1";
@@ -197,6 +197,10 @@ function formatRoll(dice) {
   return `${dice[0]} + ${dice[1]} = ${dice[0] + dice[1]}`;
 }
 
+function moveAnimationDuration(path) {
+  return Math.min(1200, 650 + Math.max(path?.length ?? 1, 1) * 80);
+}
+
 function createMoveReplay(state, move) {
   const path = move.path?.length ? [...move.path] : [move.destination];
   return {
@@ -204,7 +208,8 @@ function createMoveReplay(state, move) {
     fromPositionId: state.pieces[move.pieceId].positionId,
     destinationId: move.destination,
     path,
-    durationMs: Math.min(2400, 1300 + path.length * 160),
+    durationMs: moveAnimationDuration(path),
+    forceMotion: true,
     captureId: move.captureId ?? null,
     capturedFromPositionId: move.captureId ? state.pieces[move.captureId].positionId : null,
   };
@@ -765,7 +770,7 @@ async function runGameAction(action) {
     selectedMarbleId = null;
     statusMessage = `Action not saved. ${error.message} The latest room state is shown; please retry.`;
   } finally {
-    const settleDelay = gameState?.lastAction?.type === "move" ? 3300 : 300;
+    const settleDelay = gameState?.lastAction?.type === "move" ? 1800 : 300;
     await new Promise((resolve) => setTimeout(resolve, settleDelay));
     actionLocked = false;
     renderGame();
@@ -815,11 +820,12 @@ async function replayLastTurn() {
   selectedMarbleId = null;
   try {
     for (const replay of [...lastTurnReplay]) {
-      pendingMoveReplay = { ...replay, forceMotion: true };
+      const durationMs = moveAnimationDuration(replay.path);
+      pendingMoveReplay = { ...replay, durationMs, forceMotion: true };
       renderGame();
       await new Promise((resolve) => setTimeout(
         resolve,
-        (replay.durationMs ?? 1600) + (replay.captureId ? 900 : 200),
+        durationMs + (replay.captureId ? 450 : 100),
       ));
     }
   } finally {

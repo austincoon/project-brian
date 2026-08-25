@@ -68,6 +68,7 @@ test("move replays start after the SVG is attached", () => {
   let scheduledAnimation;
   let attachedAtStart = false;
   const replayPaths = [];
+  const replayDurations = [];
   let captureCueSeen = false;
   let pathCueCount = 0;
 
@@ -84,6 +85,7 @@ test("move replays start after the SVG is attached", () => {
     beginElement() {
       attachedAtStart = container.children.length === 1;
       replayPaths.push(this.attributes.values);
+      replayDurations.push(this.attributes.dur);
     }
   }
 
@@ -121,6 +123,7 @@ test("move replays start after the SVG is attached", () => {
       ["track:2", "track:3", "track:4"],
       ["track:4", "base:blue:0"],
     ].map((path) => path.map((id) => `${HOLES_BY_ID[id].x} ${HOLES_BY_ID[id].y}`).join(";")));
+    assert.deepEqual(replayDurations, ["800ms", "450ms"]);
     assert.equal(captureCueSeen, true);
     assert.equal(pathCueCount, 2);
   } finally {
