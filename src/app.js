@@ -1,5 +1,5 @@
-import { PLAYER_ORDER, PLAYERS, renderBoard } from "./board.js?v=20260823-19";
-import { getDicePresentation, randomIndex, rollDice } from "./dice.js?v=20260824-24";
+import { PLAYER_ORDER, PLAYERS, renderBoard } from "./board.js?v=20260824-20";
+import { getPlayerDiceRows, randomIndex, rollDice } from "./dice.js?v=20260824-25";
 import { loadTurnReplay, saveTurnReplay } from "./replay.js?v=20260823-19";
 import { applyTheme, loadTheme } from "./theme.js?v=20260824-1";
 import {
@@ -46,13 +46,9 @@ const phaseLabel = document.querySelector("#phase-label");
 const gameTitle = document.querySelector("#game-title");
 const mainMenuButton = document.querySelector("#main-menu-button");
 const newGameButton = document.querySelector("#new-game-button");
+const gameHeader = document.querySelector(".game-header");
 const board = document.querySelector("#board");
-const gameControls = document.querySelector(".game-controls");
-const diceDisplay = document.querySelector(".dice");
-const diceOwnerLabel = document.querySelector("#dice-owner-label");
-const dieOne = document.querySelector("#die-1");
-const dieTwo = document.querySelector("#die-2");
-const dieDisplays = [dieOne, dieTwo];
+const playerDiceGrid = document.querySelector("#player-dice-grid");
 const rollButton = document.querySelector("#roll-button");
 const replayMoveButton = document.querySelector("#replay-move-button");
 
@@ -78,6 +74,7 @@ let replayInProgress = false;
 let pendingMoveReplay = null;
 let lastTurnReplay = [];
 let botTimer = null;
+let lastDiceByUid = {};
 
 const activeTheme = applyTheme(document.documentElement, localStorage, loadTheme(localStorage));
 themeInputs.find(({ value }) => value === activeTheme).checked = true;
@@ -171,6 +168,7 @@ function forgetOnlineRoom() {
   }
   pendingMoveReplay = null;
   lastTurnReplay = [];
+  lastDiceByUid = {};
   clearTimeout(botTimer);
   botTimer = null;
   setRoomUrl(null);
@@ -183,6 +181,7 @@ function returnToMainMenu() {
     gameState = null;
     pendingMoveReplay = null;
     lastTurnReplay = [];
+    lastDiceByUid = {};
   }
   selectedMarbleId = null;
   statusMessage = "";
@@ -263,7 +262,10 @@ async function watchRoom(code) {
       const action = room.game.lastAction;
       const gameId = room.restartedAt ?? room.startedAt;
       if (!previousGame) lastTurnReplay = loadTurnReplay(localStorage, code, gameId);
-      if (action?.type === "started") lastTurnReplay = [];
+      if (action?.type === "started") {
+        lastTurnReplay = [];
+        lastDiceByUid = {};
+      }
       const previousPiece = previousGame?.pieces?.[action?.pieceId];
       const movedPiece = room.game.pieces?.[action?.pieceId];
       const replay = action?.type === "move"
@@ -271,10 +273,11 @@ async function watchRoom(code) {
         && previousPiece
         && movedPiece
         && previousPiece.positionId !== movedPiece.positionId
-        ? {
+          ? {
             pieceId: action.pieceId,
             fromPositionId: previousPiece.positionId,
             destinationId: movedPiece.positionId,
+            captureId: action.captureId ?? null,
           }
         : null;
       pendingMoveReplay = replay;
@@ -471,36 +474,56 @@ function drawDie(button, value) {
 }
 
 function renderDice() {
-  const presentation = getDicePresentation(
-    gameState,
-    gameMode === "online" ? firebaseUser?.uid : null,
-  );
-  const { dice } = presentation;
-  const ownerColor = PLAYERS[presentation.color]?.color ?? "#8d7b5f";
-  gameControls.style.setProperty("--dice-owner-color", ownerColor);
-  diceOwnerLabel.textContent = presentation.label;
-  drawDie(dieOne, dice?.[0]);
-  drawDie(dieTwo, dice?.[1]);
-  diceDisplay.setAttribute(
-    "aria-label",
-    dice ? `${presentation.label}: ${dice[0]} and ${dice[1]}` : presentation.label,
-  );
+  const rows = getPlayerDiceRows(gameState, lastDiceByUid);
+  lastDiceByUid = Object.fromEntries(rows.flatMap(({ uid, dice }) => dice ? [[uid, dice]] : []));
+  playerDiceGrid.replaceChildren(...rows.map((row) => {
+    const card = document.createElement("article");
+    card.className = `player-dice-card${row.isActive ? " is-active" : ""}${row.isLastRoller ? " is-last-roller" : ""}`;
+    card.style.setProperty("--player-color", PLAYERS[row.color].color);
 
-  const counts = new Map();
-  for (const die of gameState?.remainingDice ?? []) counts.set(die, (counts.get(die) ?? 0) + 1);
-  const available = (dice ?? []).map((die) => {
-    const count = counts.get(die) ?? 0;
-    if (!count) return false;
-    counts.set(die, count - 1);
-    return true;
-  });
-  dieDisplays.forEach((display, index) => {
-    const isUsed = gameState?.phase === "move" && !available[index];
-    display.classList.toggle("is-used", isUsed);
-    display.setAttribute("aria-label", dice?.[index]
-      ? `${index ? "Second" : "First"} die: ${dice[index]}${gameState?.phase === "move" ? available[index] ? " available" : " used" : ""}`
-      : `${index ? "Second" : "First"} die has not been rolled`);
-  });
+    const identity = document.createElement("div");
+    identity.className = "player-dice-identity";
+    const swatch = document.createElement("span");
+    swatch.className = "player-dice-swatch";
+    swatch.setAttribute("aria-hidden", "true");
+    const name = document.createElement("strong");
+    name.textContent = `${row.name}${isBotUid(row.uid) ? " · NPC" : ""}`;
+    identity.append(swatch, name);
+
+    const status = document.createElement("span");
+    status.className = "player-dice-status";
+    const total = row.dice ? row.dice[0] + row.dice[1] : null;
+    status.textContent = row.isActive
+      ? gameState.phase === "move" ? "Moving now" : gameState.phase === "opening-roll" ? "Opening roll" : "Up next"
+      : total ? `Last roll: ${total}` : "Waiting to roll";
+
+    const dice = document.createElement("div");
+    dice.className = "dice player-dice-set";
+    dice.setAttribute("aria-label", row.dice
+      ? `${row.name} rolled ${row.dice[0]} and ${row.dice[1]}, total ${total}`
+      : `${row.name} has not rolled yet`);
+    const displays = [0, 1].map((index) => {
+      const display = document.createElement("span");
+      display.className = "die-button";
+      display.setAttribute("aria-hidden", "true");
+      drawDie(display, row.dice?.[index]);
+      return display;
+    });
+
+    if (row.isActive && gameState.phase === "move" && row.dice) {
+      const counts = new Map();
+      for (const die of gameState.remainingDice ?? []) counts.set(die, (counts.get(die) ?? 0) + 1);
+      displays.forEach((display, index) => {
+        const count = counts.get(row.dice[index]) ?? 0;
+        display.classList.toggle("is-used", !count);
+        if (count) counts.set(row.dice[index], count - 1);
+      });
+    }
+
+    dice.append(...displays);
+    card.append(identity, status, dice);
+    return card;
+  }));
 }
 
 function canControlTurn() {
@@ -514,7 +537,8 @@ function scheduleBotTurn() {
   const player = currentPlayer();
   const hostCanRunBot = gameMode === "local" || firebaseUser?.uid === onlineRoom?.hostUid;
   if (!player || !isBotUid(player.uid) || !hostCanRunBot || actionLocked || replayInProgress) return;
-  botTimer = setTimeout(() => runGameAction(playBotTurn), 700);
+  const delay = gameState.lastAction?.type === "move" ? 1600 : 1300;
+  botTimer = setTimeout(() => runGameAction(playBotTurn), delay);
 }
 
 async function playBotTurn() {
@@ -539,6 +563,7 @@ async function playBotTurn() {
     pieceId: move.pieceId,
     fromPositionId: gameState.pieces[move.pieceId].positionId,
     destinationId: move.destination,
+    captureId: move.captureId ?? null,
   };
   const continuesRoll = gameState.lastAction?.type === "move" && gameState.lastAction.uid === uid;
   const transition = (state) => applyMove(state, uid, move.pieceId, move.destination, move.die);
@@ -546,6 +571,7 @@ async function playBotTurn() {
   if (gameMode === "online") await commitOnlineGame(transition, true, uid);
   else {
     gameState = transition(gameState);
+    pendingMoveReplay = replay;
     lastTurnReplay = continuesRoll ? [...lastTurnReplay, replay] : [replay];
   }
 }
@@ -634,7 +660,8 @@ function renderGame() {
     : gameState.phase === "ended" ? "Game ended"
     : `${player.name}'s turn`;
   const titlePlayer = gameState.players.find(({ uid }) => uid === (gameState.winnerUid ?? player.uid));
-  gameTitle.style.setProperty("--active-color", PLAYERS[titlePlayer.color].darkColor);
+  gameHeader.style.setProperty("--active-color", PLAYERS[titlePlayer.color].darkColor);
+  gameHeader.style.setProperty("--active-accent", PLAYERS[titlePlayer.color].color);
 
   rollButton.textContent = gameState.phase === "move"
     ? "Dice in play"
@@ -713,7 +740,8 @@ async function runGameAction(action) {
     selectedMarbleId = null;
     statusMessage = `Action not saved. ${error.message} The latest room state is shown; please retry.`;
   } finally {
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    const settleDelay = isBotUid(gameState?.lastAction?.uid) ? 900 : 300;
+    await new Promise((resolve) => setTimeout(resolve, settleDelay));
     actionLocked = false;
     renderGame();
   }
@@ -744,6 +772,7 @@ async function moveSelectedMarble(destination) {
     pieceId,
     fromPositionId: gameState.pieces[pieceId].positionId,
     destinationId: destination,
+    captureId: move.captureId ?? null,
   };
   const continuesRoll = gameState.lastAction?.type === "move"
     && gameState.lastAction.uid === uid;
@@ -793,6 +822,7 @@ setupForm.addEventListener("submit", (event) => {
   gameMode = "local";
   gameState = createGame(players);
   gameState = startGame(gameState, gameState.hostUid);
+  lastDiceByUid = {};
   selectedMarbleId = null;
   statusMessage = describeLastAction();
   showScreen("game");

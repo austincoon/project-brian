@@ -33,3 +33,28 @@ export function getDicePresentation(state, viewerUid = null) {
 
   return { dice, uid, color: player?.color ?? null, label: `${owner} ${context}` };
 }
+
+export function getPlayerDiceRows(state, rememberedDice = {}) {
+  const diceByUid = Object.fromEntries(
+    (state?.players ?? []).flatMap(({ uid }) => Array.isArray(rememberedDice[uid])
+      ? [[uid, [...rememberedDice[uid]]]]
+      : []),
+  );
+
+  for (const [uid, roll] of Object.entries(state?.opening?.rolls ?? {})) {
+    if (Array.isArray(roll?.dice)) diceByUid[uid] = [...roll.dice];
+  }
+  if (state?.lastAction?.uid && Array.isArray(state.lastAction.dice)) {
+    diceByUid[state.lastAction.uid] = [...state.lastAction.dice];
+  }
+  if (state?.phase === "move" && state.turnUid && Array.isArray(state.dice)) {
+    diceByUid[state.turnUid] = [...state.dice];
+  }
+
+  return (state?.players ?? []).map((player) => ({
+    ...player,
+    dice: diceByUid[player.uid] ?? null,
+    isActive: player.uid === state.turnUid,
+    isLastRoller: player.uid === state.lastAction?.uid && Array.isArray(state.lastAction?.dice),
+  }));
+}

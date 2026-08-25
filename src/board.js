@@ -371,6 +371,7 @@ function drawMarbles(svg, marbles, state) {
     if (marble.id === state.selectedMarbleId) classes.push("is-selected");
     if (state.legalMarbleIds.has(marble.id)) classes.push("is-legal-move");
     if (replaying) classes.push("is-replaying");
+    if (marble.id === state.replayMove?.captureId) classes.push("is-replay-capture");
 
     const group = svgElement("g", {
       class: classes.join(" "),

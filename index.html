@@ -14,7 +14,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./styles.css?v=20260824-36">
+    <link rel="stylesheet" href="./styles.css?v=20260824-37">
   </head>
   <body>
     <main class="app-shell">
@@ -124,14 +124,11 @@
         <div id="board" class="board" aria-live="polite"></div>
 
         <div class="game-controls panel">
-          <div class="dice-owner" aria-live="polite">
-            <span class="dice-owner-swatch" aria-hidden="true"></span>
-            <strong id="dice-owner-label">Waiting for a roll</strong>
+          <div class="turn-table-heading">
+            <strong>Turn table</strong>
+            <span>Clockwise play →</span>
           </div>
-          <div class="dice" aria-label="Dice have not been rolled">
-            <span id="die-1" class="die-button" role="img" aria-label="First die">-</span>
-            <span id="die-2" class="die-button" role="img" aria-label="Second die">-</span>
-          </div>
+          <div id="player-dice-grid" class="player-dice-grid" role="region" aria-label="Player dice"></div>
           <div class="control-buttons">
             <button id="roll-button" type="button">Roll dice</button>
           
@@ -198,6 +195,6 @@
       </form>
     </dialog>
 
-    <script type="module" src="./src/app.js?v=20260824-26"></script>
+    <script type="module" src="./src/app.js?v=20260824-27"></script>
   </body>
 </html>

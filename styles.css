@@ -1033,6 +1033,7 @@ legend {
   gap: 0.8rem;
   padding: 1.35rem;
   border: 0.3rem solid #111;
+  border-left: 0.8rem solid var(--active-accent, #ff2bd6);
   border-radius: 0.7rem 1.8rem 0.7rem 1.3rem;
   color: #111;
   background: #fff900;
@@ -1269,6 +1270,12 @@ legend {
   animation: replay-ring 850ms ease-out;
 }
 
+.marble.is-replay-capture .marble-disc {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: replay-capture 1.1s ease-out;
+}
+
 .board-hole.is-replay-destination {
   animation: replay-destination 850ms ease-out;
 }
@@ -1369,32 +1376,118 @@ legend {
   padding: 0.45rem 0 0.65rem;
 }
 
-.dice-owner {
+.turn-table-heading {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.55rem;
-  width: fit-content;
-  max-width: 100%;
-  margin: 0 auto 0.25rem;
-  padding: 0.45rem 0.8rem;
-  border: 0.2rem solid #111;
-  border-radius: 0;
-  background: #fff900;
-  box-shadow: 0.25rem 0.25rem 0 #111;
-  color: var(--ink);
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+  color: #111;
   text-transform: uppercase;
-  transform: rotate(1deg);
 }
 
-.dice-owner-swatch {
-  width: 0.8rem;
+.turn-table-heading strong {
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+}
+
+.turn-table-heading span {
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.player-dice-grid {
+  display: grid;
+  gap: 0.7rem;
+  margin-bottom: 1rem;
+}
+
+.player-dice-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  gap: 0.15rem 0.8rem;
+  min-width: 0;
+  padding: 0.62rem 0.72rem;
+  border: 0.18rem solid #111;
+  border-left: 0.65rem solid var(--player-color);
+  color: #111;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0.22rem 0.22rem 0 #111;
+  opacity: 0.72;
+  transition: opacity 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.player-dice-card.is-last-roller {
+  opacity: 0.9;
+}
+
+.player-dice-card.is-active {
+  background: #fff900;
+  box-shadow: 0.35rem 0.35rem 0 var(--turn-shadow, #111), 0 0 0 0.2rem var(--player-color);
+  opacity: 1;
+  transform: translateX(-0.25rem);
+  animation: active-turn-card 1.4s ease-in-out infinite alternate;
+}
+
+.player-dice-identity {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 0.45rem;
+}
+
+.player-dice-identity strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-dice-swatch {
+  width: 0.85rem;
   aspect-ratio: 1;
   flex: none;
-  border: 0.14rem solid #111;
+  border: 0.12rem solid #111;
   border-radius: 50%;
-  background: var(--dice-owner-color, #8d7b5f);
-  box-shadow: 0.12rem 0.12rem 0 #111;
+  background: var(--player-color);
+}
+
+.player-dice-status {
+  grid-column: 1;
+  color: #454545;
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.player-dice-card.is-active .player-dice-status {
+  color: #111;
+}
+
+.player-dice-set {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  gap: 0.38rem;
+  padding: 0;
+}
+
+.player-dice-set .die-button {
+  width: 2.8rem;
+  padding: 0.36rem;
+  border-width: 0.18rem;
+  border-radius: 0.45rem;
+  box-shadow: inset 0 0 0.2rem #fff, 0.2rem 0.2rem 0 #111;
+  transform: none;
+}
+
+.player-dice-set .die-pip {
+  width: 0.34rem;
+}
+
+@keyframes active-turn-card {
+  to { box-shadow: 0.4rem 0.4rem 0 var(--turn-shadow, #111), 0 0 0 0.3rem var(--player-color); }
 }
 
 .dice .die-button {
@@ -1830,8 +1923,7 @@ html[data-theme="medieval"] .game-header {
   transform: none;
 }
 
-html[data-theme="medieval"] .game-header .eyebrow,
-html[data-theme="medieval"] .dice-owner {
+html[data-theme="medieval"] .game-header .eyebrow {
   border-color: #d3a63b;
   color: #f7ebc8;
   background: #263f25;
@@ -1870,6 +1962,24 @@ html[data-theme="medieval"] .game-controls {
   background: #304b2f;
   box-shadow: 0.55rem 0.55rem 0 #182317, -0.25rem -0.25rem 0 #d3a63b;
   transform: none;
+}
+
+html[data-theme="medieval"] .turn-table-heading {
+  color: #f7ebc8;
+}
+
+html[data-theme="medieval"] .player-dice-card {
+  --turn-shadow: #182317;
+  border-color: #4b2e18;
+  border-left-color: var(--player-color);
+  color: #2f2115;
+  background: #efe1b9;
+  box-shadow: 0.22rem 0.22rem 0 #182317;
+}
+
+html[data-theme="medieval"] .player-dice-card.is-active {
+  background: #ead28b;
+  box-shadow: 0.35rem 0.35rem 0 #182317, 0 0 0 0.2rem var(--player-color);
 }
 
 html[data-theme="medieval"] .dice .die-button {
@@ -2156,8 +2266,7 @@ html[data-theme="pixel"] .game-header {
   transform: none;
 }
 
-html[data-theme="pixel"] .game-header .eyebrow,
-html[data-theme="pixel"] .dice-owner {
+html[data-theme="pixel"] .game-header .eyebrow {
   border-color: var(--pixel-paper);
   color: var(--pixel-paper);
   background: var(--pixel-purple);
@@ -2195,6 +2304,24 @@ html[data-theme="pixel"] .game-controls {
   background: #a8cdc5;
   box-shadow: 0.45rem 0.45rem 0 var(--pixel-deep), -0.22rem -0.22rem 0 var(--pixel-coral);
   transform: none;
+}
+
+html[data-theme="pixel"] .turn-table-heading {
+  color: var(--pixel-deep);
+}
+
+html[data-theme="pixel"] .player-dice-card {
+  --turn-shadow: var(--pixel-deep);
+  border-color: var(--pixel-deep);
+  border-left-color: var(--player-color);
+  color: var(--pixel-deep);
+  background: var(--pixel-paper);
+  box-shadow: 0.22rem 0.22rem 0 var(--pixel-deep);
+}
+
+html[data-theme="pixel"] .player-dice-card.is-active {
+  background: #dfcf94;
+  box-shadow: 0.35rem 0.35rem 0 var(--pixel-deep), 0 0 0 0.2rem var(--player-color);
 }
 
 html[data-theme="pixel"] .dice .die-button {
@@ -2356,12 +2483,27 @@ html[data-theme="pixel"] .victory-confetti {
     width: 3.55rem;
   }
 
+  .player-dice-set .die-button {
+    width: 2.35rem;
+  }
+
   .victory-actions {
     flex-direction: column;
   }
 
   .victory-actions button {
     width: 100%;
+  }
+}
+
+@keyframes replay-capture {
+  0%, 35% {
+    filter: drop-shadow(0 0 14px #fff) drop-shadow(0 0 22px #ff2bd6);
+    transform: scale(1.65);
+  }
+  100% {
+    filter: drop-shadow(0 0.2rem 0.16rem rgba(24, 29, 24, 0.32));
+    transform: scale(1);
   }
 }
 

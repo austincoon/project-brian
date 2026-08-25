@@ -26,7 +26,7 @@ import {
   skipTurn,
   startGame,
 } from "../src/game.js";
-import { getDicePresentation, randomIndex, rollDie } from "../src/dice.js";
+import { getDicePresentation, getPlayerDiceRows, randomIndex, rollDie } from "../src/dice.js";
 import { loadTurnReplay, saveTurnReplay } from "../src/replay.js";
 import { applyTheme, loadTheme, normalizeTheme, THEME_STORAGE_KEY } from "../src/theme.js";
 
@@ -68,10 +68,14 @@ test("move replays start after the SVG is attached", () => {
   let scheduledAnimation;
   let attachedAtStart = false;
   let replayDestination;
+  let captureCueSeen = false;
 
   class FakeElement {
     constructor() { this.attributes = {}; this.children = []; }
-    setAttribute(name, value) { this.attributes[name] = String(value); }
+    setAttribute(name, value) {
+      this.attributes[name] = String(value);
+      if (name === "class" && String(value).includes("is-replay-capture")) captureCueSeen = true;
+    }
     append(...children) { this.children.push(...children); }
     addEventListener() {}
     replaceChildren(...children) { this.children = children; }
@@ -91,13 +95,23 @@ test("move replays start after the SVG is attached", () => {
   try {
     container = new FakeElement();
     renderBoard(container, {
-      marbles: [{ id: "a:0", ownerUid: "a", color: "red", number: 1, positionId: "track:6" }],
-      replayMove: { pieceId: "a:0", fromPositionId: "track:2", destinationId: "track:4", forceMotion: true },
+      marbles: [
+        { id: "a:0", ownerUid: "a", color: "red", number: 1, positionId: "track:6" },
+        { id: "b:0", ownerUid: "b", color: "blue", number: 1, positionId: "base:blue:0" },
+      ],
+      replayMove: {
+        pieceId: "a:0",
+        fromPositionId: "track:2",
+        destinationId: "track:4",
+        captureId: "b:0",
+        forceMotion: true,
+      },
     });
     assert.equal(attachedAtStart, false);
     scheduledAnimation();
     assert.equal(attachedAtStart, true);
     assert.equal(replayDestination, `${HOLES_BY_ID["track:4"].x} ${HOLES_BY_ID["track:4"].y}`);
+    assert.equal(captureCueSeen, true);
   } finally {
     if (previousDocument === undefined) delete globalThis.document;
     else globalThis.document = previousDocument;
@@ -142,6 +156,21 @@ test("dice presentation identifies live, previous, and upcoming rollers", () => 
   state = applyMove(state, "a", "a:0", "track:2", 6);
   state = applyMove(state, "a", "a:0", "track:4", 2);
   assert.equal(getDicePresentation(state, "b").label, "Alex's last roll");
+});
+
+test("each player keeps a clearly owned latest dice set", () => {
+  let state = activeGame();
+  let rows = getPlayerDiceRows(state, { a: [3, 3], b: [2, 4] });
+  assert.deepEqual(rows.map(({ uid, dice, isActive }) => [uid, dice, isActive]), [
+    ["a", [3, 3], true],
+    ["b", [1, 1], false],
+  ]);
+
+  state = applyRoll(state, "a", [6, 2]);
+  rows = getPlayerDiceRows(state, Object.fromEntries(rows.map(({ uid, dice }) => [uid, dice])));
+  assert.deepEqual(rows.find(({ uid }) => uid === "a").dice, [6, 2]);
+  assert.equal(rows.find(({ uid }) => uid === "a").isLastRoller, true);
+  assert.deepEqual(rows.find(({ uid }) => uid === "b").dice, [1, 1]);
 });
 
 test("database rules enforce the room security boundary", () => {
