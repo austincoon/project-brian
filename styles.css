@@ -613,8 +613,8 @@ legend {
 
 .theme-preview-pixel {
   background:
-    linear-gradient(90deg, #57f2ff 50%, #ff4fd8 50%) 0 0 / 1.2rem 1.2rem,
-    linear-gradient(#ff4fd8 50%, #57f2ff 50%) 0.6rem 0.6rem / 1.2rem 1.2rem;
+    linear-gradient(90deg, #7ebbb2 50%, #c97978 50%) 0 0 / 1rem 1rem,
+    linear-gradient(#c97978 50%, #7ebbb2 50%) 0.5rem 0.5rem / 1rem 1rem;
   image-rendering: pixelated;
 }
 
@@ -1658,27 +1658,37 @@ html[data-theme="medieval"] .theme-option:has(input:checked) {
 
 /* Pixel skin */
 html[data-theme="pixel"] {
-  --ink: #111225;
-  --muted: #514c76;
-  --green: #15a66b;
-  --green-dark: #087849;
-  --gold: #ffe45b;
-  --line: #111225;
-  --paper: #f4f1ff;
-  font-family: "Courier New", ui-monospace, monospace;
+  --pixel-ink: #202238;
+  --pixel-bg: #222940;
+  --pixel-deep: #15192a;
+  --pixel-purple: #6c668e;
+  --pixel-teal: #7ebbb2;
+  --pixel-coral: #c97978;
+  --pixel-gold: #d8b968;
+  --pixel-paper: #eee8d7;
+  --ink: var(--pixel-ink);
+  --muted: #67657a;
+  --green: #568f7b;
+  --green-dark: #3f6f60;
+  --gold: var(--pixel-gold);
+  --line: var(--pixel-ink);
+  --paper: var(--pixel-paper);
+  font-family: "Lucida Console", Monaco, "Courier New", ui-monospace, monospace;
   color: var(--ink);
-  background: #130b2b;
+  background: var(--pixel-bg);
+  image-rendering: pixelated;
+  -webkit-font-smoothing: none;
 }
 
 html[data-theme="pixel"] body {
-  background: #130b2b;
+  background: var(--pixel-bg);
 }
 
 html[data-theme="pixel"] .app-shell:has([data-screen]:not([hidden])) {
   background:
-    linear-gradient(90deg, rgba(87, 242, 255, 0.13) 50%, transparent 50%) 0 0 / 3rem 3rem,
-    linear-gradient(rgba(255, 79, 216, 0.13) 50%, transparent 50%) 1.5rem 1.5rem / 3rem 3rem,
-    #1a103d;
+    linear-gradient(90deg, rgba(126, 187, 178, 0.08) 50%, transparent 50%) 0 0 / 2rem 2rem,
+    linear-gradient(rgba(201, 121, 120, 0.07) 50%, transparent 50%) 1rem 1rem / 2rem 2rem,
+    var(--pixel-bg);
 }
 
 html[data-theme="pixel"] * {
@@ -1686,37 +1696,37 @@ html[data-theme="pixel"] * {
 }
 
 html[data-theme="pixel"] :is(#home-title, #local-title, #lobby-title, #game-title, .home-panel h2, [data-screen="local"] legend, [data-screen="lobby"] h2, #settings-title) {
-  font-family: "Courier New", ui-monospace, monospace;
+  font-family: "Lucida Console", Monaco, "Courier New", ui-monospace, monospace;
   font-weight: 900;
   letter-spacing: -0.06em;
   text-transform: uppercase;
 }
 
 html[data-theme="pixel"] .home-hero {
-  border: 0.35rem solid #090713;
-  color: #fff;
+  border: 0.3rem solid var(--pixel-deep);
+  color: var(--pixel-paper);
   background:
-    linear-gradient(90deg, rgba(87, 242, 255, 0.18) 50%, transparent 50%) 0 0 / 2rem 2rem,
-    linear-gradient(rgba(255, 79, 216, 0.18) 50%, transparent 50%) 1rem 1rem / 2rem 2rem,
-    #4b2ca3;
-  box-shadow: 0.7rem 0.7rem 0 #090713, -0.45rem -0.45rem 0 #57f2ff;
+    linear-gradient(90deg, rgba(238, 232, 215, 0.08) 50%, transparent 50%) 0 0 / 1rem 1rem,
+    linear-gradient(rgba(126, 187, 178, 0.1) 50%, transparent 50%) 0.5rem 0.5rem / 1rem 1rem,
+    var(--pixel-purple);
+  box-shadow: 0.5rem 0.5rem 0 var(--pixel-deep), -0.25rem -0.25rem 0 var(--pixel-teal);
   transform: none;
 }
 
 html[data-theme="pixel"] .home-hero::before {
   inset: auto 0 1rem;
-  height: 1rem;
+  height: 0.75rem;
   border: 0;
-  background: repeating-linear-gradient(90deg, #ff4fd8 0 1rem, #ffe45b 1rem 2rem, #57f2ff 2rem 3rem);
+  background: repeating-linear-gradient(90deg, var(--pixel-coral) 0 0.75rem, var(--pixel-gold) 0.75rem 1.5rem, var(--pixel-teal) 1.5rem 2.25rem);
   transform: none;
 }
 
 html[data-theme="pixel"] .home-hero::after {
   top: -3rem;
   right: 1rem;
-  color: rgba(87, 242, 255, 0.24);
+  color: rgba(238, 232, 215, 0.12);
   content: "+";
-  font-family: "Courier New", ui-monospace, monospace;
+  font-family: "Lucida Console", Monaco, "Courier New", ui-monospace, monospace;
   font-size: 22rem;
   -webkit-text-stroke: 0;
   transform: none;
@@ -1725,196 +1735,200 @@ html[data-theme="pixel"] .home-hero::after {
 html[data-theme="pixel"] .home-kicker,
 html[data-theme="pixel"] [data-screen="local"] > .eyebrow,
 html[data-theme="pixel"] [data-screen="lobby"] > .eyebrow {
-  border-color: #090713;
-  color: #090713;
-  background: #57f2ff;
-  box-shadow: 0.3rem 0.3rem 0 #090713;
-  font-family: "Courier New", ui-monospace, monospace;
+  border-color: var(--pixel-deep);
+  color: var(--pixel-deep);
+  background: var(--pixel-teal);
+  box-shadow: 0.25rem 0.25rem 0 var(--pixel-deep);
+  font-family: "Lucida Console", Monaco, "Courier New", ui-monospace, monospace;
   transform: none;
 }
 
 html[data-theme="pixel"] #home-title,
 html[data-theme="pixel"] #local-title,
 html[data-theme="pixel"] #lobby-title {
-  color: #ffe45b;
+  color: var(--pixel-paper);
   -webkit-text-stroke: 0;
-  text-shadow: 0.08em 0.08em 0 #ff4fd8, 0.14em 0.14em 0 #090713;
+  text-shadow: 0.07em 0.07em 0 var(--pixel-coral), 0.13em 0.13em 0 var(--pixel-deep);
   transform: none;
   animation: none;
 }
 
 html[data-theme="pixel"] #home-title span,
 html[data-theme="pixel"] #lobby-code {
-  border-color: #f4f1ff;
-  color: #f4f1ff;
-  background: #090713;
-  box-shadow: 0.25rem 0.25rem 0 #ff4fd8;
+  border-color: var(--pixel-paper);
+  color: var(--pixel-paper);
+  background: var(--pixel-deep);
+  box-shadow: 0.25rem 0.25rem 0 var(--pixel-coral);
   text-shadow: none;
   transform: none;
 }
 
 html[data-theme="pixel"] .home-die {
-  border-color: #090713;
-  color: #090713;
-  background: #f4f1ff;
-  box-shadow: 0.4rem 0.4rem 0 #090713;
+  border-color: var(--pixel-deep);
+  color: var(--pixel-deep);
+  background: var(--pixel-paper);
+  box-shadow: 0.3rem 0.3rem 0 var(--pixel-deep);
   animation: none;
 }
 
 html[data-theme="pixel"] .home-game-pieces::before {
-  border-color: #ffe45b;
-  box-shadow: 0 0 0 0.35rem #090713, inset 0 0 0 0.35rem #090713;
+  border-color: var(--pixel-gold);
+  box-shadow: 0 0 0 0.3rem var(--pixel-deep), inset 0 0 0 0.3rem var(--pixel-deep);
 }
 
 html[data-theme="pixel"] .home-game-pieces::after {
   clip-path: none;
-  color: #090713;
-  background: #57f2ff;
+  color: var(--pixel-deep);
+  background: var(--pixel-teal);
   content: "!";
-  font-family: "Courier New", ui-monospace, monospace;
+  font-family: "Lucida Console", Monaco, "Courier New", ui-monospace, monospace;
   -webkit-text-stroke: 0;
 }
 
 html[data-theme="pixel"] :is(.panel.home-panel, [data-screen="local"] > .panel, [data-screen="lobby"] > .panel) {
-  border-color: #090713;
-  color: #111225;
-  background: #f4f1ff;
-  box-shadow: 0.65rem 0.65rem 0 #090713, -0.35rem -0.35rem 0 #57f2ff;
+  border: 0.25rem solid var(--pixel-deep);
+  color: var(--pixel-ink);
+  background: var(--pixel-paper);
+  box-shadow: 0.5rem 0.5rem 0 var(--pixel-deep), -0.25rem -0.25rem 0 var(--pixel-teal);
   transform: none;
 }
 
 html[data-theme="pixel"] .home-panel.home-panel-create {
-  background: #ffe45b;
+  background: #dfcf94;
 }
 
 html[data-theme="pixel"] .home-panel.home-panel-join {
-  background: #57f2ff;
+  background: #a8cdc5;
 }
 
 html[data-theme="pixel"] :is(.home-panel input, [data-screen="local"] input, [data-screen="lobby"] input) {
-  border-color: #090713;
-  background: #fff;
-  box-shadow: 0.3rem 0.3rem 0 #090713;
+  border-color: var(--pixel-deep);
+  background: #f8f4e9;
+  box-shadow: 0.25rem 0.25rem 0 var(--pixel-deep);
 }
 
 html[data-theme="pixel"] :is([data-screen="local"] > .panel, [data-screen="lobby"] > .panel) {
   background:
-    linear-gradient(90deg, rgba(255, 79, 216, 0.14) 50%, transparent 50%) 0 0 / 1.5rem 1.5rem,
-    #57f2ff;
+    linear-gradient(90deg, rgba(108, 102, 142, 0.08) 50%, transparent 50%) 0 0 / 1rem 1rem,
+    #a8cdc5;
 }
 
 html[data-theme="pixel"] :is([data-screen="local"] legend, [data-screen="lobby"] #lobby-status, [data-screen="local"] > p:not(.eyebrow)) {
-  border-color: #090713;
-  color: #f4f1ff;
-  background: #4b2ca3;
-  box-shadow: 0.25rem 0.25rem 0 #090713;
+  border-color: var(--pixel-deep);
+  color: var(--pixel-paper);
+  background: var(--pixel-purple);
+  box-shadow: 0.25rem 0.25rem 0 var(--pixel-deep);
   transform: none;
 }
 
 html[data-theme="pixel"] [data-screen="lobby"] .player-list li {
-  border-color: #090713;
-  background: #f4f1ff;
-  box-shadow: 0.25rem 0.25rem 0 #090713;
+  border-color: var(--pixel-deep);
+  background: var(--pixel-paper);
+  box-shadow: 0.25rem 0.25rem 0 var(--pixel-deep);
   transform: none;
 }
 
 html[data-theme="pixel"] :is([data-screen] button, .settings-panel button) {
-  border-color: #090713;
-  color: #090713;
-  background: #ffe45b;
-  box-shadow: 0.35rem 0.35rem 0 #090713;
-  font-family: "Courier New", ui-monospace, monospace;
+  border: 0.22rem solid var(--pixel-deep);
+  color: var(--pixel-deep);
+  background: var(--pixel-gold);
+  box-shadow: 0.3rem 0.3rem 0 var(--pixel-deep);
+  font-family: "Lucida Console", Monaco, "Courier New", ui-monospace, monospace;
   text-transform: uppercase;
   transform: none;
 }
 
 html[data-theme="pixel"] [data-screen="home"] .home-actions .text-button {
-  color: #090713;
-  background: #ffe45b;
-  box-shadow: 0.35rem 0.35rem 0 #090713;
+  color: var(--pixel-deep);
+  background: var(--pixel-gold);
+  box-shadow: 0.3rem 0.3rem 0 var(--pixel-deep);
 }
 
 html[data-theme="pixel"] :is([data-screen] button, .settings-panel button):hover:not(:disabled) {
-  color: #090713;
-  background: #57f2ff;
-  box-shadow: 0.5rem 0.5rem 0 #090713;
-  transform: translate(-0.12rem, -0.12rem);
+  color: var(--pixel-deep);
+  background: var(--pixel-teal);
+  box-shadow: 0.4rem 0.4rem 0 var(--pixel-deep);
+  transform: translate(-0.08rem, -0.08rem);
 }
 
 html[data-theme="pixel"] .game-header {
-  border-color: #090713;
-  color: #090713;
-  background: #ffe45b;
-  box-shadow: 0.55rem 0.55rem 0 #090713, -0.3rem -0.3rem 0 #ff4fd8;
+  border-color: var(--pixel-deep);
+  color: var(--pixel-deep);
+  background: #dfcf94;
+  box-shadow: 0.45rem 0.45rem 0 var(--pixel-deep), -0.22rem -0.22rem 0 var(--pixel-coral);
   transform: none;
 }
 
 html[data-theme="pixel"] .game-header .eyebrow,
 html[data-theme="pixel"] .dice-owner {
-  border-color: #f4f1ff;
-  color: #f4f1ff;
-  background: #4b2ca3;
-  box-shadow: 0.22rem 0.22rem 0 #090713;
+  border-color: var(--pixel-paper);
+  color: var(--pixel-paper);
+  background: var(--pixel-purple);
+  box-shadow: 0.22rem 0.22rem 0 var(--pixel-deep);
   transform: none;
 }
 
 html[data-theme="pixel"] #game-title {
   -webkit-text-stroke: 0;
-  text-shadow: 0.08em 0.08em 0 #ff4fd8;
+  text-shadow: 0.07em 0.07em 0 var(--pixel-coral);
 }
 
 html[data-theme="pixel"] .board {
-  border-color: #090713;
-  background: #151027;
-  box-shadow: 0.65rem 0.65rem 0 #090713, -0.35rem -0.35rem 0 #57f2ff;
+  border-color: var(--pixel-deep);
+  background: #1b2033;
+  box-shadow: 0.5rem 0.5rem 0 var(--pixel-deep), -0.25rem -0.25rem 0 var(--pixel-teal);
   transform: none;
 }
 
 html[data-theme="pixel"] .board-surface {
-  fill: #f4f1ff;
-  stroke: #090713;
+  fill: var(--pixel-paper);
+  stroke: var(--pixel-deep);
 }
 
 html[data-theme="pixel"] .base-label {
-  fill: #f4f1ff;
-  stroke: #090713;
+  fill: var(--pixel-paper);
+  stroke: var(--pixel-deep);
   stroke-width: 4px;
   paint-order: stroke fill;
 }
 
 html[data-theme="pixel"] .game-controls {
-  border-color: #090713;
-  color: #090713;
-  background: #57f2ff;
-  box-shadow: 0.55rem 0.55rem 0 #090713, -0.3rem -0.3rem 0 #ff4fd8;
+  border-color: var(--pixel-deep);
+  color: var(--pixel-deep);
+  background: #a8cdc5;
+  box-shadow: 0.45rem 0.45rem 0 var(--pixel-deep), -0.22rem -0.22rem 0 var(--pixel-coral);
   transform: none;
 }
 
 html[data-theme="pixel"] .dice .die-button {
-  border-color: #090713;
-  background: #f4f1ff;
-  box-shadow: 0.35rem 0.35rem 0 #090713;
+  border-color: var(--pixel-deep);
+  background: var(--pixel-paper);
+  box-shadow: 0.3rem 0.3rem 0 var(--pixel-deep);
   transform: none;
 }
 
 html[data-theme="pixel"] .settings-panel {
-  border-color: #090713;
-  color: #f4f1ff;
-  background: #4b2ca3;
-  box-shadow: 0.65rem 0.65rem 0 #090713, -0.35rem -0.35rem 0 #57f2ff;
+  border-color: var(--pixel-deep);
+  color: var(--pixel-paper);
+  background: var(--pixel-purple);
+  box-shadow: 0.5rem 0.5rem 0 var(--pixel-deep), -0.25rem -0.25rem 0 var(--pixel-teal);
   transform: none;
 }
 
 html[data-theme="pixel"] .theme-option {
-  border-color: #090713;
-  color: #090713;
-  background: #f4f1ff;
-  box-shadow: 0.25rem 0.25rem 0 #090713;
+  border-color: var(--pixel-deep);
+  color: var(--pixel-deep);
+  background: var(--pixel-paper);
+  box-shadow: 0.25rem 0.25rem 0 var(--pixel-deep);
 }
 
 html[data-theme="pixel"] .theme-option:has(input:checked) {
-  background: #57f2ff;
+  background: #a8cdc5;
   transform: none;
+}
+
+html[data-theme="pixel"] .theme-option input {
+  accent-color: var(--pixel-coral);
 }
 
 @media (max-width: 52rem) {
