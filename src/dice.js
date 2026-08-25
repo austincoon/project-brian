@@ -1,3 +1,8 @@
+export const CUBE_FACES = [
+  ["front", 1], ["back", 6], ["right", 3],
+  ["left", 4], ["top", 2], ["bottom", 5],
+];
+
 export function rollDie(randomValues = crypto.getRandomValues.bind(crypto)) {
   const bytes = new Uint8Array(1);
   // 252 is divisible by six; rejecting 252–255 prevents modulo bias.

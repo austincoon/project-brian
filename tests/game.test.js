@@ -26,7 +26,7 @@ import {
   skipTurn,
   startGame,
 } from "../src/game.js";
-import { getDicePresentation, getPlayerDiceRows, randomIndex, rollDie } from "../src/dice.js";
+import { CUBE_FACES, getDicePresentation, getPlayerDiceRows, randomIndex, rollDie } from "../src/dice.js";
 import { loadTurnReplay, saveTurnReplay } from "../src/replay.js";
 import { applyTheme, loadTheme, normalizeTheme, THEME_STORAGE_KEY } from "../src/theme.js";
 
@@ -34,6 +34,14 @@ const players = [
   { uid: "a", name: "Alex" },
   { uid: "b", name: "Blair" },
 ];
+
+test("3D dice contain every face in opposite pairs", () => {
+  const faces = Object.fromEntries(CUBE_FACES);
+  assert.deepEqual(Object.values(faces).sort(), [1, 2, 3, 4, 5, 6]);
+  assert.equal(faces.front + faces.back, 7);
+  assert.equal(faces.left + faces.right, 7);
+  assert.equal(faces.top + faces.bottom, 7);
+});
 
 test("visual themes persist and unknown values fall back to wacky", () => {
   const values = new Map([[THEME_STORAGE_KEY, "medieval"]]);

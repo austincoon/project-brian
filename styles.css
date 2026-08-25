@@ -1575,54 +1575,144 @@ legend {
 }
 
 .dice-roll-stage {
+  --die-size: clamp(3.5rem, 4.5vw, 4.4rem);
   position: absolute;
   top: 50%;
-  right: calc(100% + clamp(0.8rem, 1.5vw, 1.4rem));
+  right: calc(100% + clamp(0.7rem, 1.2vw, 1.1rem));
   z-index: 5;
-  width: clamp(10rem, 13vw, 13rem);
-  padding: 0.8rem;
-  border: 0.25rem solid #111;
-  border-left: 0.75rem solid var(--player-color);
-  border-radius: 1.2rem 0.5rem 1rem 0.55rem;
-  color: #111;
-  background: #00e5ff;
-  box-shadow: 0.55rem 0.55rem 0 #111, -0.25rem -0.25rem 0 #fff900;
+  width: clamp(12rem, 15vw, 15rem);
+  padding: 0.65rem;
+  border: 0.55rem ridge #75431e;
+  border-radius: 1.15rem;
+  color: #f8e5b2;
+  background:
+    repeating-linear-gradient(90deg, #6b3b1a 0 0.7rem, #7d4a24 0.7rem 1.4rem),
+    #6b3b1a;
+  box-shadow: 0.65rem 0.7rem 1rem #0008, inset 0 0 0 0.18rem #b97b3c;
   text-align: center;
-  transform: translateY(-50%) rotate(-1.5deg);
+  transform: translateY(-50%);
 }
 
 .dice-roll-stage > strong {
   display: block;
+  margin-bottom: 0.55rem;
+  padding: 0.45rem 0.35rem;
+  border: 0.16rem solid #1f1209;
+  border-left: 0.45rem solid var(--player-color);
+  border-radius: 0.35rem;
   overflow-wrap: anywhere;
+  color: #fff5d6;
+  background: #321e10;
+  box-shadow: inset 0 0 0.4rem #000, 0 0.18rem 0 #a96b32;
   font-size: 0.9rem;
   line-height: 1.2;
 }
 
-.dice-roll-pair {
-  gap: 0.65rem;
-  padding: 0.8rem 0 0.2rem;
+.dice-table-surface {
+  position: relative;
+  height: clamp(14rem, 34vh, 20rem);
+  overflow: hidden;
+  border: 0.3rem solid #24150b;
+  border-radius: 0.7rem;
+  background:
+    radial-gradient(ellipse at 50% 85%, #347b50 0, #205e3b 55%, #16482d 100%),
+    #205e3b;
+  box-shadow:
+    inset 0 0 2.5rem #071f1499,
+    inset 0 0 0 0.22rem #4d986b,
+    0 0.2rem 0 #b97b3c;
+  perspective: 650px;
+  perspective-origin: 50% 35%;
 }
 
-.dice-roll-stage.is-rolling .die-button:first-child {
-  animation: roll-die-left 850ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
+.rolling-die {
+  position: absolute;
+  width: var(--die-size);
+  height: var(--die-size);
+  transform-style: preserve-3d;
 }
 
-.dice-roll-stage.is-rolling .die-button:last-child {
-  animation: roll-die-right 850ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
+.rolling-die::after {
+  position: absolute;
+  inset: 82% -8% -18%;
+  border-radius: 50%;
+  background: #07160da8;
+  filter: blur(0.35rem);
+  content: "";
+  transform: rotateX(70deg);
 }
 
-@keyframes roll-die-left {
-  0% { transform: translate(-4rem, -2rem) rotate(-300deg) scale(0.65); }
-  42% { transform: translate(0.8rem, 0.65rem) rotate(-125deg) scale(1.12); }
-  72% { transform: translate(-0.35rem, -0.3rem) rotate(-35deg) scale(0.94); }
-  100% { transform: translate(0) rotate(-7deg) scale(1); }
+.rolling-die-1 {
+  left: 13%;
+  bottom: 17%;
 }
 
-@keyframes roll-die-right {
-  0% { transform: translate(4rem, -2.6rem) rotate(340deg) scale(0.65); }
-  42% { transform: translate(-0.9rem, 0.45rem) rotate(145deg) scale(1.12); }
-  72% { transform: translate(0.4rem, -0.25rem) rotate(45deg) scale(0.94); }
-  100% { transform: translate(0) rotate(6deg) scale(1); }
+.rolling-die-2 {
+  right: 13%;
+  bottom: 30%;
+}
+
+.die-cube {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: var(--die-final);
+  transform-style: preserve-3d;
+}
+
+.die-face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+  padding: 0.55rem;
+  place-items: center;
+  border: 0.12rem solid #b9b5aa;
+  border-radius: 0.75rem;
+  background: linear-gradient(145deg, #fffef8, #d9d5ca);
+  box-shadow: inset 0 0 0.45rem #fff, inset -0.18rem -0.22rem 0.35rem #908d85;
+  backface-visibility: hidden;
+}
+
+.die-face-front { transform: translateZ(calc(var(--die-size) / 2)); }
+.die-face-back { transform: rotateY(180deg) translateZ(calc(var(--die-size) / 2)); }
+.die-face-right { transform: rotateY(90deg) translateZ(calc(var(--die-size) / 2)); }
+.die-face-left { transform: rotateY(-90deg) translateZ(calc(var(--die-size) / 2)); }
+.die-face-top { transform: rotateX(90deg) translateZ(calc(var(--die-size) / 2)); }
+.die-face-bottom { transform: rotateX(-90deg) translateZ(calc(var(--die-size) / 2)); }
+
+.die-face .die-pip {
+  width: clamp(0.42rem, 0.65vw, 0.58rem);
+}
+
+.die-value-1 { --die-final: rotateX(-12deg) rotateY(15deg); }
+.die-value-2 { --die-final: rotateX(-102deg) rotateY(12deg); }
+.die-value-3 { --die-final: rotateX(-12deg) rotateY(-75deg); }
+.die-value-4 { --die-final: rotateX(-12deg) rotateY(105deg); }
+.die-value-5 { --die-final: rotateX(78deg) rotateY(12deg); }
+.die-value-6 { --die-final: rotateX(-12deg) rotateY(195deg); }
+
+.dice-roll-stage.is-rolling .rolling-die-1 .die-cube {
+  animation: roll-cube-one 1.1s cubic-bezier(0.16, 0.72, 0.2, 1) both;
+}
+
+.dice-roll-stage.is-rolling .rolling-die-2 .die-cube {
+  animation: roll-cube-two 1.15s cubic-bezier(0.16, 0.72, 0.2, 1) both;
+}
+
+@keyframes roll-cube-one {
+  0% { transform: translate3d(-5rem, -11rem, 5rem) rotateX(-540deg) rotateY(-420deg) rotateZ(-180deg) scale(0.72); }
+  48% { transform: translate3d(1.3rem, -2.5rem, 3rem) rotateX(-245deg) rotateY(-190deg) rotateZ(-70deg) scale(1.05); }
+  72% { transform: translate3d(-0.6rem, -0.9rem, 1.2rem) rotateX(-95deg) rotateY(-80deg) rotateZ(-25deg) scale(0.96); }
+  100% { transform: var(--die-final); }
+}
+
+@keyframes roll-cube-two {
+  0% { transform: translate3d(5rem, -12rem, 6rem) rotateX(620deg) rotateY(480deg) rotateZ(210deg) scale(0.72); }
+  45% { transform: translate3d(-1.4rem, -3rem, 3.5rem) rotateX(280deg) rotateY(210deg) rotateZ(80deg) scale(1.06); }
+  74% { transform: translate3d(0.5rem, -1rem, 1.2rem) rotateX(110deg) rotateY(95deg) rotateZ(30deg) scale(0.96); }
+  100% { transform: var(--die-final); }
 }
 
 .victory-screen {
@@ -2053,16 +2143,6 @@ html[data-theme="medieval"] .game-controls {
   transform: none;
 }
 
-html[data-theme="medieval"] .dice-roll-stage {
-  border-color: #4b2e18;
-  border-left-color: var(--player-color);
-  border-radius: 0.6rem;
-  color: #2f2115;
-  background: #efe1b9;
-  box-shadow: 0.5rem 0.5rem 0 #24160e, -0.2rem -0.2rem 0 #d3a63b;
-  transform: translateY(-50%);
-}
-
 html[data-theme="medieval"] .player-dice-card {
   --turn-shadow: #182317;
   border-color: #4b2e18;
@@ -2399,16 +2479,6 @@ html[data-theme="pixel"] .game-controls {
   background: #a8cdc5;
   box-shadow: 0.45rem 0.45rem 0 var(--pixel-deep), -0.22rem -0.22rem 0 var(--pixel-coral);
   transform: none;
-}
-
-html[data-theme="pixel"] .dice-roll-stage {
-  border-color: var(--pixel-deep);
-  border-left-color: var(--player-color);
-  border-radius: 0;
-  color: var(--pixel-deep);
-  background: #a8cdc5;
-  box-shadow: 0.45rem 0.45rem 0 var(--pixel-deep), -0.2rem -0.2rem 0 var(--pixel-coral);
-  transform: translateY(-50%);
 }
 
 html[data-theme="pixel"] .player-dice-card {

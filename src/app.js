@@ -1,5 +1,5 @@
 import { PLAYER_ORDER, PLAYERS, renderBoard } from "./board.js?v=20260825-23";
-import { getPlayerDiceRows, randomIndex, rollDice } from "./dice.js?v=20260824-25";
+import { CUBE_FACES, getPlayerDiceRows, randomIndex, rollDice } from "./dice.js?v=20260825-26";
 import { loadTurnReplay, saveTurnReplay } from "./replay.js?v=20260823-19";
 import { applyTheme, loadTheme } from "./theme.js?v=20260824-1";
 import {
@@ -497,7 +497,6 @@ const PIP_POSITIONS = {
   5: [0, 2, 4, 6, 8],
   6: [0, 2, 3, 5, 6, 8],
 };
-
 function drawDie(button, value) {
   if (!PIP_POSITIONS[value]) {
     button.classList.add("is-empty");
@@ -515,6 +514,21 @@ function drawDie(button, value) {
   }));
 }
 
+function createRollingDie(value, index) {
+  const wrapper = document.createElement("span");
+  wrapper.className = `rolling-die rolling-die-${index + 1}`;
+  const cube = document.createElement("span");
+  cube.className = `die-cube die-value-${value}`;
+  cube.append(...CUBE_FACES.map(([side, faceValue]) => {
+    const face = document.createElement("span");
+    face.className = `die-face die-face-${side}`;
+    drawDie(face, faceValue);
+    return face;
+  }));
+  wrapper.append(cube);
+  return wrapper;
+}
+
 function renderDiceRoll() {
   const action = gameState.lastAction;
   if (!["opening-roll", "roll", "no-move"].includes(action?.type)) return;
@@ -527,17 +541,12 @@ function renderDiceRoll() {
   const player = gameState.players.find(({ uid }) => uid === action.uid);
   const label = document.createElement("strong");
   label.textContent = `${player.name} rolled ${formatRoll(action.dice)}`;
-  const dice = document.createElement("div");
-  dice.className = "dice dice-roll-pair";
-  dice.append(...action.dice.map((value) => {
-    const display = document.createElement("span");
-    display.className = "die-button";
-    display.setAttribute("aria-hidden", "true");
-    drawDie(display, value);
-    return display;
-  }));
+  const table = document.createElement("div");
+  table.className = "dice-table-surface";
+  table.setAttribute("aria-hidden", "true");
+  table.append(...action.dice.map(createRollingDie));
   diceRollStage.style.setProperty("--player-color", PLAYERS[player.color].color);
-  diceRollStage.replaceChildren(label, dice);
+  diceRollStage.replaceChildren(label, table);
   diceRollStage.hidden = false;
   diceRollStage.classList.remove("is-rolling");
   void diceRollStage.offsetWidth;
