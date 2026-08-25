@@ -11,7 +11,7 @@ import {
   getLegalMoves,
   skipTurn,
   startGame,
-} from "./game.js?v=20260824-21";
+} from "./game.js?v=20260824-22";
 import {
   createRoom,
   joinRoom,

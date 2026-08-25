@@ -1810,6 +1810,11 @@ html[data-theme="medieval"] [data-screen="home"] #settings-button {
   background: #d3a63b;
 }
 
+html[data-theme="medieval"] [data-screen="lobby"] #leave-room-button {
+  color: #2f2115;
+  background: #efe1b9;
+}
+
 html[data-theme="medieval"] :is([data-screen] button, .settings-panel button):hover:not(:disabled) {
   color: #21170f;
   background: #d3a63b;

@@ -231,7 +231,7 @@ test("board IDs and connections remain internally consistent", () => {
   );
 });
 
-test("turn order advances counterclockwise", () => {
+test("the high roller starts and turn order then advances clockwise", () => {
   const fourPlayers = [
     { uid: "a", name: "Alex" },
     { uid: "b", name: "Blair" },
@@ -239,13 +239,14 @@ test("turn order advances counterclockwise", () => {
     { uid: "d", name: "Devon" },
   ];
   let state = startGame(createGame(fourPlayers), "a");
-  assert.deepEqual(state.opening.candidateUids, ["a", "d", "c", "b"]);
-  state = applyOpeningRoll(state, "a", [6, 6]);
-  state = applyOpeningRoll(state, "d", [1, 1]);
-  state = applyOpeningRoll(state, "c", [2, 2]);
-  state = applyOpeningRoll(state, "b", [3, 3]);
-  state = applyRoll(state, "a", [2, 3]);
-  assert.equal(state.turnUid, "d");
+  assert.deepEqual(state.opening.candidateUids, ["a", "b", "c", "d"]);
+  state = applyOpeningRoll(state, "a", [1, 1]);
+  state = applyOpeningRoll(state, "b", [6, 5]);
+  state = applyOpeningRoll(state, "c", [3, 3]);
+  state = applyOpeningRoll(state, "d", [4, 4]);
+  assert.equal(state.turnUid, "b");
+  state = applyRoll(state, "b", [2, 3]);
+  assert.equal(state.turnUid, "c");
 });
 
 test("a marble cannot leave Base when both dice show only 2 through 5", () => {

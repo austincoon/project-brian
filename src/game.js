@@ -75,11 +75,11 @@ function playerStats(state, uid) {
 
 function nextPlayerUid(state, uid) {
   const index = state.players.findIndex((player) => player.uid === uid);
-  return state.players[(index - 1 + state.players.length) % state.players.length].uid;
+  return state.players[(index + 1) % state.players.length].uid;
 }
 
-function counterClockwiseUids(players) {
-  return [players[0], ...players.slice(1).reverse()].map(({ uid }) => uid);
+function clockwiseUids(players) {
+  return players.map(({ uid }) => uid);
 }
 
 function relativeTrackIndex(color, trackId) {
@@ -217,7 +217,7 @@ function resolveOpeningRound(state) {
   if (!completed.length) {
     state.opening = {
       round: state.opening.round + 1,
-      candidateUids: counterClockwiseUids(state.players),
+      candidateUids: clockwiseUids(state.players),
       rolls: {},
     };
     state.turnUid = state.opening.candidateUids[0];
@@ -327,7 +327,7 @@ export function startGame(state, hostUid) {
   next.phase = "opening-roll";
   next.opening = {
     round: 1,
-    candidateUids: counterClockwiseUids(next.players),
+    candidateUids: clockwiseUids(next.players),
     rolls: {},
   };
   next.turnUid = next.opening.candidateUids[0];

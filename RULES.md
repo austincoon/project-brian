@@ -28,7 +28,7 @@ This document is the rules contract for the web game. The game engine and user i
 2. The player with the highest total goes first.
 3. If two or more players tie for the highest total, only those tied players roll again.
 4. Tied highest players continue rerolling until one player has the highest total.
-5. Normal play begins with that player and then proceeds counterclockwise by seat.
+5. Normal play begins with that player and then proceeds clockwise by seat, regardless of the other opening-roll totals.
 
 Opening rolls do not move marbles and do not use the normal doubles rule.
 
@@ -42,7 +42,7 @@ On a normal turn:
 4. If the other die still has a legal move, the player must complete that move, using either the same marble or another marble.
 5. Any die with no legal move is discarded.
 6. If the roll was doubles and the game has not been won, the same player takes another turn after both dice are resolved.
-7. Otherwise, play advances counterclockwise to the next player.
+7. Otherwise, play advances clockwise to the next player.
 
 A turn therefore always ends with exactly one of these outcomes:
 
@@ -112,7 +112,7 @@ There is no separate star-to-star shortcut. Any marked access positions exist on
 - The game recalculates legal moves after the roll and after the first die-action.
 - An unused die with no legal move is discarded automatically.
 - If neither die can be used, no marble moves.
-- After both dice are used or discarded, doubles grant another turn; otherwise, play advances counterclockwise.
+- After both dice are used or discarded, doubles grant another turn; otherwise, play advances clockwise.
 - The game must not wait for a player to select a move when no unused die has a legal move.
 
 ## 11. Host skip
@@ -120,7 +120,7 @@ There is no separate star-to-star shortcut. Any marked access positions exist on
 - The host may skip the action currently owed by an abandoned or unavailable player.
 - Skipping requires confirmation in the user interface.
 - During the opening high-roll, a skip records no competitive roll for that player for the current opening round. That player cannot win that round but remains in the game.
-- During normal play, a skip discards any unresolved roll and any extra turn earned by doubles, then advances counterclockwise.
+- During normal play, a skip discards any unresolved roll and any extra turn earned by doubles, then advances clockwise.
 - A skip never moves a marble and cannot declare a winner.
 - The host cannot skip after the game has finished.
 - The host may end an active game after confirmation. An ended game has no winner, accepts no further rolls or moves, and may be restarted by the host.
@@ -140,4 +140,4 @@ When rules interact, apply them in this order:
 3. Reject movement blocked by the player's own marble.
 4. Apply an opponent capture on the final position.
 5. Check for victory.
-6. If a usable die remains, continue the turn; otherwise grant the doubles turn or advance counterclockwise.
+6. If a usable die remains, continue the turn; otherwise grant the doubles turn or advance clockwise.
