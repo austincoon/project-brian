@@ -1571,6 +1571,11 @@ html[data-theme="medieval"] [data-screen="home"] .home-actions .text-button {
   box-shadow: 0.28rem 0.3rem 0 #321018;
 }
 
+html[data-theme="medieval"] [data-screen="home"] #settings-button {
+  color: #2f2115;
+  background: #d3a63b;
+}
+
 html[data-theme="medieval"] :is([data-screen] button, .settings-panel button):hover:not(:disabled) {
   color: #21170f;
   background: #d3a63b;
