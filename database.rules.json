@@ -102,6 +102,23 @@
             "$other": { ".validate": false }
           },
           "winnerUid": { ".validate": "newData.isString() && newData.parent().parent().child('players').child(newData.val()).exists()" },
+          "stats": {
+            "$uid": {
+              ".validate": "newData.parent().parent().parent().child('players').child($uid).exists() && newData.hasChildren(['openingRolls', 'rolls', 'diceTotal', 'sixes', 'doubles', 'moves', 'captures', 'timesCaptured', 'gambits', 'blockedRolls', 'skippedTurns']) && newData.child('openingRolls').isNumber() && newData.child('openingRolls').val() >= 0 && newData.child('openingRolls').val() % 1 === 0 && newData.child('rolls').isNumber() && newData.child('rolls').val() >= 0 && newData.child('rolls').val() % 1 === 0 && newData.child('diceTotal').isNumber() && newData.child('diceTotal').val() >= 0 && newData.child('diceTotal').val() % 1 === 0 && newData.child('sixes').isNumber() && newData.child('sixes').val() >= 0 && newData.child('sixes').val() % 1 === 0 && newData.child('doubles').isNumber() && newData.child('doubles').val() >= 0 && newData.child('doubles').val() % 1 === 0 && newData.child('moves').isNumber() && newData.child('moves').val() >= 0 && newData.child('moves').val() % 1 === 0 && newData.child('captures').isNumber() && newData.child('captures').val() >= 0 && newData.child('captures').val() % 1 === 0 && newData.child('timesCaptured').isNumber() && newData.child('timesCaptured').val() >= 0 && newData.child('timesCaptured').val() % 1 === 0 && newData.child('gambits').isNumber() && newData.child('gambits').val() >= 0 && newData.child('gambits').val() % 1 === 0 && newData.child('blockedRolls').isNumber() && newData.child('blockedRolls').val() >= 0 && newData.child('blockedRolls').val() % 1 === 0 && newData.child('skippedTurns').isNumber() && newData.child('skippedTurns').val() >= 0 && newData.child('skippedTurns').val() % 1 === 0",
+              "openingRolls": { ".validate": true },
+              "rolls": { ".validate": true },
+              "diceTotal": { ".validate": true },
+              "sixes": { ".validate": true },
+              "doubles": { ".validate": true },
+              "moves": { ".validate": true },
+              "captures": { ".validate": true },
+              "timesCaptured": { ".validate": true },
+              "gambits": { ".validate": true },
+              "blockedRolls": { ".validate": true },
+              "skippedTurns": { ".validate": true },
+              "$other": { ".validate": false }
+            }
+          },
           "lastAction": {
             ".validate": "newData.hasChild('type') && newData.child('type').isString() && newData.child('type').val().matches(/^(started|opening-roll|roll|no-move|move|opening-skip|skip|ended)$/)",
             "type": { ".validate": true },
