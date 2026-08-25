@@ -422,7 +422,7 @@ legend {
 }
 
 [data-screen="home"] #home-error,
-[data-screen="home"] #local-mode-button,
+[data-screen="home"] .home-actions,
 [data-screen="home"] .home-signature {
   grid-column: 1 / -1;
 }
@@ -435,8 +435,14 @@ legend {
   box-shadow: 0.35rem 0.35rem 0 #111;
 }
 
-[data-screen="home"] #local-mode-button {
-  justify-self: center;
+.home-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.8rem;
+}
+
+[data-screen="home"] .home-actions .text-button {
   border: 0.22rem solid #111;
   border-radius: 0;
   color: #111;
@@ -446,7 +452,12 @@ legend {
   transform: rotate(-1deg);
 }
 
-[data-screen="home"] #local-mode-button:hover:not(:disabled) {
+[data-screen="home"] #settings-button {
+  background: #fff900;
+  transform: rotate(1deg);
+}
+
+[data-screen="home"] .home-actions .text-button:hover:not(:disabled) {
   color: #fff;
   background: #ff2bd6;
 }
@@ -467,6 +478,153 @@ legend {
 
 @keyframes home-marble-pop {
   to { transform: scale(1.22); }
+}
+
+.settings-dialog {
+  width: min(42rem, calc(100% - 2rem));
+  max-height: calc(100dvh - 2rem);
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  color: #111;
+  background: transparent;
+}
+
+.settings-dialog::backdrop {
+  background: rgba(15, 5, 28, 0.78);
+  backdrop-filter: blur(0.25rem);
+}
+
+.settings-panel {
+  display: grid;
+  gap: 1.2rem;
+  padding: clamp(1.2rem, 4vw, 2rem);
+  border: 0.32rem solid #111;
+  color: #111;
+  background:
+    radial-gradient(circle, rgba(255, 249, 0, 0.78) 0 0.18rem, transparent 0.2rem) 0 0 / 1.2rem 1.2rem,
+    #00e5ff;
+  box-shadow: 0.8rem 0.8rem 0 #ff2bd6, -0.5rem -0.5rem 0 #fff900;
+  transform: rotate(-0.5deg);
+}
+
+.settings-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.settings-header .eyebrow {
+  display: table;
+  margin-bottom: 0.5rem;
+  padding: 0.3rem 0.5rem;
+  border: 0.14rem solid #fff;
+  color: #fff;
+  background: #111;
+  box-shadow: 0.2rem 0.2rem 0 #ff2bd6;
+}
+
+#settings-title {
+  margin: 0;
+  font-family: Impact, Haettenschweiler, "Arial Black", sans-serif;
+  font-size: clamp(2.3rem, 8vw, 4rem);
+  line-height: 0.9;
+  text-transform: uppercase;
+}
+
+.settings-close {
+  width: 3rem;
+  min-height: 3rem;
+  padding: 0;
+  border: 0.2rem solid #111;
+  border-radius: 0;
+  color: #111;
+  background: #fff900;
+  box-shadow: 0.25rem 0.25rem 0 #111;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.theme-options {
+  display: grid;
+  gap: 0.8rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.theme-option {
+  display: grid;
+  grid-template-columns: auto 4.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.7rem;
+  border: 0.2rem solid #111;
+  color: #111;
+  background: #fff;
+  box-shadow: 0.28rem 0.28rem 0 #111;
+  cursor: pointer;
+}
+
+.theme-option:has(input:checked) {
+  background: #7dff00;
+  transform: translate(-0.12rem, -0.12rem);
+}
+
+.theme-option input {
+  width: 1.2rem;
+  min-height: 1.2rem;
+  margin: 0;
+  accent-color: #ff2bd6;
+}
+
+.theme-option strong,
+.theme-option small {
+  display: block;
+}
+
+.theme-option strong {
+  font-size: 1.1rem;
+  text-transform: uppercase;
+}
+
+.theme-option small {
+  margin-top: 0.18rem;
+  font-weight: 550;
+}
+
+.theme-preview {
+  display: block;
+  width: 4.5rem;
+  height: 3.2rem;
+  border: 0.16rem solid #111;
+}
+
+.theme-preview-wacky {
+  background: repeating-linear-gradient(135deg, #ff2bd6 0 0.55rem, #ff5f00 0.55rem 1.1rem);
+}
+
+.theme-preview-medieval {
+  background:
+    linear-gradient(90deg, transparent 46%, #d3a63b 46% 54%, transparent 54%),
+    linear-gradient(#6f1726 50%, #263f25 50%);
+}
+
+.theme-preview-pixel {
+  background:
+    linear-gradient(90deg, #57f2ff 50%, #ff4fd8 50%) 0 0 / 1.2rem 1.2rem,
+    linear-gradient(#ff4fd8 50%, #57f2ff 50%) 0.6rem 0.6rem / 1.2rem 1.2rem;
+  image-rendering: pixelated;
+}
+
+.settings-done {
+  border: 0.22rem solid #111;
+  border-radius: 0;
+  color: #fff;
+  background: #ff2bd6;
+  box-shadow: 0.35rem 0.35rem 0 #111;
+  text-transform: uppercase;
 }
 
 .eyebrow {
@@ -1250,6 +1408,515 @@ legend {
   filter: grayscale(0.55);
 }
 
+/* Medieval skin */
+html[data-theme="medieval"] {
+  --ink: #2f2115;
+  --muted: #6e5a42;
+  --green: #304b2f;
+  --green-dark: #20351f;
+  --gold: #b8892f;
+  --line: #8b704c;
+  --paper: #efe1b9;
+  font-family: Georgia, "Times New Roman", serif;
+  color: var(--ink);
+  background: #25170f;
+}
+
+html[data-theme="medieval"] body {
+  background: #25170f;
+}
+
+html[data-theme="medieval"] .app-shell:has([data-screen]:not([hidden])) {
+  background:
+    radial-gradient(circle at 15% 20%, rgba(210, 167, 73, 0.18), transparent 24rem),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.025) 0 0.2rem, transparent 0.2rem 3rem),
+    linear-gradient(135deg, #24160e, #53351e 50%, #1e2d1d);
+}
+
+html[data-theme="medieval"] :is(#home-title, #local-title, #lobby-title, #game-title, .home-panel h2, [data-screen="local"] legend, [data-screen="lobby"] h2, #settings-title) {
+  font-family: Georgia, "Times New Roman", serif;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+html[data-theme="medieval"] .home-hero {
+  border-color: #4b2e18;
+  border-radius: 1rem;
+  color: #2f2115;
+  background:
+    radial-gradient(circle at 22% 18%, rgba(255, 255, 255, 0.48), transparent 18rem),
+    linear-gradient(135deg, #f3e6bd, #d4b66e);
+  box-shadow: 0 0 0 0.35rem #b8892f, 0.8rem 0.9rem 0 #23150d;
+  transform: none;
+}
+
+html[data-theme="medieval"] .home-hero::before {
+  inset: auto 3% 1.2rem;
+  height: 0.45rem;
+  border: 0;
+  background: linear-gradient(90deg, #6f1726, #d3a63b, #263f25, #d3a63b, #6f1726);
+  transform: none;
+}
+
+html[data-theme="medieval"] .home-hero::after {
+  top: -1rem;
+  right: 2rem;
+  color: rgba(111, 23, 38, 0.14);
+  content: "♜";
+  font-size: 18rem;
+  -webkit-text-stroke: 0;
+  transform: none;
+}
+
+html[data-theme="medieval"] .home-kicker,
+html[data-theme="medieval"] [data-screen="local"] > .eyebrow,
+html[data-theme="medieval"] [data-screen="lobby"] > .eyebrow {
+  border-color: #d3a63b;
+  border-radius: 0.2rem;
+  color: #f7ebc8;
+  background: #6f1726;
+  box-shadow: 0.25rem 0.25rem 0 #321018;
+  font-family: Georgia, "Times New Roman", serif;
+  letter-spacing: 0.1em;
+  transform: none;
+}
+
+html[data-theme="medieval"] #home-title,
+html[data-theme="medieval"] #local-title,
+html[data-theme="medieval"] #lobby-title {
+  color: #6f1726;
+  -webkit-text-stroke: 0;
+  text-shadow: 0.08em 0.08em 0 #d3a63b;
+  transform: none;
+  animation: none;
+}
+
+html[data-theme="medieval"] #home-title span,
+html[data-theme="medieval"] #lobby-code {
+  border-color: #d3a63b;
+  color: #f7ebc8;
+  background: #263f25;
+  box-shadow: 0.18em 0.18em 0 #4b2e18;
+  text-shadow: none;
+  transform: none;
+}
+
+html[data-theme="medieval"] .home-die {
+  border-color: #4b2e18;
+  border-radius: 0.45rem;
+  color: #4b2e18;
+  background: #ead8a8;
+  box-shadow: 0.3rem 0.35rem 0 #4b2e18;
+  animation: none;
+}
+
+html[data-theme="medieval"] .home-game-pieces::before {
+  border-color: #d3a63b;
+  box-shadow: 0 0 0 0.3rem #4b2e18, inset 0 0 0 0.3rem #4b2e18;
+}
+
+html[data-theme="medieval"] .home-game-pieces::after {
+  color: #f7ebc8;
+  background: #6f1726;
+  content: "♞";
+  font-family: Georgia, "Times New Roman", serif;
+  -webkit-text-stroke: 0;
+}
+
+html[data-theme="medieval"] :is(.panel.home-panel, [data-screen="local"] > .panel, [data-screen="lobby"] > .panel) {
+  border-color: #4b2e18;
+  border-radius: 0.7rem;
+  color: #2f2115;
+  background: #efe1b9;
+  box-shadow: 0.65rem 0.65rem 0 #3a2415, inset 0 0 0 0.25rem #d3a63b;
+  transform: none;
+}
+
+html[data-theme="medieval"] :is(.home-panel input, [data-screen="local"] input, [data-screen="lobby"] input) {
+  border-color: #5a4128;
+  border-radius: 0.25rem;
+  background: #fff7df;
+  box-shadow: inset 0 0 0 0.12rem #c8a85e;
+}
+
+html[data-theme="medieval"] :is([data-screen="local"] legend, [data-screen="lobby"] #lobby-status, [data-screen="local"] > p:not(.eyebrow)) {
+  border-color: #d3a63b;
+  color: #f7ebc8;
+  background: #263f25;
+  box-shadow: 0.22rem 0.22rem 0 #4b2e18;
+  transform: none;
+}
+
+html[data-theme="medieval"] [data-screen="lobby"] .player-list li {
+  border-color: #6e522f;
+  background: #fff4d2;
+  box-shadow: 0.2rem 0.2rem 0 #6e522f;
+  transform: none;
+}
+
+html[data-theme="medieval"] :is([data-screen] button, .settings-panel button) {
+  border-color: #4b2e18;
+  border-radius: 0.25rem;
+  color: #f8edcd;
+  background: #6f1726;
+  box-shadow: 0.28rem 0.3rem 0 #321018;
+  font-family: Georgia, "Times New Roman", serif;
+  text-transform: none;
+  transform: none;
+}
+
+html[data-theme="medieval"] [data-screen="home"] .home-actions .text-button {
+  color: #f8edcd;
+  background: #6f1726;
+  box-shadow: 0.28rem 0.3rem 0 #321018;
+}
+
+html[data-theme="medieval"] :is([data-screen] button, .settings-panel button):hover:not(:disabled) {
+  color: #21170f;
+  background: #d3a63b;
+  box-shadow: 0.36rem 0.38rem 0 #4b2e18;
+  transform: translateY(-0.08rem);
+}
+
+html[data-theme="medieval"] .game-header {
+  border-color: #4b2e18;
+  border-radius: 0.7rem;
+  background: #efe1b9;
+  box-shadow: 0.55rem 0.55rem 0 #3a2415, -0.25rem -0.25rem 0 #d3a63b;
+  transform: none;
+}
+
+html[data-theme="medieval"] .game-header .eyebrow,
+html[data-theme="medieval"] .dice-owner {
+  border-color: #d3a63b;
+  color: #f7ebc8;
+  background: #263f25;
+  box-shadow: 0.2rem 0.2rem 0 #4b2e18;
+  transform: none;
+}
+
+html[data-theme="medieval"] #game-title {
+  -webkit-text-stroke: 0;
+  text-shadow: 0.06em 0.06em 0 #d3a63b;
+}
+
+html[data-theme="medieval"] .board {
+  border-color: #29190f;
+  background: #6b482a;
+  box-shadow: 0 0 0 0.35rem #b8892f, 0.75rem 0.75rem 0 #23150d;
+  transform: none;
+}
+
+html[data-theme="medieval"] .board-surface {
+  fill: #f5e9c8;
+  stroke: #3e2817;
+}
+
+html[data-theme="medieval"] .base-label {
+  fill: #f8edcd;
+  stroke: #2d1b10;
+  stroke-width: 4px;
+  paint-order: stroke fill;
+}
+
+html[data-theme="medieval"] .game-controls {
+  border-color: #1c2b1b;
+  border-radius: 0.7rem;
+  color: #f7ebc8;
+  background: #304b2f;
+  box-shadow: 0.55rem 0.55rem 0 #182317, -0.25rem -0.25rem 0 #d3a63b;
+  transform: none;
+}
+
+html[data-theme="medieval"] .dice .die-button {
+  border-color: #4b2e18;
+  border-radius: 0.35rem;
+  background: #ead8a8;
+  box-shadow: inset 0 0 0.25rem #fff4d2, 0.28rem 0.3rem 0 #1d120b;
+  transform: none;
+}
+
+html[data-theme="medieval"] .settings-panel {
+  border-color: #4b2e18;
+  color: #2f2115;
+  background: #efe1b9;
+  box-shadow: 0.7rem 0.7rem 0 #24160e, -0.35rem -0.35rem 0 #d3a63b;
+  transform: none;
+}
+
+html[data-theme="medieval"] .theme-option {
+  border-color: #6e522f;
+  color: #2f2115;
+  background: #fff4d2;
+  box-shadow: 0.2rem 0.2rem 0 #6e522f;
+}
+
+html[data-theme="medieval"] .theme-option:has(input:checked) {
+  background: #d8bc72;
+  transform: none;
+}
+
+/* Pixel skin */
+html[data-theme="pixel"] {
+  --ink: #111225;
+  --muted: #514c76;
+  --green: #15a66b;
+  --green-dark: #087849;
+  --gold: #ffe45b;
+  --line: #111225;
+  --paper: #f4f1ff;
+  font-family: "Courier New", ui-monospace, monospace;
+  color: var(--ink);
+  background: #130b2b;
+}
+
+html[data-theme="pixel"] body {
+  background: #130b2b;
+}
+
+html[data-theme="pixel"] .app-shell:has([data-screen]:not([hidden])) {
+  background:
+    linear-gradient(90deg, rgba(87, 242, 255, 0.13) 50%, transparent 50%) 0 0 / 3rem 3rem,
+    linear-gradient(rgba(255, 79, 216, 0.13) 50%, transparent 50%) 1.5rem 1.5rem / 3rem 3rem,
+    #1a103d;
+}
+
+html[data-theme="pixel"] * {
+  border-radius: 0 !important;
+}
+
+html[data-theme="pixel"] :is(#home-title, #local-title, #lobby-title, #game-title, .home-panel h2, [data-screen="local"] legend, [data-screen="lobby"] h2, #settings-title) {
+  font-family: "Courier New", ui-monospace, monospace;
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  text-transform: uppercase;
+}
+
+html[data-theme="pixel"] .home-hero {
+  border: 0.35rem solid #090713;
+  color: #fff;
+  background:
+    linear-gradient(90deg, rgba(87, 242, 255, 0.18) 50%, transparent 50%) 0 0 / 2rem 2rem,
+    linear-gradient(rgba(255, 79, 216, 0.18) 50%, transparent 50%) 1rem 1rem / 2rem 2rem,
+    #4b2ca3;
+  box-shadow: 0.7rem 0.7rem 0 #090713, -0.45rem -0.45rem 0 #57f2ff;
+  transform: none;
+}
+
+html[data-theme="pixel"] .home-hero::before {
+  inset: auto 0 1rem;
+  height: 1rem;
+  border: 0;
+  background: repeating-linear-gradient(90deg, #ff4fd8 0 1rem, #ffe45b 1rem 2rem, #57f2ff 2rem 3rem);
+  transform: none;
+}
+
+html[data-theme="pixel"] .home-hero::after {
+  top: -3rem;
+  right: 1rem;
+  color: rgba(87, 242, 255, 0.24);
+  content: "+";
+  font-family: "Courier New", ui-monospace, monospace;
+  font-size: 22rem;
+  -webkit-text-stroke: 0;
+  transform: none;
+}
+
+html[data-theme="pixel"] .home-kicker,
+html[data-theme="pixel"] [data-screen="local"] > .eyebrow,
+html[data-theme="pixel"] [data-screen="lobby"] > .eyebrow {
+  border-color: #090713;
+  color: #090713;
+  background: #57f2ff;
+  box-shadow: 0.3rem 0.3rem 0 #090713;
+  font-family: "Courier New", ui-monospace, monospace;
+  transform: none;
+}
+
+html[data-theme="pixel"] #home-title,
+html[data-theme="pixel"] #local-title,
+html[data-theme="pixel"] #lobby-title {
+  color: #ffe45b;
+  -webkit-text-stroke: 0;
+  text-shadow: 0.08em 0.08em 0 #ff4fd8, 0.14em 0.14em 0 #090713;
+  transform: none;
+  animation: none;
+}
+
+html[data-theme="pixel"] #home-title span,
+html[data-theme="pixel"] #lobby-code {
+  border-color: #f4f1ff;
+  color: #f4f1ff;
+  background: #090713;
+  box-shadow: 0.25rem 0.25rem 0 #ff4fd8;
+  text-shadow: none;
+  transform: none;
+}
+
+html[data-theme="pixel"] .home-die {
+  border-color: #090713;
+  color: #090713;
+  background: #f4f1ff;
+  box-shadow: 0.4rem 0.4rem 0 #090713;
+  animation: none;
+}
+
+html[data-theme="pixel"] .home-game-pieces::before {
+  border-color: #ffe45b;
+  box-shadow: 0 0 0 0.35rem #090713, inset 0 0 0 0.35rem #090713;
+}
+
+html[data-theme="pixel"] .home-game-pieces::after {
+  clip-path: none;
+  color: #090713;
+  background: #57f2ff;
+  content: "!";
+  font-family: "Courier New", ui-monospace, monospace;
+  -webkit-text-stroke: 0;
+}
+
+html[data-theme="pixel"] :is(.panel.home-panel, [data-screen="local"] > .panel, [data-screen="lobby"] > .panel) {
+  border-color: #090713;
+  color: #111225;
+  background: #f4f1ff;
+  box-shadow: 0.65rem 0.65rem 0 #090713, -0.35rem -0.35rem 0 #57f2ff;
+  transform: none;
+}
+
+html[data-theme="pixel"] .home-panel.home-panel-create {
+  background: #ffe45b;
+}
+
+html[data-theme="pixel"] .home-panel.home-panel-join {
+  background: #57f2ff;
+}
+
+html[data-theme="pixel"] :is(.home-panel input, [data-screen="local"] input, [data-screen="lobby"] input) {
+  border-color: #090713;
+  background: #fff;
+  box-shadow: 0.3rem 0.3rem 0 #090713;
+}
+
+html[data-theme="pixel"] :is([data-screen="local"] > .panel, [data-screen="lobby"] > .panel) {
+  background:
+    linear-gradient(90deg, rgba(255, 79, 216, 0.14) 50%, transparent 50%) 0 0 / 1.5rem 1.5rem,
+    #57f2ff;
+}
+
+html[data-theme="pixel"] :is([data-screen="local"] legend, [data-screen="lobby"] #lobby-status, [data-screen="local"] > p:not(.eyebrow)) {
+  border-color: #090713;
+  color: #f4f1ff;
+  background: #4b2ca3;
+  box-shadow: 0.25rem 0.25rem 0 #090713;
+  transform: none;
+}
+
+html[data-theme="pixel"] [data-screen="lobby"] .player-list li {
+  border-color: #090713;
+  background: #f4f1ff;
+  box-shadow: 0.25rem 0.25rem 0 #090713;
+  transform: none;
+}
+
+html[data-theme="pixel"] :is([data-screen] button, .settings-panel button) {
+  border-color: #090713;
+  color: #090713;
+  background: #ffe45b;
+  box-shadow: 0.35rem 0.35rem 0 #090713;
+  font-family: "Courier New", ui-monospace, monospace;
+  text-transform: uppercase;
+  transform: none;
+}
+
+html[data-theme="pixel"] [data-screen="home"] .home-actions .text-button {
+  color: #090713;
+  background: #ffe45b;
+  box-shadow: 0.35rem 0.35rem 0 #090713;
+}
+
+html[data-theme="pixel"] :is([data-screen] button, .settings-panel button):hover:not(:disabled) {
+  color: #090713;
+  background: #57f2ff;
+  box-shadow: 0.5rem 0.5rem 0 #090713;
+  transform: translate(-0.12rem, -0.12rem);
+}
+
+html[data-theme="pixel"] .game-header {
+  border-color: #090713;
+  color: #090713;
+  background: #ffe45b;
+  box-shadow: 0.55rem 0.55rem 0 #090713, -0.3rem -0.3rem 0 #ff4fd8;
+  transform: none;
+}
+
+html[data-theme="pixel"] .game-header .eyebrow,
+html[data-theme="pixel"] .dice-owner {
+  border-color: #f4f1ff;
+  color: #f4f1ff;
+  background: #4b2ca3;
+  box-shadow: 0.22rem 0.22rem 0 #090713;
+  transform: none;
+}
+
+html[data-theme="pixel"] #game-title {
+  -webkit-text-stroke: 0;
+  text-shadow: 0.08em 0.08em 0 #ff4fd8;
+}
+
+html[data-theme="pixel"] .board {
+  border-color: #090713;
+  background: #151027;
+  box-shadow: 0.65rem 0.65rem 0 #090713, -0.35rem -0.35rem 0 #57f2ff;
+  transform: none;
+}
+
+html[data-theme="pixel"] .board-surface {
+  fill: #f4f1ff;
+  stroke: #090713;
+}
+
+html[data-theme="pixel"] .base-label {
+  fill: #f4f1ff;
+  stroke: #090713;
+  stroke-width: 4px;
+  paint-order: stroke fill;
+}
+
+html[data-theme="pixel"] .game-controls {
+  border-color: #090713;
+  color: #090713;
+  background: #57f2ff;
+  box-shadow: 0.55rem 0.55rem 0 #090713, -0.3rem -0.3rem 0 #ff4fd8;
+  transform: none;
+}
+
+html[data-theme="pixel"] .dice .die-button {
+  border-color: #090713;
+  background: #f4f1ff;
+  box-shadow: 0.35rem 0.35rem 0 #090713;
+  transform: none;
+}
+
+html[data-theme="pixel"] .settings-panel {
+  border-color: #090713;
+  color: #f4f1ff;
+  background: #4b2ca3;
+  box-shadow: 0.65rem 0.65rem 0 #090713, -0.35rem -0.35rem 0 #57f2ff;
+  transform: none;
+}
+
+html[data-theme="pixel"] .theme-option {
+  border-color: #090713;
+  color: #090713;
+  background: #f4f1ff;
+  box-shadow: 0.25rem 0.25rem 0 #090713;
+}
+
+html[data-theme="pixel"] .theme-option:has(input:checked) {
+  background: #57f2ff;
+  transform: none;
+}
+
 @media (max-width: 52rem) {
   .screen-wide {
     grid-template-areas:
@@ -1291,6 +1958,10 @@ legend {
     min-width: 0;
     min-height: 20rem;
     padding: 1.35rem;
+  }
+
+  #home-title {
+    font-size: clamp(2.7rem, 12vw, 4rem);
   }
 
   .home-kicker {

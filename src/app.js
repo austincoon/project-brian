@@ -1,6 +1,7 @@
 import { PLAYERS, renderBoard } from "./board.js?v=20260823-19";
 import { getDicePresentation, rollDice } from "./dice.js?v=20260823-23";
 import { loadTurnReplay, saveTurnReplay } from "./replay.js?v=20260823-19";
+import { applyTheme, loadTheme } from "./theme.js?v=20260824-1";
 import {
   applyMove,
   applyOpeningRoll,
@@ -26,6 +27,9 @@ const joinRoomForm = document.querySelector("#join-room-form");
 const homeError = document.querySelector("#home-error");
 const roomCodeInput = document.querySelector("#room-code");
 const localModeButton = document.querySelector("#local-mode-button");
+const settingsButton = document.querySelector("#settings-button");
+const settingsDialog = document.querySelector("#settings-dialog");
+const themeInputs = [...settingsDialog.querySelectorAll("[name='theme']")];
 const setupForm = document.querySelector("#local-game-form");
 const playerInputs = [...setupForm.querySelectorAll("[name='playerName']")];
 const lobbyCode = document.querySelector("#lobby-code");
@@ -65,6 +69,14 @@ let actionLocked = false;
 let replayInProgress = false;
 let pendingMoveReplay = null;
 let lastTurnReplay = [];
+
+const activeTheme = applyTheme(document.documentElement, localStorage, loadTheme(localStorage));
+themeInputs.find(({ value }) => value === activeTheme).checked = true;
+
+settingsButton.addEventListener("click", () => settingsDialog.showModal());
+settingsDialog.addEventListener("change", ({ target }) => {
+  if (target.matches("[name='theme']")) applyTheme(document.documentElement, localStorage, target.value);
+});
 
 function showScreen(name) {
   for (const screen of screens) screen.hidden = screen.dataset.screen !== name;

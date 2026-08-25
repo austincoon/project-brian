@@ -7,7 +7,11 @@
     <meta name="theme-color" content="#ff2bd6">
     <title>Brian's Aggravation</title>
     <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="./styles.css?v=20260823-29">
+    <script>
+      try { document.documentElement.dataset.theme = localStorage.getItem("project-brian-theme") || "wacky"; }
+      catch { document.documentElement.dataset.theme = "wacky"; }
+    </script>
+    <link rel="stylesheet" href="./styles.css?v=20260824-30">
   </head>
   <body>
     <main class="app-shell">
@@ -43,7 +47,10 @@
         </form>
 
         <p id="home-error" class="error-message" aria-live="assertive"></p>
-        <button id="local-mode-button" class="text-button" type="button">Play together on one device</button>
+        <div class="home-actions">
+          <button id="local-mode-button" class="text-button" type="button">Play together on one device</button>
+          <button id="settings-button" class="text-button" type="button">Settings</button>
+        </div>
 
       </section>
 
@@ -121,6 +128,37 @@
       </section>
     </main>
 
-    <script type="module" src="./src/app.js?v=20260823-23"></script>
+    <dialog id="settings-dialog" class="settings-dialog" aria-labelledby="settings-title">
+      <form class="settings-panel" method="dialog">
+        <header class="settings-header">
+          <div>
+            <p class="eyebrow">Visual settings</p>
+            <h2 id="settings-title">Choose a skin</h2>
+          </div>
+          <button class="settings-close" type="submit" aria-label="Close settings">×</button>
+        </header>
+        <fieldset class="theme-options">
+          <legend class="sr-only">Site skin</legend>
+          <label class="theme-option">
+            <input type="radio" name="theme" value="wacky">
+            <span class="theme-preview theme-preview-wacky" aria-hidden="true"></span>
+            <span><strong>Wacky</strong><small>Neon comic chaos</small></span>
+          </label>
+          <label class="theme-option">
+            <input type="radio" name="theme" value="medieval">
+            <span class="theme-preview theme-preview-medieval" aria-hidden="true"></span>
+            <span><strong>Medieval</strong><small>Parchment, wood, and heraldry</small></span>
+          </label>
+          <label class="theme-option">
+            <input type="radio" name="theme" value="pixel">
+            <span class="theme-preview theme-preview-pixel" aria-hidden="true"></span>
+            <span><strong>Pixel</strong><small>Chunky 8-bit color</small></span>
+          </label>
+        </fieldset>
+        <button class="settings-done" type="submit">Done</button>
+      </form>
+    </dialog>
+
+    <script type="module" src="./src/app.js?v=20260824-24"></script>
   </body>
 </html>

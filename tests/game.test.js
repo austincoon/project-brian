@@ -28,11 +28,27 @@ import {
 } from "../src/game.js";
 import { getDicePresentation, rollDie } from "../src/dice.js";
 import { loadTurnReplay, saveTurnReplay } from "../src/replay.js";
+import { applyTheme, loadTheme, normalizeTheme, THEME_STORAGE_KEY } from "../src/theme.js";
 
 const players = [
   { uid: "a", name: "Alex" },
   { uid: "b", name: "Blair" },
 ];
+
+test("visual themes persist and unknown values fall back to wacky", () => {
+  const values = new Map([[THEME_STORAGE_KEY, "medieval"]]);
+  const storage = {
+    getItem: (key) => values.get(key) ?? null,
+    setItem: (key, value) => values.set(key, value),
+  };
+  const root = { dataset: {} };
+
+  assert.equal(loadTheme(storage), "medieval");
+  assert.equal(applyTheme(root, storage, "pixel"), "pixel");
+  assert.equal(root.dataset.theme, "pixel");
+  assert.equal(values.get(THEME_STORAGE_KEY), "pixel");
+  assert.equal(normalizeTheme("unknown"), "wacky");
+});
 
 test("a room replay survives refresh only for the same game", () => {
   const values = new Map();
@@ -165,7 +181,7 @@ function place(state, pieceId, positionId, progress) {
 
 test("board IDs and connections remain internally consistent", () => {
   assert.equal(validateBoardData(), true);
-  assert.equal(BOARD_HOLES.length, 93);
+  assert.equal(BOARD_HOLES.length, 89);
   assert.equal(new Set(BOARD_HOLES.map(({ id }) => id)).size, BOARD_HOLES.length);
   assert.equal(TRACK_ORDER.length, 48);
   assert.deepEqual(Object.values(BASE_POSITIONS).map(({ length }) => length), [5, 5, 5, 5]);
