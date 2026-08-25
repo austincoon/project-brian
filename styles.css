@@ -1663,6 +1663,7 @@ html[data-theme="medieval"] .theme-option:has(input:checked) {
 
 /* Pixel skin */
 html[data-theme="pixel"] {
+  --pixel-font: "Pixelify Sans", "Lucida Console", Monaco, "Courier New", ui-monospace, monospace;
   --pixel-ink: #202238;
   --pixel-bg: #222940;
   --pixel-deep: #15192a;
@@ -1678,7 +1679,7 @@ html[data-theme="pixel"] {
   --gold: var(--pixel-gold);
   --line: var(--pixel-ink);
   --paper: var(--pixel-paper);
-  font-family: "Lucida Console", Monaco, "Courier New", ui-monospace, monospace;
+  font-family: var(--pixel-font);
   color: var(--ink);
   background: var(--pixel-bg);
   image-rendering: pixelated;
@@ -1701,7 +1702,7 @@ html[data-theme="pixel"] * {
 }
 
 html[data-theme="pixel"] :is(#home-title, #local-title, #lobby-title, #game-title, .home-panel h2, [data-screen="local"] legend, [data-screen="lobby"] h2, #settings-title) {
-  font-family: "Lucida Console", Monaco, "Courier New", ui-monospace, monospace;
+  font-family: var(--pixel-font);
   font-weight: 900;
   letter-spacing: -0.06em;
   text-transform: uppercase;
@@ -1731,7 +1732,7 @@ html[data-theme="pixel"] .home-hero::after {
   right: 1rem;
   color: rgba(238, 232, 215, 0.12);
   content: "+";
-  font-family: "Lucida Console", Monaco, "Courier New", ui-monospace, monospace;
+  font-family: var(--pixel-font);
   font-size: 22rem;
   -webkit-text-stroke: 0;
   transform: none;
@@ -1744,7 +1745,7 @@ html[data-theme="pixel"] [data-screen="lobby"] > .eyebrow {
   color: var(--pixel-deep);
   background: var(--pixel-teal);
   box-shadow: 0.25rem 0.25rem 0 var(--pixel-deep);
-  font-family: "Lucida Console", Monaco, "Courier New", ui-monospace, monospace;
+  font-family: var(--pixel-font);
   transform: none;
 }
 
@@ -1786,7 +1787,7 @@ html[data-theme="pixel"] .home-game-pieces::after {
   color: var(--pixel-deep);
   background: var(--pixel-teal);
   content: "!";
-  font-family: "Lucida Console", Monaco, "Courier New", ui-monospace, monospace;
+  font-family: var(--pixel-font);
   -webkit-text-stroke: 0;
 }
 
@@ -1810,6 +1811,10 @@ html[data-theme="pixel"] :is(.home-panel input, [data-screen="local"] input, [da
   border-color: var(--pixel-deep);
   background: #f8f4e9;
   box-shadow: 0.25rem 0.25rem 0 var(--pixel-deep);
+}
+
+html[data-theme="pixel"] #room-code {
+  font-family: var(--pixel-font);
 }
 
 html[data-theme="pixel"] :is([data-screen="local"] > .panel, [data-screen="lobby"] > .panel) {
@@ -1838,7 +1843,7 @@ html[data-theme="pixel"] :is([data-screen] button, .settings-panel button) {
   color: var(--pixel-deep);
   background: var(--pixel-gold);
   box-shadow: 0.3rem 0.3rem 0 var(--pixel-deep);
-  font-family: "Lucida Console", Monaco, "Courier New", ui-monospace, monospace;
+  font-family: var(--pixel-font);
   text-transform: uppercase;
   transform: none;
 }
