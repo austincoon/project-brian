@@ -75,6 +75,7 @@ let pendingMoveReplay = null;
 let lastTurnReplay = [];
 let botTimer = null;
 let lastDiceByUid = {};
+let moveUnlockDelayMs = 0;
 
 const activeTheme = applyTheme(document.documentElement, localStorage, loadTheme(localStorage));
 themeInputs.find(({ value }) => value === activeTheme).checked = true;
@@ -201,6 +202,10 @@ function moveAnimationDuration(path) {
   return Math.min(1200, 650 + Math.max(path?.length ?? 1, 1) * 80);
 }
 
+function moveAnimationTotal(replay) {
+  return replay.durationMs + (replay.captureId ? 350 : 50);
+}
+
 function createMoveReplay(state, move) {
   const path = move.path?.length ? [...move.path] : [move.destination];
   return {
@@ -319,7 +324,6 @@ async function watchRoom(code) {
       saveTurnReplay(localStorage, code, gameId, lastTurnReplay);
       gameMode = "online";
       gameState = room.game;
-      selectedMarbleId = null;
       statusMessage = describeLastAction();
       showScreen("game");
       renderGame();
@@ -591,6 +595,7 @@ async function playBotTurn() {
   if (!moves.length) return;
   const move = moves[randomIndex(moves.length)];
   const replay = createMoveReplay(gameState, move);
+  moveUnlockDelayMs = moveAnimationTotal(replay);
   const continuesRoll = gameState.lastAction?.type === "move" && gameState.lastAction.uid === uid;
   const transition = (state) => applyMove(state, uid, move.pieceId, move.destination, move.die);
   transition(gameState);
@@ -759,6 +764,7 @@ async function commitOnlineGame(transition, requireTurn = true, actingUid = null
 async function runGameAction(action) {
   if (actionLocked) return;
   actionLocked = true;
+  moveUnlockDelayMs = 0;
   renderGame();
   try {
     await action();
@@ -768,10 +774,12 @@ async function runGameAction(action) {
     }
   } catch (error) {
     selectedMarbleId = null;
+    moveUnlockDelayMs = 0;
     statusMessage = `Action not saved. ${error.message} The latest room state is shown; please retry.`;
   } finally {
-    const settleDelay = gameState?.lastAction?.type === "move" ? 1800 : 300;
+    const settleDelay = moveUnlockDelayMs || 300;
     await new Promise((resolve) => setTimeout(resolve, settleDelay));
+    moveUnlockDelayMs = 0;
     actionLocked = false;
     renderGame();
   }
@@ -799,11 +807,11 @@ async function moveSelectedMarble(destination) {
   if (!move) throw new Error("That destination is no longer available.");
   const die = move.die;
   const replay = createMoveReplay(gameState, move);
+  moveUnlockDelayMs = moveAnimationTotal(replay);
   const continuesRoll = gameState.lastAction?.type === "move"
     && gameState.lastAction.uid === uid;
   const transition = (state, actingUid) => applyMove(state, actingUid, pieceId, destination, die);
   transition(gameState, uid);
-  selectedMarbleId = null;
 
   if (gameMode === "online") await commitOnlineGame(transition);
   else {
@@ -825,7 +833,7 @@ async function replayLastTurn() {
       renderGame();
       await new Promise((resolve) => setTimeout(
         resolve,
-        durationMs + (replay.captureId ? 450 : 100),
+        moveAnimationTotal({ ...replay, durationMs }),
       ));
     }
   } finally {
