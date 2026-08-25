@@ -49,6 +49,7 @@ const newGameButton = document.querySelector("#new-game-button");
 const gameHeader = document.querySelector(".game-header");
 const board = document.querySelector("#board");
 const playerDiceGrid = document.querySelector("#player-dice-grid");
+const diceRollStage = document.querySelector("#dice-roll-stage");
 const rollButton = document.querySelector("#roll-button");
 const replayMoveButton = document.querySelector("#replay-move-button");
 
@@ -75,6 +76,7 @@ let pendingMoveReplay = null;
 let lastTurnReplay = [];
 let botTimer = null;
 let lastDiceByUid = {};
+let lastDiceRollKey = null;
 let moveUnlockDelayMs = 0;
 
 const activeTheme = applyTheme(document.documentElement, localStorage, loadTheme(localStorage));
@@ -87,6 +89,12 @@ settingsDialog.addEventListener("change", ({ target }) => {
 
 function showScreen(name) {
   for (const screen of screens) screen.hidden = screen.dataset.screen !== name;
+}
+
+function resetDiceDisplays() {
+  lastDiceByUid = {};
+  lastDiceRollKey = null;
+  diceRollStage.hidden = true;
 }
 
 function setOnlineBusy(busy) {
@@ -169,7 +177,7 @@ function forgetOnlineRoom() {
   }
   pendingMoveReplay = null;
   lastTurnReplay = [];
-  lastDiceByUid = {};
+  resetDiceDisplays();
   clearTimeout(botTimer);
   botTimer = null;
   setRoomUrl(null);
@@ -182,7 +190,7 @@ function returnToMainMenu() {
     gameState = null;
     pendingMoveReplay = null;
     lastTurnReplay = [];
-    lastDiceByUid = {};
+    resetDiceDisplays();
   }
   selectedMarbleId = null;
   statusMessage = "";
@@ -293,7 +301,7 @@ async function watchRoom(code) {
       if (!previousGame) lastTurnReplay = loadTurnReplay(localStorage, code, gameId);
       if (action?.type === "started") {
         lastTurnReplay = [];
-        lastDiceByUid = {};
+        resetDiceDisplays();
       }
       const previousPiece = previousGame?.pieces?.[action?.pieceId];
       const movedPiece = room.game.pieces?.[action?.pieceId];
@@ -507,6 +515,35 @@ function drawDie(button, value) {
   }));
 }
 
+function renderDiceRoll() {
+  const action = gameState.lastAction;
+  if (!["opening-roll", "roll", "no-move"].includes(action?.type)) return;
+  const stats = gameState.stats?.[action.uid] ?? {};
+  const sequence = action.type === "opening-roll" ? stats.openingRolls : stats.rolls;
+  const key = `${action.type}:${action.uid}:${sequence}:${action.dice.join("-")}`;
+  if (key === lastDiceRollKey) return;
+  lastDiceRollKey = key;
+
+  const player = gameState.players.find(({ uid }) => uid === action.uid);
+  const label = document.createElement("strong");
+  label.textContent = `${player.name} rolled ${formatRoll(action.dice)}`;
+  const dice = document.createElement("div");
+  dice.className = "dice dice-roll-pair";
+  dice.append(...action.dice.map((value) => {
+    const display = document.createElement("span");
+    display.className = "die-button";
+    display.setAttribute("aria-hidden", "true");
+    drawDie(display, value);
+    return display;
+  }));
+  diceRollStage.style.setProperty("--player-color", PLAYERS[player.color].color);
+  diceRollStage.replaceChildren(label, dice);
+  diceRollStage.hidden = false;
+  diceRollStage.classList.remove("is-rolling");
+  void diceRollStage.offsetWidth;
+  diceRollStage.classList.add("is-rolling");
+}
+
 function renderDice() {
   const rows = getPlayerDiceRows(gameState, lastDiceByUid);
   lastDiceByUid = Object.fromEntries(rows.flatMap(({ uid, dice }) => dice ? [[uid, dice]] : []));
@@ -559,6 +596,7 @@ function renderDice() {
     card.append(identity, status, dice);
     return card;
   }));
+  renderDiceRoll();
 }
 
 function canControlTurn() {
@@ -861,7 +899,7 @@ setupForm.addEventListener("submit", (event) => {
   gameMode = "local";
   gameState = createGame(players);
   gameState = startGame(gameState, gameState.hostUid);
-  lastDiceByUid = {};
+  resetDiceDisplays();
   selectedMarbleId = null;
   statusMessage = describeLastAction();
   showScreen("game");

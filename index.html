@@ -14,7 +14,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./styles.css?v=20260825-42">
+    <link rel="stylesheet" href="./styles.css?v=20260825-43">
   </head>
   <body>
     <main class="app-shell">
@@ -122,6 +122,7 @@
         </header>
 
         <div class="board-stage">
+          <aside id="dice-roll-stage" class="dice-roll-stage" role="status" aria-live="polite" hidden></aside>
           <div id="board" class="board" aria-live="polite"></div>
           <div id="player-dice-grid" class="player-dice-grid" role="region" aria-label="Player dice"></div>
         </div>
@@ -193,6 +194,6 @@
       </form>
     </dialog>
 
-    <script type="module" src="./src/app.js?v=20260825-31"></script>
+    <script type="module" src="./src/app.js?v=20260825-32"></script>
   </body>
 </html>
