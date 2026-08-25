@@ -14,6 +14,19 @@ const HOME_END = HOME_START + 4;
 const startIndexes = Object.fromEntries(
   PLAYER_ORDER.map((color) => [color, TRACK_ORDER.indexOf(START_POSITIONS[color])]),
 );
+const EMPTY_STATS = {
+  openingRolls: 0,
+  rolls: 0,
+  diceTotal: 0,
+  sixes: 0,
+  doubles: 0,
+  moves: 0,
+  captures: 0,
+  timesCaptured: 0,
+  gambits: 0,
+  blockedRolls: 0,
+  skippedTurns: 0,
+};
 
 function copy(state) {
   return structuredClone(state);
@@ -52,6 +65,12 @@ function readDice(dice) {
 
 function piecesFor(state, uid) {
   return Object.values(state.pieces).filter((piece) => piece.ownerUid === uid);
+}
+
+function playerStats(state, uid) {
+  state.stats ??= {};
+  state.stats[uid] ??= { ...EMPTY_STATS };
+  return state.stats[uid];
 }
 
 function nextPlayerUid(state, uid) {
@@ -295,6 +314,7 @@ export function createGame(players) {
     dice: null,
     remainingDice: null,
     winnerUid: null,
+    stats: Object.fromEntries(normalizedPlayers.map(({ uid }) => [uid, { ...EMPTY_STATS }])),
     lastAction: { type: "created" },
   };
 }
@@ -327,6 +347,7 @@ export function applyOpeningRoll(state, uid, dice) {
 
   const roll = readDice(dice);
   const next = copy(state);
+  playerStats(next, uid).openingRolls += 1;
   next.opening.rolls ??= {};
   next.opening.rolls[uid] = { dice: roll.values, total: roll.total };
   next.lastAction = { type: "opening-roll", uid, dice: roll.values, total: roll.total };
@@ -379,12 +400,18 @@ export function applyRoll(state, uid, dice) {
   requireTurn(state, uid);
   const roll = readDice(dice);
   const next = copy(state);
+  const stats = playerStats(next, uid);
+  stats.rolls += 1;
+  stats.diceTotal += roll.total;
+  stats.sixes += roll.values.filter((value) => value === 6).length;
+  if (roll.doubles) stats.doubles += 1;
   next.phase = "move";
   next.dice = roll.values;
   next.remainingDice = [...roll.values];
   next.lastAction = { type: "roll", uid, dice: roll.values, total: roll.total };
 
   if (!getLegalMoves(next, uid).length) {
+    stats.blockedRolls += 1;
     finishTurn(next, roll.doubles);
     next.lastAction = {
       type: "no-move",
@@ -410,12 +437,17 @@ export function applyMove(state, uid, pieceId, destination, die = null) {
 
   const roll = readDice(state.dice);
   const next = copy(state);
+  const stats = playerStats(next, uid);
+  stats.moves += 1;
+  if (move.kind === "enter-gambit") stats.gambits += 1;
   const piece = next.pieces[pieceId];
   piece.positionId = move.destination;
   piece.progress = move.progress;
 
   if (move.captureId) {
+    stats.captures += 1;
     const captured = next.pieces[move.captureId];
+    playerStats(next, captured.ownerUid).timesCaptured += 1;
     captured.positionId = availableBase(next, captured);
     captured.progress = null;
   }
@@ -471,6 +503,7 @@ export function skipTurn(state, hostUid) {
 
   const next = copy(state);
   const skippedUid = next.turnUid;
+  playerStats(next, skippedUid).skippedTurns += 1;
 
   if (next.phase === "opening-roll") {
     next.opening.rolls[skippedUid] = null;

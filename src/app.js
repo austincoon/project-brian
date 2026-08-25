@@ -1,5 +1,5 @@
-import { PLAYERS, renderBoard } from "./board.js?v=20260823-19";
-import { getDicePresentation, rollDice } from "./dice.js?v=20260823-23";
+import { PLAYER_ORDER, PLAYERS, renderBoard } from "./board.js?v=20260823-19";
+import { getDicePresentation, randomIndex, rollDice } from "./dice.js?v=20260824-24";
 import { loadTurnReplay, saveTurnReplay } from "./replay.js?v=20260823-19";
 import { applyTheme, loadTheme } from "./theme.js?v=20260824-1";
 import {
@@ -11,7 +11,7 @@ import {
   getLegalMoves,
   skipTurn,
   startGame,
-} from "./game.js?v=20260823-20";
+} from "./game.js?v=20260824-21";
 import {
   createRoom,
   joinRoom,
@@ -32,12 +32,15 @@ const settingsDialog = document.querySelector("#settings-dialog");
 const themeInputs = [...settingsDialog.querySelectorAll("[name='theme']")];
 const setupForm = document.querySelector("#local-game-form");
 const playerInputs = [...setupForm.querySelectorAll("[name='playerName']")];
+const botInputs = [...setupForm.querySelectorAll("[data-bot-for]")];
 const lobbyCode = document.querySelector("#lobby-code");
 const inviteLink = document.querySelector("#invite-link");
 const copyInviteButton = document.querySelector("#copy-invite-button");
 const playerList = document.querySelector("#player-list");
 const lobbyStatus = document.querySelector("#lobby-status");
 const startButton = document.querySelector("#start-game-button");
+const addBotButton = document.querySelector("#add-bot-button");
+const removeBotButton = document.querySelector("#remove-bot-button");
 const leaveButton = document.querySelector("#leave-room-button");
 const phaseLabel = document.querySelector("#phase-label");
 const gameTitle = document.querySelector("#game-title");
@@ -55,6 +58,11 @@ const replayMoveButton = document.querySelector("#replay-move-button");
 
 const endGameButton = document.querySelector("#end-game-button");
 const turnStatus = document.querySelector("#turn-status");
+const victoryWinner = document.querySelector("#victory-winner");
+const victoryStats = document.querySelector("#victory-stats");
+const victoryRestartButton = document.querySelector("#victory-restart-button");
+const victoryMenuButton = document.querySelector("#victory-menu-button");
+const victoryStatus = document.querySelector("#victory-status");
 
 let firebaseUser = null;
 let onlineRoom = null;
@@ -69,6 +77,7 @@ let actionLocked = false;
 let replayInProgress = false;
 let pendingMoveReplay = null;
 let lastTurnReplay = [];
+let botTimer = null;
 
 const activeTheme = applyTheme(document.documentElement, localStorage, loadTheme(localStorage));
 themeInputs.find(({ value }) => value === activeTheme).checked = true;
@@ -111,6 +120,10 @@ function gamePlayers(room) {
   return order.map((uid) => ({ uid, name: room.players[uid].name }));
 }
 
+function isBotUid(uid) {
+  return /^(?:npc-|local-npc-)/.test(uid);
+}
+
 function freshGame(room, hostUid) {
   return startGame(createGame(gamePlayers(room)), hostUid);
 }
@@ -129,6 +142,7 @@ function renderOnlineLobby() {
     swatch.style.setProperty("--player-color", PLAYERS[player.color].color);
     swatch.setAttribute("aria-hidden", "true");
     row.append(swatch, document.createTextNode(player.name));
+    if (isBotUid(player.uid)) row.append(document.createTextNode(" (NPC)"));
     if (player.uid === onlineRoom.hostUid) row.append(document.createTextNode(" (host)"));
     return row;
   }));
@@ -138,6 +152,11 @@ function renderOnlineLobby() {
     : `${players.length} players are ready.`;
   startButton.hidden = !isHost;
   startButton.disabled = onlineBusy || players.length < 2 || players.length > 4;
+  const bots = players.filter(({ uid }) => isBotUid(uid));
+  addBotButton.hidden = !isHost;
+  addBotButton.disabled = onlineBusy || players.length >= 4;
+  removeBotButton.hidden = !isHost || !bots.length;
+  removeBotButton.disabled = onlineBusy;
   leaveButton.disabled = onlineBusy;
 }
 
@@ -152,6 +171,8 @@ function forgetOnlineRoom() {
   }
   pendingMoveReplay = null;
   lastTurnReplay = [];
+  clearTimeout(botTimer);
+  botTimer = null;
   setRoomUrl(null);
 }
 
@@ -340,6 +361,53 @@ copyInviteButton.addEventListener("click", async () => {
   }
 });
 
+addBotButton.addEventListener("click", () => runOnlineAction(async () => {
+  await updateRoomTransaction(onlineRoomCode, (room, uid) => {
+    if (!room || room.status !== "waiting") throw new Error("This lobby is no longer waiting.");
+    if (room.hostUid !== uid) throw new Error("Only the host can add an NPC.");
+    if (room.playerCount >= 4) throw new Error("The lobby already has four players.");
+    const seat = [1, 2, 3].find((index) => room.seats?.[index] === "");
+    if (!seat) throw new Error("There is no available NPC seat.");
+    const botUid = `npc-${seat}`;
+    const now = Date.now();
+    return {
+      ...room,
+      updatedAt: now,
+      playerCount: room.playerCount + 1,
+      seats: { ...room.seats, [seat]: botUid },
+      players: {
+        ...room.players,
+        [botUid]: {
+          uid: botUid,
+          name: `NPC ${seat}`,
+          color: PLAYER_ORDER[seat],
+          seat,
+          joinedAt: now,
+          isBot: true,
+        },
+      },
+    };
+  });
+}, lobbyStatus));
+
+removeBotButton.addEventListener("click", () => runOnlineAction(async () => {
+  await updateRoomTransaction(onlineRoomCode, (room, uid) => {
+    if (!room || room.status !== "waiting") throw new Error("This lobby is no longer waiting.");
+    if (room.hostUid !== uid) throw new Error("Only the host can remove an NPC.");
+    const bot = sortedPlayers(room).filter((player) => isBotUid(player.uid)).at(-1);
+    if (!bot) throw new Error("There is no NPC to remove.");
+    const players = { ...room.players };
+    delete players[bot.uid];
+    return {
+      ...room,
+      updatedAt: Date.now(),
+      playerCount: room.playerCount - 1,
+      seats: { ...room.seats, [bot.seat]: "" },
+      players,
+    };
+  });
+}, lobbyStatus));
+
 startButton.addEventListener("click", () => runOnlineAction(async () => {
   await updateRoomTransaction(onlineRoomCode, (room, uid) => {
     if (!room || room.status !== "waiting") throw new Error("This room is no longer waiting.");
@@ -436,11 +504,113 @@ function renderDice() {
 }
 
 function canControlTurn() {
-  return gameMode === "local" || firebaseUser?.uid === gameState?.turnUid;
+  return !isBotUid(gameState?.turnUid)
+    && (gameMode === "local" || firebaseUser?.uid === gameState?.turnUid);
+}
+
+function scheduleBotTurn() {
+  clearTimeout(botTimer);
+  botTimer = null;
+  const player = currentPlayer();
+  const hostCanRunBot = gameMode === "local" || firebaseUser?.uid === onlineRoom?.hostUid;
+  if (!player || !isBotUid(player.uid) || !hostCanRunBot || actionLocked || replayInProgress) return;
+  botTimer = setTimeout(() => runGameAction(playBotTurn), 700);
+}
+
+async function playBotTurn() {
+  const uid = currentPlayer()?.uid;
+  if (!uid || !isBotUid(uid)) return;
+
+  if (["opening-roll", "roll"].includes(gameState.phase)) {
+    const dice = rollDice();
+    const transition = (state) => state.phase === "opening-roll"
+      ? applyOpeningRoll(state, uid, dice)
+      : applyRoll(state, uid, dice);
+    transition(gameState);
+    if (gameMode === "online") await commitOnlineGame(transition, true, uid);
+    else gameState = transition(gameState);
+    return;
+  }
+
+  const moves = getLegalMoves(gameState, uid);
+  if (!moves.length) return;
+  const move = moves[randomIndex(moves.length)];
+  const replay = {
+    pieceId: move.pieceId,
+    fromPositionId: gameState.pieces[move.pieceId].positionId,
+    destinationId: move.destination,
+  };
+  const continuesRoll = gameState.lastAction?.type === "move" && gameState.lastAction.uid === uid;
+  const transition = (state) => applyMove(state, uid, move.pieceId, move.destination, move.die);
+  transition(gameState);
+  if (gameMode === "online") await commitOnlineGame(transition, true, uid);
+  else {
+    gameState = transition(gameState);
+    lastTurnReplay = continuesRoll ? [...lastTurnReplay, replay] : [replay];
+  }
+}
+
+function renderVictory() {
+  clearTimeout(botTimer);
+  botTimer = null;
+  const winner = gameState.players.find(({ uid }) => uid === gameState.winnerUid);
+  const hostUid = gameMode === "online" ? onlineRoom.hostUid : gameState.hostUid;
+  const canRestart = gameMode === "local" || firebaseUser.uid === hostUid;
+  victoryWinner.textContent = winner.name;
+  victoryWinner.style.setProperty("--winner-color", PLAYERS[winner.color].color);
+  victoryRestartButton.hidden = !canRestart;
+  victoryRestartButton.disabled = actionLocked;
+  victoryMenuButton.disabled = actionLocked;
+  victoryStatus.textContent = canRestart ? "" : `Waiting for ${playerName(hostUid)} to start the next game.`;
+
+  const players = [winner, ...gameState.players.filter(({ uid }) => uid !== winner.uid)];
+  victoryStats.replaceChildren(...players.map((player) => {
+    const stats = gameState.stats?.[player.uid] ?? {};
+    const home = Object.values(gameState.pieces).filter((piece) => (
+      piece.ownerUid === player.uid && piece.positionId.startsWith("home:")
+    )).length;
+    const values = [
+      ["Marbles Home", `${home} / 5`],
+      ["Opening rolls", stats.openingRolls ?? 0],
+      ["Rolls", stats.rolls ?? 0],
+      ["Average roll", stats.rolls ? (stats.diceTotal / stats.rolls).toFixed(1) : "–"],
+      ["Dice total", stats.diceTotal ?? 0],
+      ["Sixes", stats.sixes ?? 0],
+      ["Doubles", stats.doubles ?? 0],
+      ["Moves", stats.moves ?? 0],
+      ["Captures", stats.captures ?? 0],
+      ["Times captured", stats.timesCaptured ?? 0],
+      ["Gambit visits", stats.gambits ?? 0],
+      ["Blocked rolls", stats.blockedRolls ?? 0],
+      ["Skipped turns", stats.skippedTurns ?? 0],
+    ];
+    const card = document.createElement("article");
+    card.className = `victory-player${player.uid === winner.uid ? " is-winner" : ""}`;
+    card.style.setProperty("--player-color", PLAYERS[player.color].color);
+    const heading = document.createElement("h3");
+    heading.textContent = player.uid === winner.uid ? `${player.name} — Champion` : player.name;
+    const list = document.createElement("dl");
+    for (const [label, value] of values) {
+      const row = document.createElement("div");
+      const term = document.createElement("dt");
+      const detail = document.createElement("dd");
+      term.textContent = label;
+      detail.textContent = value;
+      row.append(term, detail);
+      list.append(row);
+    }
+    card.append(heading, list);
+    return card;
+  }));
 }
 
 function renderGame() {
   if (!gameState) return;
+  if (gameState.phase === "finished") {
+    showScreen("victory");
+    renderVictory();
+    return;
+  }
   const player = currentPlayer();
   const canAct = canControlTurn();
   const allLegalMoves = gameState.phase === "move" ? getLegalMoves(gameState, gameState.turnUid) : [];
@@ -468,6 +638,7 @@ function renderGame() {
 
   rollButton.textContent = gameState.phase === "move"
     ? "Dice in play"
+    : isBotUid(player.uid) ? `${player.name} is thinking...`
     : gameMode === "local" ? `Roll for ${player.name}`
     : canAct ? (gameState.phase === "opening-roll" ? "Make your opening roll" : "Roll your dice")
     : `Waiting for ${player.name}`;
@@ -517,14 +688,17 @@ function renderGame() {
       runGameAction(() => moveSelectedMarble(destination));
     },
   });
+  scheduleBotTurn();
 }
 
-async function commitOnlineGame(transition, requireTurn = true) {
+async function commitOnlineGame(transition, requireTurn = true, actingUid = null) {
   await updateRoomTransaction(onlineRoomCode, (room, uid) => {
     if (!room || room.status !== "playing" || !room.game) throw new Error("The game state changed.");
     if (!room.players?.[uid]) throw new Error("You are not a member of this room.");
-    if (requireTurn && room.game.turnUid !== uid) throw new Error("That turn has already changed.");
-    return { ...room, game: transition(room.game, uid) };
+    const actor = actingUid ?? uid;
+    if (actingUid && (uid !== room.hostUid || !isBotUid(actor))) throw new Error("Only the host can run an NPC turn.");
+    if (requireTurn && room.game.turnUid !== actor) throw new Error("That turn has already changed.");
+    return { ...room, game: transition(room.game, actor) };
   });
 }
 
@@ -603,17 +777,21 @@ async function replayLastTurn() {
 
 setupForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  const names = playerInputs.map((input) => input.value.trim());
-  for (const [index, input] of playerInputs.entries()) {
-    input.setCustomValidity(index < 2 && !names[index] ? "Enter a player name." : "");
-  }
+  const players = playerInputs.map((input, index) => {
+    const bot = botInputs.find(({ dataset }) => dataset.botFor === input.id)?.checked;
+    const name = input.value.trim();
+    if (!name) return null;
+    return {
+      uid: bot ? `local-npc-${index}` : `local-${index + 1}`,
+      name,
+    };
+  }).filter(Boolean);
+  playerInputs[0].setCustomValidity(playerInputs[0].value.trim() ? "" : "Enter your name.");
+  playerInputs[1].setCustomValidity(players.length >= 2 ? "" : "Add another person or select NPC.");
   if (!setupForm.reportValidity()) return;
 
   gameMode = "local";
-  gameState = createGame(names.filter(Boolean).map((name, index) => ({
-    uid: `local-${index + 1}`,
-    name,
-  })));
+  gameState = createGame(players);
   gameState = startGame(gameState, gameState.hostUid);
   selectedMarbleId = null;
   statusMessage = describeLastAction();
@@ -622,6 +800,14 @@ setupForm.addEventListener("submit", (event) => {
 });
 
 for (const input of playerInputs) input.addEventListener("input", () => input.setCustomValidity(""));
+for (const [index, checkbox] of botInputs.entries()) {
+  checkbox.addEventListener("change", () => {
+    const input = document.querySelector(`#${checkbox.dataset.botFor}`);
+    input.disabled = checkbox.checked;
+    input.value = checkbox.checked ? `NPC ${index + 1}` : "";
+    input.setCustomValidity("");
+  });
+}
 rollButton.addEventListener("click", () => runGameAction(handleRoll));
 replayMoveButton.addEventListener("click", replayLastTurn);
 
@@ -647,7 +833,7 @@ mainMenuButton.addEventListener("click", () => {
   returnToMainMenu();
 });
 
-newGameButton.addEventListener("click", () => {
+function restartGame() {
   if (gameMode === "local") {
     if (!["finished", "ended"].includes(gameState.phase) && !confirm("Start a new game?")) return;
     gameState = null;
@@ -666,7 +852,11 @@ newGameButton.addEventListener("click", () => {
       return { ...room, game: freshGame(room, uid) };
     });
   });
-});
+}
+
+newGameButton.addEventListener("click", restartGame);
+victoryRestartButton.addEventListener("click", restartGame);
+victoryMenuButton.addEventListener("click", returnToMainMenu);
 
 async function initializeOnlinePlay() {
   const requestedCode = new URLSearchParams(location.search).get("room")?.trim().toUpperCase();

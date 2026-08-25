@@ -14,7 +14,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./styles.css?v=20260824-33">
+    <link rel="stylesheet" href="./styles.css?v=20260824-35">
   </head>
   <body>
     <main class="app-shell">
@@ -69,13 +69,22 @@
             <input id="player-1" name="playerName" maxlength="24" autocomplete="nickname" required>
 
             <label for="player-2">Player 2</label>
-            <input id="player-2" name="playerName" maxlength="24" autocomplete="off" required>
+            <div class="player-entry">
+              <input id="player-2" name="playerName" maxlength="24" autocomplete="off">
+              <label class="bot-toggle"><input type="checkbox" data-bot-for="player-2"> NPC</label>
+            </div>
 
             <label for="player-3">Player 3 <span class="muted">(optional)</span></label>
-            <input id="player-3" name="playerName" maxlength="24" autocomplete="off">
+            <div class="player-entry">
+              <input id="player-3" name="playerName" maxlength="24" autocomplete="off">
+              <label class="bot-toggle"><input type="checkbox" data-bot-for="player-3"> NPC</label>
+            </div>
 
             <label for="player-4">Player 4 <span class="muted">(optional)</span></label>
-            <input id="player-4" name="playerName" maxlength="24" autocomplete="off">
+            <div class="player-entry">
+              <input id="player-4" name="playerName" maxlength="24" autocomplete="off">
+              <label class="bot-toggle"><input type="checkbox" data-bot-for="player-4"> NPC</label>
+            </div>
           </fieldset>
           <button type="submit">Start local game</button>
           <button class="text-button" type="button" data-home>Back</button>
@@ -94,6 +103,10 @@
           <h2>Players</h2>
           <ol id="player-list" class="player-list"></ol>
           <p id="lobby-status" class="muted" aria-live="polite">Waiting for players...</p>
+          <div class="lobby-bot-controls">
+            <button id="add-bot-button" class="secondary" type="button">Add NPC</button>
+            <button id="remove-bot-button" class="text-button" type="button">Remove NPC</button>
+          </div>
           <button id="start-game-button" type="button">Start game</button>
           <button id="leave-room-button" class="text-button" type="button">Leave room</button>
         </div>
@@ -129,6 +142,29 @@
           <p id="turn-status" class="sr-only" aria-live="polite">Each player rolls both dice. Highest total goes first.</p>
         </div>
       </section>
+
+      <section class="screen victory-screen" data-screen="victory" aria-labelledby="victory-title" hidden>
+        <div class="victory-effects" aria-hidden="true">
+          <div class="victory-confetti"></div>
+          <span class="firework firework-one"></span>
+          <span class="firework firework-two"></span>
+          <span class="firework firework-three"></span>
+        </div>
+        <header class="victory-hero">
+          <p class="eyebrow">Final results</p>
+          <h1 id="victory-title"><span id="victory-winner"></span> wins!</h1>
+          <p>All five marbles made it Home.</p>
+        </header>
+        <section class="victory-scoreboard" aria-labelledby="stats-title">
+          <h2 id="stats-title">Game stats</h2>
+          <div id="victory-stats" class="victory-stats"></div>
+        </section>
+        <div class="victory-actions">
+          <button id="victory-restart-button" type="button">Play again</button>
+          <button id="victory-menu-button" class="text-button" type="button">Main menu</button>
+        </div>
+        <p id="victory-status" class="victory-status" aria-live="polite"></p>
+      </section>
     </main>
 
     <dialog id="settings-dialog" class="settings-dialog" aria-labelledby="settings-title">
@@ -162,6 +198,6 @@
       </form>
     </dialog>
 
-    <script type="module" src="./src/app.js?v=20260824-24"></script>
+    <script type="module" src="./src/app.js?v=20260824-26"></script>
   </body>
 </html>

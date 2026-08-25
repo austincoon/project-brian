@@ -26,7 +26,7 @@ import {
   skipTurn,
   startGame,
 } from "../src/game.js";
-import { getDicePresentation, rollDie } from "../src/dice.js";
+import { getDicePresentation, randomIndex, rollDie } from "../src/dice.js";
 import { loadTurnReplay, saveTurnReplay } from "../src/replay.js";
 import { applyTheme, loadTheme, normalizeTheme, THEME_STORAGE_KEY } from "../src/theme.js";
 
@@ -119,6 +119,17 @@ test("Web Crypto die sampling is unbiased and always returns 1 through 6", () =>
   assert.equal(rollDie((buffer) => { buffer[0] = bytes.shift(); }), 6);
 });
 
+test("NPC move selection is unbiased", () => {
+  const counts = Array(7).fill(0);
+  for (let byte = 0; byte < 252; byte += 1) {
+    counts[randomIndex(7, (buffer) => { buffer[0] = byte; })] += 1;
+  }
+  assert.deepEqual(counts, Array(7).fill(36));
+
+  const bytes = [255, 6];
+  assert.equal(randomIndex(7, (buffer) => { buffer[0] = bytes.shift(); }), 6);
+});
+
 test("dice presentation identifies live, previous, and upcoming rollers", () => {
   let state = activeGame();
   assert.equal(getDicePresentation(state, "a").label, "Blair's opening roll");
@@ -145,13 +156,17 @@ test("database rules enforce the room security boundary", () => {
   assert.match(rules.rules.rooms.$code[".write"], /players.*auth\.uid.*exists/);
   assert.match(rules.rules.rooms.$code[".write"], /auth\.uid === data\.child\('hostUid'\)/);
   assert.match(rules.rules.rooms.$code[".write"], /!newData\.exists\(\)/);
+  assert.match(rules.rules.rooms.$code[".write"], /npc-1.*npc-2.*npc-3/);
   assert.match(rules.rules.rooms.$code.players.$uid[".validate"], /length <= 24/);
+  assert.match(rules.rules.rooms.$code.players.$uid[".validate"], /isBot.*npc-/);
   assert.match(rules.rules.rooms.$code.game[".write"], /status.*playing/);
   assert.match(rules.rules.rooms.$code.game[".write"], /players.*auth\.uid.*exists/);
   assert.match(rules.rules.rooms.$code.game[".write"], /root\.child\('rooms'\).*child\(\$code\)/);
   assert.match(rules.rules.rooms.$code.game[".validate"], /opening-roll.*finished/);
   assert.match(rules.rules.rooms.$code.game[".validate"], /remainingDice/);
   assert.match(rules.rules.rooms.$code.game.remainingDice[".validate"], /newData\.hasChild\('0'\)/);
+  assert.match(rules.rules.rooms.$code.game.stats.$uid[".validate"], /openingRolls.*timesCaptured.*skippedTurns/);
+  assert.equal(rules.rules.rooms.$code.game.stats.$uid.$other[".validate"], false);
   assert.equal(rules.rules.rooms.$code.game.$other[".validate"], false);
   assert.doesNotMatch(source, /numChildren/);
   assert.match(source, /playerCount/);
@@ -295,6 +310,29 @@ test("landing on an opponent captures it", () => {
   assert.match(moved.pieces["b:0"].positionId, /^base:blue:/);
 });
 
+test("game stats track rolls, moves, doubles, sixes, and captures", () => {
+  let state = activeGame();
+  place(state, "b:0", "track:8", 18);
+  state = applyRoll(state, "a", [6, 6]);
+  state = applyMove(state, "a", "a:0", "track:2", 6);
+  state = applyMove(state, "a", "a:0", "track:8", 6);
+
+  assert.deepEqual(state.stats.a, {
+    openingRolls: 1,
+    rolls: 1,
+    diceTotal: 12,
+    sixes: 2,
+    doubles: 1,
+    moves: 2,
+    captures: 1,
+    timesCaptured: 0,
+    gambits: 0,
+    blockedRolls: 0,
+    skippedTurns: 0,
+  });
+  assert.equal(state.stats.b.timesCaptured, 1);
+});
+
 test("Home requires an exact roll and cannot be overshot", () => {
   const exact = movePhase([2, 3]);
   place(exact, "a:0", "track:47", 45);
@@ -368,6 +406,7 @@ test("a 6 can leave Base and the remaining 5 can enter the Gambit", () => {
   )), true);
   state = applyMove(state, "a", "a:0", "center", 5);
   assert.equal(state.pieces["a:0"].positionId, "center");
+  assert.equal(state.stats.a.gambits, 1);
 });
 
 test("the two dice can move different marbles or the same marble", () => {
@@ -400,6 +439,7 @@ test("a turn advances when no legal move exists", () => {
   assert.equal(before.phase, "roll");
   assert.equal(after.phase, "roll");
   assert.equal(after.turnUid, "b");
+  assert.equal(after.stats.a.blockedRolls, 1);
 });
 
 test("opening-roll ties reroll until one player wins", () => {
@@ -442,6 +482,7 @@ test("the host can skip another player's opening or normal turn", () => {
   opening = skipTurn(opening, "a");
   assert.equal(opening.phase, "roll");
   assert.equal(opening.turnUid, "a");
+  assert.equal(opening.stats.b.skippedTurns, 1);
 
   let active = applyRoll(activeGame(), "a", [2, 3]);
   active = skipTurn(active, "a");

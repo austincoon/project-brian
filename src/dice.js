@@ -9,6 +9,16 @@ export function rollDice() {
   return [rollDie(), rollDie()];
 }
 
+export function randomIndex(length, randomValues = crypto.getRandomValues.bind(crypto)) {
+  if (!Number.isInteger(length) || length < 1 || length > 256) {
+    throw new RangeError("Choice length must be an integer from 1 through 256.");
+  }
+  const bytes = new Uint8Array(1);
+  const limit = Math.floor(256 / length) * length;
+  do randomValues(bytes); while (bytes[0] >= limit);
+  return bytes[0] % length;
+}
+
 export function getDicePresentation(state, viewerUid = null) {
   const liveRoll = state?.phase === "move" && Array.isArray(state.dice);
   const dice = liveRoll
