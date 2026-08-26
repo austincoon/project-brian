@@ -561,7 +561,7 @@ function physicalDiceRoll(player, seed, renderer = null) {
 
   return new Promise((resolve, reject) => {
     diceRollCancel = reject;
-    const loadRenderer = renderer ? Promise.resolve(renderer) : import("./dice-scene.js?v=20260825-3");
+    const loadRenderer = renderer ? Promise.resolve(renderer) : import("./dice-scene.js?v=20260826-4");
     loadRenderer.then(({ throwDice }) => {
       if (token !== diceRollToken) return;
       diceScene = throwDice(table, seed, (dice) => {
@@ -605,7 +605,7 @@ function renderDiceRoll() {
     return;
   }
 
-  import("./dice-scene.js?v=20260825-3").then((renderer) => (
+  import("./dice-scene.js?v=20260826-4").then((renderer) => (
     physicalDiceRoll(player, renderer.replaySeedFor(action.dice), renderer)
   )).then(() => renderGame()).catch((error) => {
     if (key !== lastDiceRollKey) return;

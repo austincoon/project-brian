@@ -11,7 +11,7 @@ import {
   replaySeedFor,
   simulateDice,
   stepDiceSimulation,
-} from "./dice-physics.js?v=20260825-1";
+} from "./dice-physics.js?v=20260826-2";
 
 export { replaySeedFor };
 
