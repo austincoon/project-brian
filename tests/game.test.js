@@ -26,7 +26,7 @@ import {
   skipTurn,
   startGame,
 } from "../src/game.js";
-import { CUBE_FACES, getDicePresentation, getPlayerDiceRows, randomIndex, rollDie, stepDicePhysics } from "../src/dice.js";
+import { DIE_FACE_VALUES, DIE_RESULT_ROTATIONS, getDicePresentation, getPlayerDiceRows, randomIndex, rollDie } from "../src/dice.js";
 import { loadTurnReplay, saveTurnReplay } from "../src/replay.js";
 import { applyTheme, loadTheme, normalizeTheme, THEME_STORAGE_KEY } from "../src/theme.js";
 
@@ -35,28 +35,19 @@ const players = [
   { uid: "b", name: "Blair" },
 ];
 
-test("3D dice contain every face in opposite pairs", () => {
-  const faces = Object.fromEntries(CUBE_FACES);
-  assert.deepEqual(Object.values(faces).sort(), [1, 2, 3, 4, 5, 6]);
-  assert.equal(faces.front + faces.back, 7);
-  assert.equal(faces.left + faces.right, 7);
-  assert.equal(faces.top + faces.bottom, 7);
-});
-
-test("thrown dice bounce off tray walls and each other", () => {
-  const bounds = { width: 300, height: 400, size: 50, padding: 10 };
-  const wall = [{ x: 245, y: 100, vx: 100, vy: 0 }];
-  stepDicePhysics(wall, bounds, 0.1);
-  assert.equal(wall[0].x, 240);
-  assert.ok(wall[0].vx < 0);
-
-  const pair = [
-    { x: 100, y: 100, vx: 100, vy: 0 },
-    { x: 130, y: 100, vx: 0, vy: 0 },
-  ];
-  stepDicePhysics(pair, bounds, 0);
-  assert.ok(pair[0].vx < pair[1].vx);
-  assert.ok(pair[1].x - pair[0].x >= bounds.size * 0.88);
+test("3D dice define six faces and a landing rotation for every result", () => {
+  assert.deepEqual([...DIE_FACE_VALUES].sort(), [1, 2, 3, 4, 5, 6]);
+  assert.equal(DIE_FACE_VALUES[0] + DIE_FACE_VALUES[1], 7);
+  assert.equal(DIE_FACE_VALUES[2] + DIE_FACE_VALUES[3], 7);
+  assert.equal(DIE_FACE_VALUES[4] + DIE_FACE_VALUES[5], 7);
+  assert.deepEqual(Object.keys(DIE_RESULT_ROTATIONS), ["1", "2", "3", "4", "5", "6"]);
+  const normals = { 1: [0, 0, 1], 2: [0, 1, 0], 3: [1, 0, 0], 4: [-1, 0, 0], 5: [0, -1, 0], 6: [0, 0, -1] };
+  for (const [value, [rx, , rz]] of Object.entries(DIE_RESULT_ROTATIONS)) {
+    const [x, y, z] = normals[value];
+    const afterX = [x, y * Math.cos(rx) - z * Math.sin(rx), y * Math.sin(rx) + z * Math.cos(rx)];
+    const upwardY = afterX[0] * Math.sin(rz) + afterX[1] * Math.cos(rz);
+    assert.ok(Math.abs(upwardY - 1) < 1e-10, `${value} must face upward`);
+  }
 });
 
 test("visual themes persist and unknown values fall back to wacky", () => {

@@ -1,5 +1,5 @@
 import { PLAYER_ORDER, PLAYERS, renderBoard } from "./board.js?v=20260825-23";
-import { CUBE_FACES, getPlayerDiceRows, randomIndex, rollDice, stepDicePhysics } from "./dice.js?v=20260825-27";
+import { getPlayerDiceRows, randomIndex, rollDice } from "./dice.js?v=20260825-28";
 import { loadTurnReplay, saveTurnReplay } from "./replay.js?v=20260823-19";
 import { applyTheme, loadTheme } from "./theme.js?v=20260824-1";
 import {
@@ -77,8 +77,8 @@ let lastTurnReplay = [];
 let botTimer = null;
 let lastDiceByUid = {};
 let lastDiceRollKey = null;
-let diceAnimationFrame = null;
-let diceSettleTimer = null;
+let diceScene = null;
+let diceRollToken = 0;
 let diceInMotion = false;
 let moveUnlockDelayMs = 0;
 
@@ -95,10 +95,9 @@ function showScreen(name) {
 }
 
 function resetDiceDisplays() {
-  cancelAnimationFrame(diceAnimationFrame);
-  clearTimeout(diceSettleTimer);
-  diceAnimationFrame = null;
-  diceSettleTimer = null;
+  diceScene?.dispose();
+  diceScene = null;
+  diceRollToken += 1;
   diceInMotion = false;
   lastDiceByUid = {};
   lastDiceRollKey = null;
@@ -532,95 +531,6 @@ function drawDie(button, value) {
   }));
 }
 
-function createRollingDie(value, index) {
-  const wrapper = document.createElement("span");
-  wrapper.className = `rolling-die rolling-die-${index + 1}`;
-  const cube = document.createElement("span");
-  cube.className = `die-cube die-value-${value}`;
-  cube.append(...CUBE_FACES.map(([side, faceValue]) => {
-    const face = document.createElement("span");
-    face.className = `die-face die-face-${side}`;
-    drawDie(face, faceValue);
-    return face;
-  }));
-  wrapper.append(cube);
-  return wrapper;
-}
-
-function animateDiceThrow(table, elements, onSettled) {
-  cancelAnimationFrame(diceAnimationFrame);
-  clearTimeout(diceSettleTimer);
-  diceAnimationFrame = null;
-  diceSettleTimer = null;
-  diceInMotion = false;
-  const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const width = table.clientWidth;
-  const height = table.clientHeight;
-  const size = elements[0]?.offsetWidth ?? 64;
-  if (width < 100 || height < 100) return;
-  const padding = Math.max(10, size * 0.15);
-  const bodies = elements.map((element, index) => ({
-    element,
-    cube: element.firstElementChild,
-    x: padding,
-    y: index ? height * 0.68 : height * 0.16,
-    vx: Math.max(440, width * (index ? 1.55 : 1.8)),
-    vy: height * (index ? -0.72 : 0.8),
-    rx: index ? 70 : -35,
-    ry: index ? -50 : 45,
-    rz: 0,
-  }));
-  const bounds = { width, height, size, padding };
-
-  for (const [index, body] of bodies.entries()) {
-    if (reducedMotion) {
-      body.x = width * (index ? 0.58 : 0.18);
-      body.y = height * (index ? 0.32 : 0.62);
-    }
-    body.element.style.transform = `translate3d(${body.x}px, ${body.y}px, 0)`;
-    body.element.classList.add("is-in-play");
-  }
-  if (reducedMotion) {
-    onSettled();
-    return;
-  }
-
-  diceInMotion = true;
-  let previous;
-  let elapsed = 0;
-  const frame = (now) => {
-    if (!previous) previous = now;
-    const seconds = Math.min((now - previous) / 1000, 0.032);
-    previous = now;
-    elapsed += seconds;
-    stepDicePhysics(bodies, bounds, seconds);
-    for (const [index, body] of bodies.entries()) {
-      const speed = Math.hypot(body.vx, body.vy);
-      body.rx += (speed * (index ? -1.15 : 1.25) + 260) * seconds;
-      body.ry += (speed * (index ? 1.2 : -1.05) + 330) * seconds;
-      body.rz += (index ? -190 : 170) * seconds;
-      body.element.style.transform = `translate3d(${body.x}px, ${body.y}px, 0)`;
-      body.cube.style.transform = `rotateX(${body.rx}deg) rotateY(${body.ry}deg) rotateZ(${body.rz}deg)`;
-    }
-    if (elapsed < 1.65) {
-      diceAnimationFrame = requestAnimationFrame(frame);
-      return;
-    }
-    diceAnimationFrame = null;
-    for (const body of bodies) {
-      body.cube.classList.add("is-settling");
-      body.cube.style.transform = "var(--die-final)";
-    }
-    diceSettleTimer = setTimeout(() => {
-      diceSettleTimer = null;
-      diceInMotion = false;
-      onSettled();
-      renderGame();
-    }, 380);
-  };
-  diceAnimationFrame = requestAnimationFrame(frame);
-}
-
 function renderDiceRoll() {
   const action = gameState.lastAction;
   if (!["opening-roll", "roll", "no-move"].includes(action?.type)) return;
@@ -636,19 +546,28 @@ function renderDiceRoll() {
   const table = document.createElement("div");
   table.className = "dice-table-surface";
   table.setAttribute("aria-hidden", "true");
-  const dice = action.dice.map(createRollingDie);
-  table.append(...dice);
-  cancelAnimationFrame(diceAnimationFrame);
-  clearTimeout(diceSettleTimer);
-  diceAnimationFrame = null;
-  diceSettleTimer = null;
-  diceInMotion = false;
+  diceScene?.dispose();
+  diceScene = null;
+  const token = ++diceRollToken;
+  diceInMotion = true;
   diceRollStage.style.setProperty("--player-color", PLAYERS[player.color].color);
   diceRollStage.replaceChildren(label, table);
   diceRollStage.hidden = false;
-  diceAnimationFrame = requestAnimationFrame(() => animateDiceThrow(table, dice, () => {
-    label.textContent = `${player.name} rolled ${formatRoll(action.dice)}`;
-  }));
+  import("./dice-scene.js?v=20260825-1").then(({ throwDice }) => {
+    if (token !== diceRollToken) return;
+    diceScene = throwDice(table, action.dice, () => {
+      if (token !== diceRollToken) return;
+      diceInMotion = false;
+      label.textContent = `${player.name} rolled ${formatRoll(action.dice)}`;
+      renderGame();
+    });
+  }).catch((error) => {
+    if (token !== diceRollToken) return;
+    console.error("The 3D dice renderer failed to load.", error);
+    diceInMotion = false;
+    label.textContent = `${player.name} rolled ${formatRoll(action.dice)} · 3D unavailable`;
+    renderGame();
+  });
 }
 
 function renderDice() {
