@@ -3498,6 +3498,16 @@ html[data-theme="gothic"] :is(.victory-confetti, .firework) {
     width: min(100%, 42rem);
     place-self: center;
   }
+
+  #roll-button:not(:disabled) {
+    position: fixed;
+    z-index: 20;
+    right: 0.75rem;
+    bottom: max(0.75rem, env(safe-area-inset-bottom));
+    left: 0.75rem;
+    width: min(22rem, calc(100% - 1.5rem));
+    margin-inline: auto;
+  }
 }
 
 @media (max-width: 42rem) {

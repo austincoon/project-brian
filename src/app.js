@@ -1,5 +1,5 @@
 import { PLAYER_ORDER, PLAYERS, renderBoard } from "./board.js?v=20260825-23";
-import { getPlayerDiceRows, getPlayerProgress, randomIndex } from "./dice.js?v=20260826-31";
+import { chooseBotMove, getPlayerDiceRows, getPlayerProgress } from "./dice.js?v=20260826-32";
 import { loadTurnReplay, saveTurnReplay } from "./replay.js?v=20260823-19";
 import { applyTheme, loadTheme } from "./theme.js?v=20260826-3";
 import {
@@ -708,7 +708,7 @@ async function playBotTurn() {
 
   const moves = getLegalMoves(gameState, uid);
   if (!moves.length) return;
-  const move = moves[randomIndex(moves.length)];
+  const move = chooseBotMove(moves);
   const replay = createMoveReplay(gameState, move);
   moveUnlockDelayMs = moveAnimationTotal(replay);
   const continuesRoll = gameState.lastAction?.type === "move" && gameState.lastAction.uid === uid;

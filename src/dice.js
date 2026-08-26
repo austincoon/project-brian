@@ -30,6 +30,13 @@ export function randomIndex(length, randomValues = crypto.getRandomValues.bind(c
   return bytes[0] % length;
 }
 
+export function chooseBotMove(moves) {
+  const homewardExit = moves.reduce((best, move) => (
+    move.kind === "exit-gambit" && (!best || move.progress > best.progress) ? move : best
+  ), null);
+  return homewardExit ?? moves[randomIndex(moves.length)];
+}
+
 export function getDicePresentation(state, viewerUid = null) {
   const liveRoll = state?.phase === "move" && Array.isArray(state.dice);
   const dice = liveRoll

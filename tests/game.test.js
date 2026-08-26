@@ -27,7 +27,7 @@ import {
   skipTurn,
   startGame,
 } from "../src/game.js";
-import { getDicePresentation, getPlayerDiceRows, getPlayerProgress, randomIndex, rollDie } from "../src/dice.js";
+import { chooseBotMove, getDicePresentation, getPlayerDiceRows, getPlayerProgress, randomIndex, rollDie } from "../src/dice.js";
 import { DIE_FACE_VALUES, replaySeedFor, simulateDice } from "../src/dice-physics.js";
 import { loadTurnReplay, saveTurnReplay } from "../src/replay.js";
 import { applyTheme, loadTheme, normalizeTheme, THEME_STORAGE_KEY } from "../src/theme.js";
@@ -481,6 +481,23 @@ test("the center Gambit exits to a corner only on 1 or 6", () => {
     );
     assert.equal(getLegalMoves(state, "a").some(({ pieceId, die }) => pieceId === "a:0" && die === 3), false);
   }
+});
+
+test("NPCs leave the Gambit through the corner closest to their Home", () => {
+  const fourPlayers = PLAYER_ORDER.map((_, index) => ({ uid: String(index), name: `Player ${index + 1}` }));
+  const nearestHome = { red: "track:42", blue: "track:30", green: "track:18", yellow: "track:6" };
+
+  PLAYER_ORDER.forEach((color, index) => {
+    const uid = String(index);
+    const state = createGame(fourPlayers);
+    state.phase = "move";
+    state.turnUid = uid;
+    state.dice = [1, 3];
+    state.remainingDice = [1, 3];
+    place(state, `${uid}:0`, CENTER_SHORTCUT.id, 6);
+
+    assert.equal(chooseBotMove(getLegalMoves(state, uid)).destination, nearestHome[color]);
+  });
 });
 
 test("a 6 can leave Base and the remaining 5 can enter the Gambit", () => {
