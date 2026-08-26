@@ -9,14 +9,14 @@ export function rollDice() {
   return [rollDie(), rollDie()];
 }
 
-export function getTurnQueue(state) {
-  const uids = state.opening?.candidateUids ?? state.players.map(({ uid }) => uid);
-  const start = Math.max(0, uids.indexOf(state.turnUid));
-  return [...uids.slice(start), ...uids.slice(0, start)].map((uid, index) => ({
-    ...state.players.find((player) => player.uid === uid),
-    status: state.opening?.rolls?.[uid]
-      ? `Rolled ${state.opening.rolls[uid].total}`
-      : index === 0 ? "Now" : index === 1 ? "Next" : "Waiting",
+export function getPlayerProgress(state) {
+  const pieces = Object.values(state.pieces);
+  return state.players.map((player) => ({
+    ...player,
+    homeCount: pieces.filter(({ ownerUid, positionId }) => (
+      ownerUid === player.uid && positionId.startsWith(`home:${player.color}:`)
+    )).length,
+    captures: state.stats?.[player.uid]?.captures ?? 0,
   }));
 }
 

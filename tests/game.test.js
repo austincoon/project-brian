@@ -26,7 +26,7 @@ import {
   skipTurn,
   startGame,
 } from "../src/game.js";
-import { getDicePresentation, getPlayerDiceRows, getTurnQueue, randomIndex, rollDie } from "../src/dice.js";
+import { getDicePresentation, getPlayerDiceRows, getPlayerProgress, randomIndex, rollDie } from "../src/dice.js";
 import { DIE_FACE_VALUES, replaySeedFor, simulateDice } from "../src/dice-physics.js";
 import { loadTurnReplay, saveTurnReplay } from "../src/replay.js";
 import { applyTheme, loadTheme, normalizeTheme, THEME_STORAGE_KEY } from "../src/theme.js";
@@ -205,15 +205,16 @@ test("each player keeps a clearly owned latest dice set", () => {
   assert.deepEqual(rows.find(({ uid }) => uid === "b").dice, [1, 1]);
 });
 
-test("turn queue starts with the current player and follows clockwise order", () => {
+test("player progress reports Home marbles and captures", () => {
   const state = createGame([
     { uid: "a", name: "Alex" },
     { uid: "b", name: "Blair" },
-    { uid: "c", name: "Casey" },
   ]);
-  state.turnUid = "b";
-  assert.deepEqual(getTurnQueue(state).map(({ uid, status }) => [uid, status]), [
-    ["b", "Now"], ["c", "Next"], ["a", "Waiting"],
+  state.pieces["a:0"].positionId = "home:red:0";
+  state.pieces["a:1"].positionId = "home:red:1";
+  state.stats.a.captures = 3;
+  assert.deepEqual(getPlayerProgress(state).map(({ uid, homeCount, captures }) => [uid, homeCount, captures]), [
+    ["a", 2, 3], ["b", 0, 0],
   ]);
 });
 

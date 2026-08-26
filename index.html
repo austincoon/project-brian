@@ -14,7 +14,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Pixelify+Sans:wght@400..700&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./styles.css?v=20260826-49">
+    <link rel="stylesheet" href="./styles.css?v=20260826-50">
     <script type="importmap">
       {
         "imports": {
@@ -130,12 +130,12 @@
           </header>
 
           <div class="game-controls panel">
-            <section class="turn-queue" aria-labelledby="turn-queue-title">
-              <div class="turn-queue-heading">
-                <span id="turn-queue-title">Turn order</span>
-                <small>Clockwise</small>
+            <section class="progress-board" aria-labelledby="progress-board-title">
+              <div class="progress-board-heading">
+                <span id="progress-board-title">Player progress</span>
+                <small>Race to 5 Home</small>
               </div>
-              <ol id="turn-queue-list" class="turn-queue-list"></ol>
+              <ol id="progress-board-list" class="progress-board-list"></ol>
             </section>
             <p id="turn-status" class="sr-only" aria-live="polite">Each player rolls both dice. Highest total goes first.</p>
             <div class="control-buttons">
@@ -220,6 +220,6 @@
       </form>
     </dialog>
 
-    <script type="module" src="./src/app.js?v=20260826-40"></script>
+    <script type="module" src="./src/app.js?v=20260826-41"></script>
   </body>
 </html>

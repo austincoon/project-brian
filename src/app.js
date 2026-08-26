@@ -1,5 +1,5 @@
 import { PLAYER_ORDER, PLAYERS, renderBoard } from "./board.js?v=20260825-23";
-import { getPlayerDiceRows, getTurnQueue, randomIndex } from "./dice.js?v=20260826-30";
+import { getPlayerDiceRows, getPlayerProgress, randomIndex } from "./dice.js?v=20260826-31";
 import { loadTurnReplay, saveTurnReplay } from "./replay.js?v=20260823-19";
 import { applyTheme, loadTheme } from "./theme.js?v=20260825-2";
 import {
@@ -55,7 +55,7 @@ const replayMoveButton = document.querySelector("#replay-move-button");
 
 const endGameButton = document.querySelector("#end-game-button");
 const turnStatus = document.querySelector("#turn-status");
-const turnQueueList = document.querySelector("#turn-queue-list");
+const progressBoardList = document.querySelector("#progress-board-list");
 const victoryWinner = document.querySelector("#victory-winner");
 const victoryStats = document.querySelector("#victory-stats");
 const victoryRestartButton = document.querySelector("#victory-restart-button");
@@ -805,18 +805,28 @@ function renderGame() {
   const titlePlayer = gameState.players.find(({ uid }) => uid === (gameState.winnerUid ?? player.uid));
   gameSidebar.style.setProperty("--active-color", PLAYERS[titlePlayer.color].darkColor);
   gameSidebar.style.setProperty("--active-accent", PLAYERS[titlePlayer.color].color);
-  turnQueueList.replaceChildren(...getTurnQueue(gameState).map((queuedPlayer, index) => {
+  progressBoardList.replaceChildren(...getPlayerProgress(gameState).map((progress) => {
     const item = document.createElement("li");
-    item.classList.toggle("is-active", index === 0);
-    item.style.setProperty("--player-color", PLAYERS[queuedPlayer.color].color);
-    const swatch = document.createElement("span");
-    swatch.className = "turn-queue-swatch";
+    item.style.setProperty("--player-color", PLAYERS[progress.color].color);
+    const identity = document.createElement("div");
+    identity.className = "progress-player";
     const name = document.createElement("strong");
-    name.textContent = queuedPlayer.name;
-    const status = document.createElement("span");
-    status.className = "turn-queue-status";
-    status.textContent = queuedPlayer.status;
-    item.append(swatch, name, status);
+    name.textContent = progress.name;
+    const total = document.createElement("span");
+    total.textContent = `${progress.homeCount}/5 Home`;
+    identity.append(name, total);
+    const marbles = document.createElement("div");
+    marbles.className = "progress-marbles";
+    marbles.setAttribute("aria-label", `${progress.homeCount} of 5 marbles Home`);
+    marbles.append(...Array.from({ length: 5 }, (_, index) => {
+      const marble = document.createElement("span");
+      marble.classList.toggle("is-home", index < progress.homeCount);
+      return marble;
+    }));
+    const captures = document.createElement("span");
+    captures.className = "progress-captures";
+    captures.textContent = `${progress.captures} capture${progress.captures === 1 ? "" : "s"}`;
+    item.append(identity, marbles, captures);
     return item;
   }));
 
