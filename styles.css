@@ -1097,7 +1097,7 @@ legend {
   grid-area: board;
   position: relative;
   place-self: center;
-  width: min(100%, calc(100dvh - clamp(9rem, 12vw, 10.5rem)));
+  width: min(100%, calc(100dvh - clamp(10.5rem, 14vw, 12rem)));
   max-width: none;
   aspect-ratio: 1;
   margin-block: var(--dice-gutter);
