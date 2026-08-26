@@ -22,6 +22,7 @@ import {
   applyRoll,
   createGame,
   endGame,
+  gameActionKey,
   getLegalMoves,
   skipTurn,
   startGame,
@@ -66,6 +67,14 @@ test("visual themes persist and unknown values fall back to default", () => {
   assert.equal(values.get(THEME_STORAGE_KEY), "gothic");
   assert.equal(applyTheme(root, storage, "default"), "default");
   assert.equal(normalizeTheme("unknown"), "default");
+});
+
+test("online actions detect a changed game snapshot", () => {
+  const state = activeGame();
+  assert.equal(gameActionKey(state), gameActionKey(structuredClone(state)));
+  const changed = structuredClone(state);
+  changed.phase = "move";
+  assert.notEqual(gameActionKey(state), gameActionKey(changed));
 });
 
 test("a room replay survives refresh only for the same game", () => {

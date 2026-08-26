@@ -8,10 +8,11 @@ import {
   applyRoll,
   createGame,
   endGame,
+  gameActionKey,
   getLegalMoves,
   skipTurn,
   startGame,
-} from "./game.js?v=20260824-22";
+} from "./game.js?v=20260826-23";
 import {
   createRoom,
   joinRoom,
@@ -692,12 +693,15 @@ async function playBotTurn() {
   if (!uid || !isBotUid(uid)) return;
 
   if (["opening-roll", "roll"].includes(gameState.phase)) {
+    const expectedGame = gameState;
+    const expectedKey = gameActionKey(expectedGame);
     const dice = await rollDiceFromPhysics(uid);
     const transition = (state) => state.phase === "opening-roll"
       ? applyOpeningRoll(state, uid, dice)
       : applyRoll(state, uid, dice);
+    if (gameMode === "online" && gameState !== expectedGame) return;
     transition(gameState);
-    if (gameMode === "online") await commitOnlineGame(transition, true, uid);
+    if (gameMode === "online") await commitOnlineGame(transition, true, uid, expectedKey);
     else gameState = transition(gameState);
     return;
   }
@@ -885,15 +889,27 @@ function renderGame() {
   scheduleBotTurn();
 }
 
-async function commitOnlineGame(transition, requireTurn = true, actingUid = null) {
-  await updateRoomTransaction(onlineRoomCode, (room, uid) => {
-    if (!room || room.status !== "playing" || !room.game) throw new Error("The game state changed.");
-    if (!room.players?.[uid]) throw new Error("You are not a member of this room.");
-    const actor = actingUid ?? uid;
-    if (actingUid && (uid !== room.hostUid || !isBotUid(actor))) throw new Error("Only the host can run an NPC turn.");
-    if (requireTurn && room.game.turnUid !== actor) throw new Error("That turn has already changed.");
-    return { ...room, game: transition(room.game, actor) };
-  });
+async function commitOnlineGame(transition, requireTurn = true, actingUid = null, expectedKey = gameActionKey(gameState)) {
+  const staleAction = new Error("The action is stale.");
+  let latestGame = null;
+  try {
+    await updateRoomTransaction(onlineRoomCode, (room, uid) => {
+      if (!room || room.status !== "playing" || !room.game) throw new Error("The game state changed.");
+      if (!room.players?.[uid]) throw new Error("You are not a member of this room.");
+      if (gameActionKey(room.game) !== expectedKey) {
+        latestGame = room.game;
+        throw staleAction;
+      }
+      const actor = actingUid ?? uid;
+      if (actingUid && (uid !== room.hostUid || !isBotUid(actor))) throw new Error("Only the host can run an NPC turn.");
+      if (requireTurn && room.game.turnUid !== actor) throw new Error("That turn has already changed.");
+      return { ...room, game: transition(room.game, actor) };
+    });
+  } catch (error) {
+    if (error !== staleAction) throw error;
+    gameState = latestGame;
+    statusMessage = describeLastAction();
+  }
 }
 
 async function runGameAction(action) {
@@ -923,13 +939,16 @@ async function runGameAction(action) {
 
 async function handleRoll() {
   const uid = gameMode === "online" ? firebaseUser.uid : currentPlayer().uid;
+  const expectedGame = gameState;
+  const expectedKey = gameActionKey(expectedGame);
   const dice = await rollDiceFromPhysics(uid);
   const transition = (state, actingUid) => state.phase === "opening-roll"
     ? applyOpeningRoll(state, actingUid, dice)
     : applyRoll(state, actingUid, dice);
+  if (gameMode === "online" && gameState !== expectedGame) return;
   transition(gameState, uid);
 
-  if (gameMode === "online") await commitOnlineGame(transition);
+  if (gameMode === "online") await commitOnlineGame(transition, true, null, expectedKey);
   else gameState = transition(gameState, uid);
 }
 

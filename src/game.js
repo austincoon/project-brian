@@ -319,6 +319,15 @@ export function createGame(players) {
   };
 }
 
+export function gameActionKey(state) {
+  return JSON.stringify([
+    state?.phase ?? null,
+    state?.turnUid ?? null,
+    state?.remainingDice ?? null,
+    state?.lastAction ?? null,
+  ]);
+}
+
 export function startGame(state, hostUid) {
   requirePhase(state, "waiting");
   if (state.hostUid !== hostUid) throw new Error("Only the host can start the game.");
