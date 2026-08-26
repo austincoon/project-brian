@@ -1,5 +1,5 @@
 import { PLAYER_ORDER, PLAYERS, renderBoard } from "./board.js?v=20260825-23";
-import { getPlayerDiceRows, randomIndex, rollDice } from "./dice.js?v=20260825-28";
+import { getPlayerDiceRows, randomIndex } from "./dice.js?v=20260825-29";
 import { loadTurnReplay, saveTurnReplay } from "./replay.js?v=20260823-19";
 import { applyTheme, loadTheme } from "./theme.js?v=20260824-1";
 import {
@@ -79,7 +79,9 @@ let lastDiceByUid = {};
 let lastDiceRollKey = null;
 let diceScene = null;
 let diceRollToken = 0;
+let diceRollCancel = null;
 let diceInMotion = false;
+let lastLocalPhysicalRoll = null;
 let moveUnlockDelayMs = 0;
 
 const activeTheme = applyTheme(document.documentElement, localStorage, loadTheme(localStorage));
@@ -97,8 +99,11 @@ function showScreen(name) {
 function resetDiceDisplays() {
   diceScene?.dispose();
   diceScene = null;
+  diceRollCancel?.(new Error("The dice roll was canceled."));
+  diceRollCancel = null;
   diceRollToken += 1;
   diceInMotion = false;
+  lastLocalPhysicalRoll = null;
   lastDiceByUid = {};
   lastDiceRollKey = null;
   const label = document.createElement("strong");
@@ -531,6 +536,58 @@ function drawDie(button, value) {
   }));
 }
 
+function stopPhysicalDiceRoll() {
+  diceScene?.dispose();
+  diceScene = null;
+  diceRollCancel?.(new Error("The dice roll was canceled."));
+  diceRollCancel = null;
+  diceRollToken += 1;
+  diceInMotion = false;
+}
+
+function physicalDiceRoll(player, seed, renderer = null) {
+  stopPhysicalDiceRoll();
+  const token = diceRollToken;
+  const label = document.createElement("strong");
+  label.textContent = `${player.name} is rolling…`;
+  const table = document.createElement("div");
+  table.className = "dice-table-surface";
+  table.setAttribute("aria-hidden", "true");
+  diceInMotion = true;
+  diceRollStage.style.setProperty("--player-color", PLAYERS[player.color].color);
+  diceRollStage.replaceChildren(label, table);
+  diceRollStage.hidden = false;
+
+  return new Promise((resolve, reject) => {
+    diceRollCancel = reject;
+    const loadRenderer = renderer ? Promise.resolve(renderer) : import("./dice-scene.js?v=20260825-2");
+    loadRenderer.then(({ throwDice }) => {
+      if (token !== diceRollToken) return;
+      diceScene = throwDice(table, seed, (dice) => {
+        if (token !== diceRollToken) return;
+        diceRollCancel = null;
+        diceInMotion = false;
+        label.textContent = `${player.name} rolled ${formatRoll(dice)}`;
+        resolve(dice);
+      });
+    }).catch((error) => {
+      if (token !== diceRollToken) return;
+      diceRollCancel = null;
+      diceInMotion = false;
+      label.textContent = "3D dice unavailable";
+      reject(error);
+    });
+  });
+}
+
+async function rollDiceFromPhysics(uid) {
+  const player = gameState.players.find((candidate) => candidate.uid === uid);
+  const seed = crypto.getRandomValues(new Uint32Array(1))[0];
+  const dice = await physicalDiceRoll(player, seed);
+  lastLocalPhysicalRoll = { uid, dice: [...dice] };
+  return dice;
+}
+
 function renderDiceRoll() {
   const action = gameState.lastAction;
   if (!["opening-roll", "roll", "no-move"].includes(action?.type)) return;
@@ -541,31 +598,20 @@ function renderDiceRoll() {
   lastDiceRollKey = key;
 
   const player = gameState.players.find(({ uid }) => uid === action.uid);
-  const label = document.createElement("strong");
-  label.textContent = `${player.name} is rolling…`;
-  const table = document.createElement("div");
-  table.className = "dice-table-surface";
-  table.setAttribute("aria-hidden", "true");
-  diceScene?.dispose();
-  diceScene = null;
-  const token = ++diceRollToken;
-  diceInMotion = true;
-  diceRollStage.style.setProperty("--player-color", PLAYERS[player.color].color);
-  diceRollStage.replaceChildren(label, table);
-  diceRollStage.hidden = false;
-  import("./dice-scene.js?v=20260825-1").then(({ throwDice }) => {
-    if (token !== diceRollToken) return;
-    diceScene = throwDice(table, action.dice, () => {
-      if (token !== diceRollToken) return;
-      diceInMotion = false;
-      label.textContent = `${player.name} rolled ${formatRoll(action.dice)}`;
-      renderGame();
-    });
-  }).catch((error) => {
-    if (token !== diceRollToken) return;
+  if (lastLocalPhysicalRoll?.uid === action.uid
+      && lastLocalPhysicalRoll.dice.every((die, index) => die === action.dice[index])) {
+    lastLocalPhysicalRoll = null;
+    return;
+  }
+
+  import("./dice-scene.js?v=20260825-2").then((renderer) => (
+    physicalDiceRoll(player, renderer.replaySeedFor(action.dice), renderer)
+  )).then(() => renderGame()).catch((error) => {
+    if (key !== lastDiceRollKey) return;
     console.error("The 3D dice renderer failed to load.", error);
     diceInMotion = false;
-    label.textContent = `${player.name} rolled ${formatRoll(action.dice)} · 3D unavailable`;
+    const label = diceRollStage.querySelector("strong");
+    if (label) label.textContent = `${player.name} rolled ${formatRoll(action.dice)} · 3D unavailable`;
     renderGame();
   });
 }
@@ -645,7 +691,7 @@ async function playBotTurn() {
   if (!uid || !isBotUid(uid)) return;
 
   if (["opening-roll", "roll"].includes(gameState.phase)) {
-    const dice = rollDice();
+    const dice = await rollDiceFromPhysics(uid);
     const transition = (state) => state.phase === "opening-roll"
       ? applyOpeningRoll(state, uid, dice)
       : applyRoll(state, uid, dice);
@@ -837,6 +883,7 @@ async function runGameAction(action) {
       renderGame();
     }
   } catch (error) {
+    lastLocalPhysicalRoll = null;
     selectedMarbleId = null;
     moveUnlockDelayMs = 0;
     statusMessage = `Action not saved. ${error.message} The latest room state is shown; please retry.`;
@@ -851,7 +898,7 @@ async function runGameAction(action) {
 
 async function handleRoll() {
   const uid = gameMode === "online" ? firebaseUser.uid : currentPlayer().uid;
-  const dice = rollDice();
+  const dice = await rollDiceFromPhysics(uid);
   const transition = (state, actingUid) => state.phase === "opening-roll"
     ? applyOpeningRoll(state, actingUid, dice)
     : applyRoll(state, actingUid, dice);

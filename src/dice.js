@@ -1,13 +1,3 @@
-export const DIE_FACE_VALUES = [3, 4, 2, 5, 1, 6];
-export const DIE_RESULT_ROTATIONS = {
-  1: [-Math.PI / 2, 0, 0],
-  2: [0, 0, 0],
-  3: [0, 0, Math.PI / 2],
-  4: [0, 0, -Math.PI / 2],
-  5: [Math.PI, 0, 0],
-  6: [Math.PI / 2, 0, 0],
-};
-
 export function rollDie(randomValues = crypto.getRandomValues.bind(crypto)) {
   const bytes = new Uint8Array(1);
   // 252 is divisible by six; rejecting 252–255 prevents modulo bias.
