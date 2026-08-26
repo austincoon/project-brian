@@ -1,4 +1,4 @@
-export const THEMES = ["wacky", "medieval", "pixel"];
+export const THEMES = ["wacky", "medieval", "pixel", "gothic"];
 export const THEME_STORAGE_KEY = "project-brian-theme";
 
 export function normalizeTheme(value) {

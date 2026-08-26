@@ -619,6 +619,12 @@ legend {
   image-rendering: pixelated;
 }
 
+.theme-preview-gothic {
+  background:
+    radial-gradient(ellipse at 50% 100%, transparent 0 32%, #aaa3ad 34% 38%, transparent 40%) 0 0 / 2.25rem 3.2rem,
+    linear-gradient(135deg, #390917, #08070b 58%, #32133f);
+}
+
 .settings-done {
   border: 0.22rem solid #111;
   border-radius: 0;
@@ -2485,6 +2491,380 @@ html[data-theme="pixel"] .victory-status {
 
 html[data-theme="pixel"] .victory-confetti {
   opacity: 0.45;
+}
+
+/* Gothic skin */
+html[data-theme="gothic"] {
+  --ink: #eee8e2;
+  --muted: #aaa1ac;
+  --green: #681329;
+  --green-dark: #3c0918;
+  --gold: #c1b5c2;
+  --line: #625966;
+  --paper: #17131b;
+  --gothic-black: #08070b;
+  --gothic-panel: #17131b;
+  --gothic-raised: #241b27;
+  --gothic-blood: #7c1530;
+  --gothic-wine: #3d0a19;
+  --gothic-silver: #bcb4bf;
+  --gothic-bone: #e8e0d5;
+  color-scheme: dark;
+  color: var(--ink);
+  background: var(--gothic-black);
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.04rem;
+}
+
+html[data-theme="gothic"] body {
+  background: var(--gothic-black);
+}
+
+html[data-theme="gothic"] .app-shell:has([data-screen]:not([hidden])) {
+  background:
+    radial-gradient(circle at 12% 15%, rgba(124, 21, 48, 0.42), transparent 24rem),
+    radial-gradient(circle at 88% 85%, rgba(66, 24, 80, 0.4), transparent 26rem),
+    repeating-linear-gradient(120deg, transparent 0 3.8rem, rgba(188, 180, 191, 0.035) 3.8rem 3.9rem),
+    linear-gradient(145deg, #050407, #17101a 48%, #08070b);
+}
+
+html[data-theme="gothic"] :is(#home-title, #local-title, #lobby-title, #game-title, #victory-title, .home-panel h2, [data-screen="local"] legend, [data-screen="lobby"] h2, #settings-title, .victory-scoreboard h2) {
+  font-family: "UnifrakturCook", Georgia, serif;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+  text-transform: none;
+}
+
+html[data-theme="gothic"] .home-hero {
+  border: 0.5rem double var(--gothic-silver);
+  border-radius: 8rem 8rem 0.8rem 0.8rem / 3rem 3rem 0.8rem 0.8rem;
+  color: var(--gothic-bone);
+  background:
+    radial-gradient(circle at 74% 30%, rgba(143, 27, 55, 0.42), transparent 13rem),
+    repeating-conic-gradient(from 45deg at 78% 46%, rgba(188, 180, 191, 0.08) 0 8deg, transparent 8deg 24deg),
+    linear-gradient(145deg, #21101b, #08070b 65%, #351021);
+  box-shadow: 0 0 0 0.2rem var(--gothic-wine), 0 1.1rem 2.2rem #000d, inset 0 0 4rem #000;
+  transform: none;
+}
+
+html[data-theme="gothic"] .home-hero::before {
+  inset: auto 5% 1.1rem;
+  height: 0.55rem;
+  border: 0;
+  background: repeating-linear-gradient(90deg, var(--gothic-blood) 0 1rem, var(--gothic-silver) 1rem 1.15rem, #241125 1.15rem 2.15rem);
+  transform: none;
+}
+
+html[data-theme="gothic"] .home-hero::after {
+  top: -3.2rem;
+  right: 1rem;
+  color: rgba(188, 180, 191, 0.12);
+  content: "B";
+  font-family: "UnifrakturCook", Georgia, serif;
+  font-size: 23rem;
+  -webkit-text-stroke: 0.08rem rgba(124, 21, 48, 0.45);
+  transform: none;
+}
+
+html[data-theme="gothic"] .home-kicker,
+html[data-theme="gothic"] [data-screen="local"] > .eyebrow,
+html[data-theme="gothic"] [data-screen="lobby"] > .eyebrow {
+  border-color: var(--gothic-silver);
+  border-radius: 0;
+  color: var(--gothic-bone);
+  background: var(--gothic-wine);
+  box-shadow: 0.25rem 0.25rem 0 #000;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  letter-spacing: 0.16em;
+  transform: none;
+}
+
+html[data-theme="gothic"] :is(#home-title, #local-title, #lobby-title) {
+  color: var(--gothic-bone);
+  -webkit-text-stroke: 0;
+  text-shadow: 0.06em 0.07em 0 var(--gothic-blood), 0 0 1.2rem #9d244788;
+  transform: none;
+  animation: none;
+}
+
+html[data-theme="gothic"] #home-title span,
+html[data-theme="gothic"] #lobby-code {
+  border-color: var(--gothic-silver);
+  color: var(--gothic-silver);
+  background: #09070a;
+  box-shadow: 0.2rem 0.2rem 0 var(--gothic-blood);
+  text-shadow: none;
+  transform: none;
+}
+
+html[data-theme="gothic"] .home-die {
+  border-color: var(--gothic-silver);
+  border-radius: 0.3rem;
+  color: var(--gothic-bone);
+  background: #120f14;
+  box-shadow: 0.35rem 0.4rem 0 #000, inset 0 0 1rem #000;
+  animation: none;
+}
+
+html[data-theme="gothic"] .home-die:nth-child(2) {
+  color: #b72749;
+}
+
+html[data-theme="gothic"] .home-game-pieces::before {
+  border-color: var(--gothic-blood);
+  box-shadow: 0 0 0 0.3rem var(--gothic-silver), inset 0 0 0 0.3rem #08070b, 0 0 1.4rem #9d2447;
+}
+
+html[data-theme="gothic"] .home-game-pieces::after {
+  color: var(--gothic-bone);
+  background: var(--gothic-blood);
+  content: "†";
+  font-family: Georgia, serif;
+  -webkit-text-stroke: 0;
+}
+
+html[data-theme="gothic"] :is(.panel.home-panel, [data-screen="local"] > .panel, [data-screen="lobby"] > .panel) {
+  border: 0.42rem double var(--gothic-silver);
+  border-radius: 0.35rem;
+  color: var(--gothic-bone);
+  background:
+    linear-gradient(135deg, rgba(124, 21, 48, 0.14), transparent 45%),
+    var(--gothic-panel);
+  box-shadow: 0.7rem 0.75rem 0 #030204, inset 0 0 2rem #0008;
+  transform: none;
+}
+
+html[data-theme="gothic"] :is(.home-panel-copy, label, legend, [data-screen="local"] > p:not(.eyebrow), [data-screen="lobby"] #lobby-status) {
+  color: var(--gothic-bone);
+}
+
+html[data-theme="gothic"] :is(.home-panel input, [data-screen="local"] input, [data-screen="lobby"] input) {
+  border: 0.12rem solid #766d79;
+  border-radius: 0.15rem;
+  color: var(--gothic-bone);
+  background: #0d0b0f;
+  box-shadow: inset 0 0.1rem 0.55rem #000;
+}
+
+html[data-theme="gothic"] :is([data-screen="local"] legend, [data-screen="lobby"] #lobby-status, [data-screen="local"] > p:not(.eyebrow)) {
+  border-color: var(--gothic-silver);
+  color: var(--gothic-bone);
+  background: var(--gothic-wine);
+  box-shadow: 0.22rem 0.22rem 0 #000;
+  transform: none;
+}
+
+html[data-theme="gothic"] .bot-toggle,
+html[data-theme="gothic"] [data-screen="lobby"] .player-list li {
+  border-color: #766d79;
+  color: var(--gothic-bone);
+  background: var(--gothic-raised);
+  box-shadow: 0.2rem 0.2rem 0 #000;
+  transform: none;
+}
+
+html[data-theme="gothic"] [data-screen="local"] .bot-toggle input {
+  box-shadow: none;
+  accent-color: var(--gothic-blood);
+}
+
+html[data-theme="gothic"] :is([data-screen] button, .settings-panel button) {
+  border: 0.14rem solid var(--gothic-silver);
+  border-radius: 0.15rem;
+  color: var(--gothic-bone);
+  background: linear-gradient(#8d1b38, #4c0b1c);
+  box-shadow: 0.28rem 0.3rem 0 #000;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-weight: 700;
+  letter-spacing: 0.035em;
+  text-transform: none;
+  transform: none;
+}
+
+html[data-theme="gothic"] :is([data-screen] button, .settings-panel button):hover:not(:disabled) {
+  color: #fff;
+  background: linear-gradient(#a52648, #671027);
+  box-shadow: 0 0 0.9rem #a5264877, 0.34rem 0.36rem 0 #000;
+  transform: translateY(-0.08rem);
+}
+
+html[data-theme="gothic"] :is([data-screen="home"] .home-actions .text-button, [data-screen="home"] #settings-button, [data-screen="lobby"] #leave-room-button, .control-buttons .secondary, .control-buttons .text-button) {
+  color: var(--gothic-bone);
+  background: #211b24;
+  box-shadow: 0.28rem 0.3rem 0 #000;
+}
+
+html[data-theme="gothic"] .game-header {
+  border: 0.36rem double var(--gothic-silver);
+  border-left: 0.8rem solid var(--active-accent, var(--gothic-blood));
+  border-radius: 0.25rem;
+  color: var(--gothic-bone);
+  background: var(--gothic-panel);
+  box-shadow: 0.55rem 0.6rem 0 #000, inset 0 0 1.5rem #0008;
+  transform: none;
+}
+
+html[data-theme="gothic"] .game-header .eyebrow {
+  border-color: var(--gothic-silver);
+  color: var(--gothic-bone);
+  background: var(--gothic-wine);
+  box-shadow: 0.2rem 0.2rem 0 #000;
+}
+
+html[data-theme="gothic"] #game-title {
+  -webkit-text-stroke: 0;
+  text-shadow: 0.05em 0.06em 0 #000, 0 0 0.65rem var(--active-accent, var(--gothic-blood));
+}
+
+html[data-theme="gothic"] .board {
+  border: 0.5rem double var(--gothic-silver);
+  border-radius: 0.35rem;
+  background: #100c12;
+  box-shadow: 0 0 0 0.22rem var(--gothic-wine), 0.75rem 0.8rem 0 #000;
+  transform: none;
+}
+
+html[data-theme="gothic"] .board-surface {
+  fill: #d8d0c5;
+  stroke: #181219;
+}
+
+html[data-theme="gothic"] .route-line {
+  stroke: #8f858f;
+}
+
+html[data-theme="gothic"] .route-line--gambit {
+  stroke: var(--gothic-blood);
+}
+
+html[data-theme="gothic"] :is(.base-label, .center-label) {
+  fill: var(--gothic-bone);
+  stroke: #100c12;
+  stroke-width: 4px;
+  paint-order: stroke fill;
+}
+
+html[data-theme="gothic"] .game-controls {
+  border: 0.36rem double var(--gothic-silver);
+  border-radius: 0.25rem;
+  color: var(--gothic-bone);
+  background: var(--gothic-panel);
+  box-shadow: 0.55rem 0.6rem 0 #000, inset 0 0 1.5rem #0008;
+  transform: none;
+}
+
+html[data-theme="gothic"] .player-dice-card {
+  --turn-shadow: #000;
+  border-color: #625966;
+  border-left-color: var(--player-color);
+  color: var(--gothic-bone);
+  background: rgba(23, 19, 27, 0.94);
+  box-shadow: 0.22rem 0.22rem 0 #000;
+}
+
+html[data-theme="gothic"] .player-dice-card.is-active {
+  background: #332332;
+  box-shadow: 0 0 1rem var(--player-color), 0.35rem 0.35rem 0 #000, 0 0 0 0.2rem var(--player-color);
+}
+
+html[data-theme="gothic"] :is(.player-dice-status, .player-dice-card.is-active .player-dice-status) {
+  color: var(--gothic-silver);
+}
+
+html[data-theme="gothic"] .dice .die-button {
+  border-color: #151117;
+  border-radius: 0.32rem;
+  background: linear-gradient(145deg, #f0e8df, #b9afb8);
+  box-shadow: inset 0 0 0.3rem #fff, 0.3rem 0.32rem 0 #000;
+  transform: none;
+}
+
+html[data-theme="gothic"] .dice-roll-stage {
+  border-color: #4d424f;
+  color: var(--gothic-bone);
+  background: repeating-linear-gradient(90deg, #160c12 0 0.7rem, #211019 0.7rem 1.4rem);
+  box-shadow: 0.65rem 0.7rem 1rem #000, inset 0 0 0 0.18rem var(--gothic-wine);
+}
+
+html[data-theme="gothic"] .dice-roll-stage > strong {
+  border-color: #050407;
+  border-left-color: var(--player-color);
+  color: var(--gothic-bone);
+  background: #0c090d;
+  box-shadow: inset 0 0 0.4rem #000, 0 0.18rem 0 #4d424f;
+}
+
+html[data-theme="gothic"] .settings-dialog::backdrop {
+  background: rgba(2, 1, 3, 0.88);
+}
+
+html[data-theme="gothic"] .settings-panel {
+  border: 0.5rem double var(--gothic-silver);
+  color: var(--gothic-bone);
+  background:
+    radial-gradient(circle at 80% 15%, rgba(124, 21, 48, 0.28), transparent 12rem),
+    var(--gothic-panel);
+  box-shadow: 0.7rem 0.75rem 0 #000, inset 0 0 2.2rem #000;
+  transform: none;
+}
+
+html[data-theme="gothic"] .settings-header .eyebrow {
+  border-color: var(--gothic-silver);
+  color: var(--gothic-bone);
+  background: var(--gothic-wine);
+  box-shadow: 0.2rem 0.2rem 0 #000;
+}
+
+html[data-theme="gothic"] .theme-option {
+  border-color: #625966;
+  color: var(--gothic-bone);
+  background: #0e0b10;
+  box-shadow: 0.22rem 0.22rem 0 #000;
+}
+
+html[data-theme="gothic"] .theme-option:has(input:checked) {
+  color: #fff;
+  background: var(--gothic-wine);
+  box-shadow: 0 0 0.8rem #8d1b3866, 0.22rem 0.22rem 0 #000;
+  transform: none;
+}
+
+html[data-theme="gothic"] .theme-option input {
+  accent-color: #b72749;
+}
+
+html[data-theme="gothic"] :is(.victory-hero, .victory-scoreboard) {
+  border: 0.45rem double var(--gothic-silver);
+  color: var(--gothic-bone);
+  background: var(--gothic-panel);
+  box-shadow: 0.7rem 0.75rem 0 #000, inset 0 0 2rem #000;
+  transform: none;
+}
+
+html[data-theme="gothic"] :is(#victory-title, .victory-scoreboard h2) {
+  color: var(--gothic-bone);
+  text-shadow: 0.06em 0.07em 0 var(--gothic-blood), 0 0 1rem #9d244777;
+}
+
+html[data-theme="gothic"] .victory-player {
+  border-color: #625966;
+  border-top-color: var(--player-color);
+  color: var(--gothic-bone);
+  background: var(--gothic-raised);
+  box-shadow: 0.3rem 0.3rem 0 #000;
+}
+
+html[data-theme="gothic"] .victory-player.is-winner {
+  background: #3d1828;
+  box-shadow: 0 0 1rem var(--winner-color, var(--gothic-blood)), 0.4rem 0.4rem 0 #000;
+}
+
+html[data-theme="gothic"] .victory-status {
+  color: var(--gothic-bone);
+}
+
+html[data-theme="gothic"] :is(.victory-confetti, .firework) {
+  filter: grayscale(0.75) sepia(0.25) hue-rotate(285deg) saturate(1.8);
 }
 
 @media (max-width: 72rem) {

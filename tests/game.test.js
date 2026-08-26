@@ -62,6 +62,8 @@ test("visual themes persist and unknown values fall back to wacky", () => {
   assert.equal(applyTheme(root, storage, "pixel"), "pixel");
   assert.equal(root.dataset.theme, "pixel");
   assert.equal(values.get(THEME_STORAGE_KEY), "pixel");
+  assert.equal(applyTheme(root, storage, "gothic"), "gothic");
+  assert.equal(values.get(THEME_STORAGE_KEY), "gothic");
   assert.equal(normalizeTheme("unknown"), "wacky");
 });
 
