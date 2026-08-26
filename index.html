@@ -8,13 +8,13 @@
     <title>Brian's Aggravation</title>
     <link rel="icon" href="data:,">
     <script>
-      try { document.documentElement.dataset.theme = localStorage.getItem("project-brian-theme") || "wacky"; }
-      catch { document.documentElement.dataset.theme = "wacky"; }
+      try { document.documentElement.dataset.theme = localStorage.getItem("project-brian-theme") || "default"; }
+      catch { document.documentElement.dataset.theme = "default"; }
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Pixelify+Sans:wght@400..700&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./styles.css?v=20260826-53">
+    <link rel="stylesheet" href="./styles.css?v=20260826-54">
     <script type="importmap">
       {
         "imports": {
@@ -196,6 +196,11 @@
         <fieldset class="theme-options">
           <legend class="sr-only">Site skin</legend>
           <label class="theme-option">
+            <input type="radio" name="theme" value="default">
+            <span class="theme-preview theme-preview-default" aria-hidden="true"></span>
+            <span><strong>Default</strong></span>
+          </label>
+          <label class="theme-option">
             <input type="radio" name="theme" value="wacky">
             <span class="theme-preview theme-preview-wacky" aria-hidden="true"></span>
             <span><strong>Wacky</strong></span>
@@ -220,6 +225,6 @@
       </form>
     </dialog>
 
-    <script type="module" src="./src/app.js?v=20260826-42"></script>
+    <script type="module" src="./src/app.js?v=20260826-43"></script>
   </body>
 </html>

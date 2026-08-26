@@ -1,15 +1,15 @@
-export const THEMES = ["wacky", "medieval", "pixel", "gothic"];
+export const THEMES = ["default", "wacky", "medieval", "pixel", "gothic"];
 export const THEME_STORAGE_KEY = "project-brian-theme";
 
 export function normalizeTheme(value) {
-  return THEMES.includes(value) ? value : "wacky";
+  return THEMES.includes(value) ? value : "default";
 }
 
 export function loadTheme(storage) {
   try {
     return normalizeTheme(storage?.getItem(THEME_STORAGE_KEY));
   } catch {
-    return "wacky";
+    return "default";
   }
 }
 

@@ -50,7 +50,7 @@ test("physical dice determine and naturally replay every possible result", () =>
   assert.deepEqual(simulateDice(0x12345678), simulateDice(0x12345678));
 });
 
-test("visual themes persist and unknown values fall back to wacky", () => {
+test("visual themes persist and unknown values fall back to default", () => {
   const values = new Map([[THEME_STORAGE_KEY, "medieval"]]);
   const storage = {
     getItem: (key) => values.get(key) ?? null,
@@ -64,7 +64,8 @@ test("visual themes persist and unknown values fall back to wacky", () => {
   assert.equal(values.get(THEME_STORAGE_KEY), "pixel");
   assert.equal(applyTheme(root, storage, "gothic"), "gothic");
   assert.equal(values.get(THEME_STORAGE_KEY), "gothic");
-  assert.equal(normalizeTheme("unknown"), "wacky");
+  assert.equal(applyTheme(root, storage, "default"), "default");
+  assert.equal(normalizeTheme("unknown"), "default");
 });
 
 test("a room replay survives refresh only for the same game", () => {

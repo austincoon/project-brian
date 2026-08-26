@@ -1,7 +1,7 @@
 import { PLAYER_ORDER, PLAYERS, renderBoard } from "./board.js?v=20260825-23";
 import { getPlayerDiceRows, getPlayerProgress, randomIndex } from "./dice.js?v=20260826-31";
 import { loadTurnReplay, saveTurnReplay } from "./replay.js?v=20260823-19";
-import { applyTheme, loadTheme } from "./theme.js?v=20260825-2";
+import { applyTheme, loadTheme } from "./theme.js?v=20260826-3";
 import {
   applyMove,
   applyOpeningRoll,
