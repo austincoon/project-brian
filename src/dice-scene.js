@@ -60,7 +60,7 @@ export function throwDice(container, seed, onSettled) {
   scene.background = new THREE.Color(0x185c39);
   const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 100);
   const cameraDistance = (TRAY_DEPTH / 2) / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-  camera.position.set(0, cameraDistance * 0.9, cameraDistance * 0.42);
+  camera.position.set(0, cameraDistance * 1.1, cameraDistance * 0.51);
   camera.lookAt(0, 0, 0);
   scene.add(new THREE.HemisphereLight(0xfff7dd, 0x102c1c, 2.1));
   const light = new THREE.DirectionalLight(0xffffff, 3.8);
