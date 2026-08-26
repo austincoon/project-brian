@@ -1,5 +1,5 @@
 import { PLAYER_ORDER, PLAYERS, renderBoard } from "./board.js?v=20260825-23";
-import { getPlayerDiceRows, randomIndex } from "./dice.js?v=20260825-29";
+import { getPlayerDiceRows, getTurnQueue, randomIndex } from "./dice.js?v=20260826-30";
 import { loadTurnReplay, saveTurnReplay } from "./replay.js?v=20260823-19";
 import { applyTheme, loadTheme } from "./theme.js?v=20260825-2";
 import {
@@ -55,6 +55,7 @@ const replayMoveButton = document.querySelector("#replay-move-button");
 
 const endGameButton = document.querySelector("#end-game-button");
 const turnStatus = document.querySelector("#turn-status");
+const turnQueueList = document.querySelector("#turn-queue-list");
 const victoryWinner = document.querySelector("#victory-winner");
 const victoryStats = document.querySelector("#victory-stats");
 const victoryRestartButton = document.querySelector("#victory-restart-button");
@@ -804,6 +805,20 @@ function renderGame() {
   const titlePlayer = gameState.players.find(({ uid }) => uid === (gameState.winnerUid ?? player.uid));
   gameSidebar.style.setProperty("--active-color", PLAYERS[titlePlayer.color].darkColor);
   gameSidebar.style.setProperty("--active-accent", PLAYERS[titlePlayer.color].color);
+  turnQueueList.replaceChildren(...getTurnQueue(gameState).map((queuedPlayer, index) => {
+    const item = document.createElement("li");
+    item.classList.toggle("is-active", index === 0);
+    item.style.setProperty("--player-color", PLAYERS[queuedPlayer.color].color);
+    const swatch = document.createElement("span");
+    swatch.className = "turn-queue-swatch";
+    const name = document.createElement("strong");
+    name.textContent = queuedPlayer.name;
+    const status = document.createElement("span");
+    status.className = "turn-queue-status";
+    status.textContent = queuedPlayer.status;
+    item.append(swatch, name, status);
+    return item;
+  }));
 
   rollButton.textContent = gameState.phase === "move"
     ? "Dice in play"
@@ -829,6 +844,7 @@ function renderGame() {
     ? "Saving action..."
     : statusMessage;
   const showError = /^(Action not saved|Connection lost)/.test(statusMessage);
+  turnStatus.classList.toggle("sr-only", !showError);
   turnStatus.classList.toggle("game-error", showError);
 
   const selectableMarbles = actionLocked || replayInProgress || diceInMotion || !canAct ? [] : movableMarbles;

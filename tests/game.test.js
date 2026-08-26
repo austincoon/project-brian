@@ -26,7 +26,7 @@ import {
   skipTurn,
   startGame,
 } from "../src/game.js";
-import { getDicePresentation, getPlayerDiceRows, randomIndex, rollDie } from "../src/dice.js";
+import { getDicePresentation, getPlayerDiceRows, getTurnQueue, randomIndex, rollDie } from "../src/dice.js";
 import { DIE_FACE_VALUES, replaySeedFor, simulateDice } from "../src/dice-physics.js";
 import { loadTurnReplay, saveTurnReplay } from "../src/replay.js";
 import { applyTheme, loadTheme, normalizeTheme, THEME_STORAGE_KEY } from "../src/theme.js";
@@ -203,6 +203,18 @@ test("each player keeps a clearly owned latest dice set", () => {
   assert.deepEqual(rows.find(({ uid }) => uid === "a").dice, [6, 2]);
   assert.equal(rows.find(({ uid }) => uid === "a").isLastRoller, true);
   assert.deepEqual(rows.find(({ uid }) => uid === "b").dice, [1, 1]);
+});
+
+test("turn queue starts with the current player and follows clockwise order", () => {
+  const state = createGame([
+    { uid: "a", name: "Alex" },
+    { uid: "b", name: "Blair" },
+    { uid: "c", name: "Casey" },
+  ]);
+  state.turnUid = "b";
+  assert.deepEqual(getTurnQueue(state).map(({ uid, status }) => [uid, status]), [
+    ["b", "Now"], ["c", "Next"], ["a", "Waiting"],
+  ]);
 });
 
 test("database rules enforce the room security boundary", () => {
