@@ -46,7 +46,7 @@ const phaseLabel = document.querySelector("#phase-label");
 const gameTitle = document.querySelector("#game-title");
 const mainMenuButton = document.querySelector("#main-menu-button");
 const newGameButton = document.querySelector("#new-game-button");
-const gameHeader = document.querySelector(".game-header");
+const gameSidebar = document.querySelector(".game-sidebar");
 const board = document.querySelector("#board");
 const playerDiceGrid = document.querySelector("#player-dice-grid");
 const diceRollStage = document.querySelector("#dice-roll-stage");
@@ -802,8 +802,8 @@ function renderGame() {
     : gameState.phase === "ended" ? "Game ended"
     : `${player.name}'s turn`;
   const titlePlayer = gameState.players.find(({ uid }) => uid === (gameState.winnerUid ?? player.uid));
-  gameHeader.style.setProperty("--active-color", PLAYERS[titlePlayer.color].darkColor);
-  gameHeader.style.setProperty("--active-accent", PLAYERS[titlePlayer.color].color);
+  gameSidebar.style.setProperty("--active-color", PLAYERS[titlePlayer.color].darkColor);
+  gameSidebar.style.setProperty("--active-accent", PLAYERS[titlePlayer.color].color);
 
   rollButton.textContent = gameState.phase === "move"
     ? "Dice in play"
@@ -829,7 +829,6 @@ function renderGame() {
     ? "Saving action..."
     : statusMessage;
   const showError = /^(Action not saved|Connection lost)/.test(statusMessage);
-  turnStatus.classList.toggle("sr-only", !showError);
   turnStatus.classList.toggle("game-error", showError);
 
   const selectableMarbles = actionLocked || replayInProgress || diceInMotion || !canAct ? [] : movableMarbles;

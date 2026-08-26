@@ -136,15 +136,22 @@ legend {
 
 .screen-wide {
   display: grid;
-  grid-template-areas:
-    "dice board header"
-    "dice board controls";
-  grid-template-columns: minmax(14rem, 0.45fr) minmax(0, 1fr) clamp(23rem, 27vw, 30rem);
-  grid-template-rows: auto 1fr;
-  align-items: start;
+  grid-template-areas: "dice board sidebar";
+  grid-template-columns: minmax(14rem, 0.45fr) minmax(0, 1fr) clamp(24rem, 29vw, 32rem);
+  grid-template-rows: minmax(0, 1fr);
+  align-items: stretch;
   width: 100%;
   max-width: none;
   min-height: calc(100dvh - clamp(1.5rem, 4vw, 3rem));
+  gap: clamp(1rem, 2vw, 1.6rem);
+}
+
+.game-sidebar {
+  grid-area: sidebar;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  align-self: stretch;
+  min-width: 0;
   gap: clamp(1rem, 2vw, 1.6rem);
 }
 
@@ -1032,7 +1039,7 @@ legend {
 }
 
 .game-header {
-  grid-area: header;
+  grid-area: auto;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: start;
@@ -1347,9 +1354,10 @@ legend {
 }
 
 .game-controls {
-  grid-area: controls;
-  grid-template-columns: 1fr;
-  align-content: start;
+  grid-area: auto;
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
   margin: 0;
   padding: 1.35rem;
   border: 0.3rem solid #111;
@@ -1358,6 +1366,39 @@ legend {
   box-shadow: 0.65rem 0.65rem 0 #111, -0.35rem -0.35rem 0 #7dff00;
   backdrop-filter: none;
   transform: rotate(-0.6deg);
+}
+
+.turn-details {
+  display: grid;
+  min-height: 12rem;
+  flex: 1;
+  align-content: center;
+  gap: 1rem;
+  padding: clamp(1rem, 2.5vw, 1.6rem);
+  border: 0.18rem solid var(--line);
+  border-left: 0.65rem solid var(--active-accent, #ff2bd6);
+  color: var(--ink);
+  background: var(--paper);
+  box-shadow: inset 0 0 1.5rem rgba(0, 0, 0, 0.09), 0.28rem 0.3rem 0 rgba(17, 17, 17, 0.75);
+}
+
+.turn-details-label {
+  justify-self: start;
+  padding: 0.32rem 0.55rem;
+  border: 0.12rem solid currentColor;
+  color: var(--paper);
+  background: var(--ink);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.turn-status {
+  margin: 0;
+  font-size: clamp(1.2rem, 1.8vw, 1.65rem);
+  font-weight: 800;
+  line-height: 1.25;
 }
 
 .sr-only {
@@ -1384,13 +1425,13 @@ legend {
 }
 
 .control-buttons {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.7rem;
+  margin-top: 1rem;
 }
 
 .control-buttons button {
-  flex: 1;
   min-height: 3.45rem;
   border: 0.2rem solid #111;
   border-radius: 0;
@@ -1417,8 +1458,13 @@ legend {
   background: #fff;
 }
 
-#replay-move-button {
-  flex-basis: 100%;
+:is(#roll-button, #replay-move-button, #main-menu-button) {
+  grid-column: 1 / -1;
+}
+
+#roll-button {
+  min-height: 4.6rem;
+  font-size: 1.08rem;
 }
 
 .dice {
@@ -2869,9 +2915,7 @@ html[data-theme="gothic"] :is(.victory-confetti, .firework) {
 
 @media (max-width: 72rem) {
   .screen-wide {
-    grid-template-areas:
-      "board header"
-      "board controls";
+    grid-template-areas: "board sidebar";
     grid-template-columns: minmax(0, 1fr) clamp(20rem, 34vw, 25rem);
   }
 
@@ -2889,6 +2933,23 @@ html[data-theme="gothic"] :is(.victory-confetti, .firework) {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto auto auto;
     min-height: 0;
+  }
+
+  .game-sidebar {
+    display: contents;
+  }
+
+  .game-header {
+    grid-area: header;
+  }
+
+  .game-controls {
+    grid-area: controls;
+    height: auto;
+  }
+
+  .turn-details {
+    min-height: 8rem;
   }
 
   .board-stage {

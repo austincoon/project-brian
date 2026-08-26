@@ -14,7 +14,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Pixelify+Sans:wght@400..700&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./styles.css?v=20260825-47">
+    <link rel="stylesheet" href="./styles.css?v=20260826-48">
     <script type="importmap">
       {
         "imports": {
@@ -121,13 +121,28 @@
       </section>
 
       <section class="screen screen-wide" data-screen="game" aria-labelledby="game-title" hidden>
-        <header class="game-header">
-          <div>
-            <p id="phase-label" class="eyebrow">Opening roll</p>
-            <h1 id="game-title">Roll to begin</h1>
+        <aside class="game-sidebar" aria-label="Turn information and game controls">
+          <header class="game-header">
+            <div>
+              <p id="phase-label" class="eyebrow">Opening roll</p>
+              <h1 id="game-title">Roll to begin</h1>
+            </div>
+          </header>
+
+          <div class="game-controls panel">
+            <div class="turn-details">
+              <span class="turn-details-label">Game status</span>
+              <p id="turn-status" class="turn-status" aria-live="polite">Each player rolls both dice. Highest total goes first.</p>
+            </div>
+            <div class="control-buttons">
+              <button id="roll-button" type="button">Roll dice</button>
+              <button id="replay-move-button" class="secondary" type="button" hidden>Replay last move</button>
+              <button id="end-game-button" class="secondary" type="button" hidden>End game</button>
+              <button id="new-game-button" class="text-button" type="button">New game</button>
+              <button id="main-menu-button" class="text-button" type="button">Main menu</button>
+            </div>
           </div>
-          <button id="new-game-button" class="text-button" type="button">New game</button>
-        </header>
+        </aside>
 
         <aside id="dice-roll-stage" class="dice-roll-stage" role="status" aria-live="polite">
           <strong>Dice tray · Waiting for a roll</strong>
@@ -139,16 +154,6 @@
           <div id="player-dice-grid" class="player-dice-grid" role="region" aria-label="Player dice"></div>
         </div>
 
-        <div class="game-controls panel">
-          <div class="control-buttons">
-            <button id="roll-button" type="button">Roll dice</button>
-          
-            <button id="replay-move-button" class="secondary" type="button" hidden>Replay last move</button>
-            <button id="end-game-button" class="secondary" type="button" hidden>End game</button>
-            <button id="main-menu-button" class="text-button" type="button">Main menu</button>
-          </div>
-          <p id="turn-status" class="sr-only" aria-live="polite">Each player rolls both dice. Highest total goes first.</p>
-        </div>
       </section>
 
       <section class="screen victory-screen" data-screen="victory" aria-labelledby="victory-title" hidden>
@@ -211,6 +216,6 @@
       </form>
     </dialog>
 
-    <script type="module" src="./src/app.js?v=20260825-38"></script>
+    <script type="module" src="./src/app.js?v=20260826-39"></script>
   </body>
 </html>
