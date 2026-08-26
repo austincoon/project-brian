@@ -1970,24 +1970,27 @@ legend {
 
 /* Default skin */
 html[data-theme="default"] {
-  --ink: #18231b;
-  --muted: #667168;
-  --green: #315f41;
-  --green-dark: #234a31;
-  --gold: #ba812a;
-  --line: #cdd8cf;
+  --ink: #16221d;
+  --muted: #64736c;
+  --green: #147565;
+  --green-dark: #0d5a4e;
+  --gold: #d58a24;
+  --line: #d7e1dc;
   --paper: #fff;
-  --shadow: 0 1rem 2.5rem rgba(29, 52, 36, 0.11);
+  --shadow: 0 1.15rem 3rem rgba(28, 51, 42, 0.1), 0 0.15rem 0.5rem rgba(28, 51, 42, 0.06);
   color: var(--ink);
-  background: #edf2ed;
+  background: #f1f5f3;
 }
 
 html[data-theme="default"] body,
 html[data-theme="default"] .app-shell:has([data-screen]:not([hidden])) {
   background:
-    radial-gradient(circle at 8% 10%, #fff 0, transparent 30rem),
-    radial-gradient(circle at 92% 90%, #d6e4d8 0, transparent 32rem),
-    #edf2ed;
+    radial-gradient(circle at 6% 8%, rgba(255, 255, 255, 0.98) 0, transparent 28rem),
+    radial-gradient(circle at 94% 92%, rgba(188, 223, 212, 0.68) 0, transparent 31rem),
+    linear-gradient(rgba(28, 91, 75, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(28, 91, 75, 0.025) 1px, transparent 1px),
+    #f1f5f3;
+  background-size: auto, auto, 2rem 2rem, 2rem 2rem, auto;
 }
 
 html[data-theme="default"] :is(#home-title, #local-title, #lobby-title, #game-title, #victory-title, .home-panel h2, [data-screen="local"] legend, [data-screen="lobby"] h2, #settings-title, .victory-scoreboard h2) {
@@ -1997,30 +2000,97 @@ html[data-theme="default"] :is(#home-title, #local-title, #lobby-title, #game-ti
 }
 
 html[data-theme="default"] .home-hero {
-  min-height: 17rem;
+  isolation: isolate;
+  min-height: 19rem;
   padding: clamp(2rem, 5vw, 3.5rem);
-  border: 0.08rem solid #274b33;
-  border-radius: 1.5rem;
+  border: 0.08rem solid rgba(255, 255, 255, 0.15);
+  border-radius: 1.75rem;
   color: #fff;
-  background: linear-gradient(145deg, #386b49, #23462f);
-  box-shadow: 0 1.2rem 3rem rgba(24, 52, 33, 0.2);
+  background: linear-gradient(130deg, #0d2520 0%, #124c42 58%, #1b7466 100%);
+  box-shadow: 0 1.7rem 4rem rgba(17, 49, 40, 0.24), inset 0 1px rgba(255, 255, 255, 0.14);
   transform: none;
 }
 
 html[data-theme="default"] .home-hero::before,
-html[data-theme="default"] .home-hero::after,
+html[data-theme="default"] .home-hero::after {
+  display: block;
+  border: 0;
+  content: "";
+  pointer-events: none;
+}
+
+html[data-theme="default"] .home-hero::before {
+  inset: 0;
+  height: auto;
+  background:
+    linear-gradient(115deg, transparent 0 52%, rgba(255, 255, 255, 0.055) 52% 53%, transparent 53%),
+    radial-gradient(circle at 82% 38%, rgba(71, 205, 177, 0.2), transparent 17rem);
+  transform: none;
+}
+
+html[data-theme="default"] .home-hero::after {
+  right: -6rem;
+  top: -9rem;
+  width: 23rem;
+  aspect-ratio: 1;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: 0 0 0 3rem rgba(255, 255, 255, 0.025), 0 0 0 7rem rgba(255, 255, 255, 0.02);
+  -webkit-text-stroke: 0;
+  transform: none;
+}
+
 html[data-theme="default"] .home-game-pieces {
+  display: block;
+  right: clamp(1.6rem, 6vw, 5.4rem);
+  bottom: 2.6rem;
+  transform: scale(0.92);
+}
+
+html[data-theme="default"] .home-game-pieces::before {
+  inset: -1.2rem -1.4rem auto auto;
+  border: 0.55rem solid rgba(255, 255, 255, 0.12);
+  box-shadow: none;
+}
+
+html[data-theme="default"] .home-game-pieces::after {
   display: none;
+}
+
+html[data-theme="default"] .home-die {
+  border: 0.08rem solid rgba(13, 37, 32, 0.18);
+  border-radius: 1.1rem;
+  color: #123d34;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 1rem 2rem rgba(4, 23, 19, 0.28), inset 0 1px rgba(255, 255, 255, 0.9);
+  animation: none;
+}
+
+html[data-theme="default"] .home-die:first-child {
+  transform: rotate(-9deg);
+}
+
+html[data-theme="default"] .home-die:nth-child(2) {
+  color: #147565;
+  transform: rotate(8deg);
+}
+
+html[data-theme="default"] .home-marble {
+  border: 0.2rem solid rgba(255, 255, 255, 0.72);
+  box-shadow: inset -0.3rem -0.35rem 0.4rem rgba(0, 0, 0, 0.22), 0 0.55rem 1rem rgba(4, 23, 19, 0.3);
+  animation: none;
 }
 
 html[data-theme="default"] .home-kicker,
 html[data-theme="default"] [data-screen="local"] > .eyebrow,
 html[data-theme="default"] [data-screen="lobby"] > .eyebrow {
   margin-bottom: 1rem;
-  padding: 0;
-  border: 0;
-  color: #d8eadc;
-  background: transparent;
+  padding: 0.42rem 0.72rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  color: #dff8f1;
+  background: rgba(255, 255, 255, 0.09);
   box-shadow: none;
   font-family: inherit;
   font-size: 0.78rem;
@@ -2032,6 +2102,7 @@ html[data-theme="default"] #home-title,
 html[data-theme="default"] #local-title,
 html[data-theme="default"] #lobby-title {
   margin-bottom: 0.5rem;
+  max-width: 70%;
   color: #fff;
   font-size: clamp(3rem, 8vw, 5.8rem);
   line-height: 0.95;
@@ -2042,6 +2113,7 @@ html[data-theme="default"] #lobby-title {
 }
 
 html[data-theme="default"] :is(#local-title, #lobby-title) {
+  max-width: none;
   color: var(--ink);
 }
 
@@ -2050,7 +2122,7 @@ html[data-theme="default"] #lobby-code {
   margin: 0 0 0.35rem;
   padding: 0;
   border: 0;
-  color: #cbe2d0;
+  color: #9fe1d2;
   background: transparent;
   box-shadow: none;
   letter-spacing: 0.12em;
@@ -2063,26 +2135,52 @@ html[data-theme="default"] :is([data-screen="local"] > .eyebrow, [data-screen="l
 }
 
 html[data-theme="default"] :is(.panel.home-panel, [data-screen="local"] > .panel, [data-screen="lobby"] > .panel) {
-  border: 0.08rem solid var(--line);
-  border-radius: 1.1rem;
+  border: 1px solid rgba(171, 191, 182, 0.58);
+  border-radius: 1.35rem;
   color: var(--ink);
-  background: rgba(255, 255, 255, 0.94);
+  background: rgba(255, 255, 255, 0.88);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(0.8rem);
+  backdrop-filter: blur(1.2rem);
   transform: none;
 }
 
 html[data-theme="default"] .home-panel.home-panel-create,
 html[data-theme="default"] .home-panel.home-panel-join,
 html[data-theme="default"] :is([data-screen="local"] > .panel, [data-screen="lobby"] > .panel) {
-  background: rgba(255, 255, 255, 0.94);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.97), rgba(246, 250, 248, 0.9));
+}
+
+html[data-theme="default"] :is(.home-panel.home-panel-create, .home-panel.home-panel-join)::before {
+  position: absolute;
+  inset: 0.7rem auto auto 1.4rem;
+  width: 3rem;
+  height: 0.22rem;
+  border-radius: 999px;
+  background: var(--green);
+  content: "";
+}
+
+html[data-theme="default"] .home-panel.home-panel-join::before {
+  background: #3b82a0;
+}
+
+html[data-theme="default"] .home-panel h2 {
+  margin-top: 0.5rem;
+  font-size: clamp(1.5rem, 3vw, 2rem);
 }
 
 html[data-theme="default"] :is(.home-panel input, [data-screen="local"] input, [data-screen="lobby"] input) {
-  border: 0.08rem solid #aebaae;
-  border-radius: 0.72rem;
-  background: #fff;
+  border: 1px solid #b9c9c1;
+  border-radius: 0.82rem;
+  background: rgba(255, 255, 255, 0.96);
   box-shadow: inset 0 0.08rem 0.2rem rgba(23, 32, 25, 0.06);
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+html[data-theme="default"] :is(.home-panel input, [data-screen="local"] input, [data-screen="lobby"] input):focus-visible {
+  border-color: var(--green);
+  outline: 0;
+  box-shadow: 0 0 0 0.24rem rgba(20, 117, 101, 0.14);
 }
 
 html[data-theme="default"] .bot-toggle {
@@ -2110,36 +2208,42 @@ html[data-theme="default"] :is([data-screen="local"] legend, [data-screen="lobby
 }
 
 html[data-theme="default"] [data-screen="lobby"] .player-list li {
-  border: 0.08rem solid var(--line);
-  border-radius: 0.72rem;
-  background: #f6f9f6;
-  box-shadow: none;
+  border: 1px solid var(--line);
+  border-radius: 0.82rem;
+  background: linear-gradient(90deg, #f4f8f6, #fff);
+  box-shadow: 0 0.25rem 0.7rem rgba(25, 55, 44, 0.05);
   transform: none;
 }
 
 html[data-theme="default"] :is([data-screen] button, .settings-panel button) {
-  border: 0.08rem solid transparent;
-  border-radius: 0.72rem;
+  border: 1px solid rgba(4, 60, 49, 0.18);
+  border-radius: 0.82rem;
   color: #fff;
-  background: var(--green);
-  box-shadow: 0 0.35rem 0.8rem rgba(36, 79, 49, 0.18);
+  background: linear-gradient(135deg, #198474, var(--green));
+  box-shadow: 0 0.4rem 0.9rem rgba(20, 117, 101, 0.2), inset 0 1px rgba(255, 255, 255, 0.18);
   text-transform: none;
   transform: none;
 }
 
 html[data-theme="default"] :is([data-screen] button, .settings-panel button):hover:not(:disabled) {
   color: #fff;
-  background: var(--green-dark);
-  box-shadow: 0 0.55rem 1rem rgba(36, 79, 49, 0.24);
+  background: linear-gradient(135deg, var(--green), var(--green-dark));
+  box-shadow: 0 0.7rem 1.25rem rgba(20, 90, 77, 0.25), inset 0 1px rgba(255, 255, 255, 0.16);
   transform: translateY(-0.08rem);
 }
 
 html[data-theme="default"] :is([data-screen] .secondary, [data-screen] .text-button, [data-screen="home"] #settings-button, [data-screen="lobby"] #leave-room-button) {
-  border: 0.08rem solid #8ba08f;
+  border: 1px solid #aabdb5;
   color: var(--green);
-  background: #fff;
-  box-shadow: none;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 0.25rem 0.6rem rgba(25, 55, 44, 0.06);
   transform: none;
+}
+
+html[data-theme="default"] :is([data-screen] .secondary, [data-screen] .text-button, [data-screen="home"] #settings-button, [data-screen="lobby"] #leave-room-button):hover:not(:disabled) {
+  border-color: #7f9d91;
+  color: var(--green-dark);
+  background: #edf6f2;
 }
 
 html[data-theme="default"] .home-signature {
@@ -2151,35 +2255,36 @@ html[data-theme="default"] .home-signature {
 }
 
 html[data-theme="default"] .game-header {
-  border: 0.08rem solid var(--line);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-left: 0.45rem solid var(--active-accent, var(--green));
-  border-radius: 1rem;
-  color: var(--ink);
-  background: #fff;
-  box-shadow: var(--shadow);
+  border-radius: 1.15rem;
+  color: #fff;
+  background: linear-gradient(135deg, #172822, #1d453a);
+  box-shadow: 0 1rem 2.5rem rgba(22, 48, 39, 0.18), inset 0 1px rgba(255, 255, 255, 0.12);
   transform: none;
 }
 
 html[data-theme="default"] .game-header .eyebrow {
-  padding: 0;
-  border: 0;
-  color: var(--muted);
-  background: transparent;
+  padding: 0.3rem 0.55rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  color: #c6ddd5;
+  background: rgba(255, 255, 255, 0.07);
   box-shadow: none;
 }
 
 html[data-theme="default"] #game-title {
-  color: var(--active-color, var(--ink));
+  color: #fff;
   font-size: clamp(2rem, 3vw, 3rem);
   -webkit-text-stroke: 0;
   text-shadow: none;
 }
 
 html[data-theme="default"] .board {
-  border: 0.08rem solid #bfcabf;
-  border-radius: 1.25rem;
-  background: #dde6dd;
-  box-shadow: 0 1.2rem 3rem rgba(27, 49, 33, 0.16);
+  border: 1px solid #bccdc5;
+  border-radius: 1.4rem;
+  background: linear-gradient(145deg, #dfe8e4, #cbd9d3);
+  box-shadow: 0 1.5rem 3.5rem rgba(27, 49, 41, 0.17), inset 0 1px rgba(255, 255, 255, 0.75);
   transform: none;
 }
 
@@ -2194,10 +2299,10 @@ html[data-theme="default"] .route-line--gambit {
 }
 
 html[data-theme="default"] .game-controls {
-  border: 0.08rem solid var(--line);
-  border-radius: 1rem;
+  border: 1px solid rgba(171, 191, 182, 0.65);
+  border-radius: 1.15rem;
   color: var(--ink);
-  background: #fff;
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.98), rgba(243, 248, 246, 0.94));
   box-shadow: var(--shadow);
   transform: none;
 }
@@ -2211,15 +2316,22 @@ html[data-theme="default"] .control-buttons button {
 html[data-theme="default"] .progress-board {
   border-color: var(--line);
   border-left-color: var(--active-accent, var(--green));
-  border-radius: 0.8rem;
-  box-shadow: none;
+  border-radius: 0.95rem;
+  background: rgba(246, 250, 248, 0.9);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.8);
+}
+
+html[data-theme="default"] .progress-board-list li {
+  border-radius: 0.72rem;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0.25rem 0.65rem rgba(27, 58, 46, 0.05);
 }
 
 html[data-theme="default"] .player-dice-card {
   --turn-shadow: rgba(28, 49, 33, 0.2);
   border-color: var(--line);
   border-left-color: var(--player-color);
-  border-radius: 0.8rem;
+  border-radius: 0.9rem;
   color: var(--ink);
   background: rgba(255, 255, 255, 0.94);
   box-shadow: 0 0.45rem 1rem rgba(28, 49, 33, 0.14);
@@ -2238,11 +2350,11 @@ html[data-theme="default"] .dice .die-button {
 }
 
 html[data-theme="default"] .dice-roll-stage {
-  border: 0.08rem solid var(--line);
-  border-radius: 1rem;
+  border: 1px solid #b8c8c1;
+  border-radius: 1.15rem;
   color: var(--ink);
-  background: #fff;
-  box-shadow: var(--shadow);
+  background: linear-gradient(145deg, #fff, #e9f1ed);
+  box-shadow: 0 1.2rem 3rem rgba(24, 53, 42, 0.13);
 }
 
 html[data-theme="default"] .dice-roll-stage > strong {
@@ -2259,10 +2371,10 @@ html[data-theme="default"] .settings-dialog::backdrop {
 }
 
 html[data-theme="default"] .settings-panel {
-  border: 0.08rem solid var(--line);
-  border-radius: 1.2rem;
+  border: 1px solid var(--line);
+  border-radius: 1.4rem;
   color: var(--ink);
-  background: #fff;
+  background: linear-gradient(145deg, #fff, #f4f8f6);
   box-shadow: 0 1.5rem 4rem rgba(12, 26, 16, 0.24);
   transform: none;
 }
@@ -2276,8 +2388,8 @@ html[data-theme="default"] .settings-header .eyebrow {
 }
 
 html[data-theme="default"] .theme-option {
-  border: 0.08rem solid var(--line);
-  border-radius: 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
   color: var(--ink);
   background: #fff;
   box-shadow: none;
@@ -2285,14 +2397,14 @@ html[data-theme="default"] .theme-option {
 
 html[data-theme="default"] .theme-option:has(input:checked) {
   border-color: var(--green);
-  background: #edf5ef;
-  box-shadow: 0 0 0 0.12rem var(--green);
+  background: #eaf5f1;
+  box-shadow: 0 0 0 0.12rem rgba(20, 117, 101, 0.45), 0 0.45rem 1rem rgba(20, 90, 77, 0.1);
   transform: none;
 }
 
 html[data-theme="default"] :is(.victory-hero, .victory-scoreboard) {
-  border: 0.08rem solid var(--line);
-  border-radius: 1.2rem;
+  border: 1px solid var(--line);
+  border-radius: 1.4rem;
   color: var(--ink);
   background: #fff;
   box-shadow: var(--shadow);
@@ -2305,7 +2417,7 @@ html[data-theme="default"] #victory-title {
 }
 
 html[data-theme="default"] .victory-player {
-  border: 0.08rem solid var(--line);
+  border: 1px solid var(--line);
   border-top: 0.45rem solid var(--player-color);
   border-radius: 0.8rem;
   color: var(--ink);
@@ -2337,6 +2449,22 @@ html[data-theme="default"] :is(.game-error, [data-screen="home"] #home-error:not
 html[data-theme="default"] .board-hole.is-legal-move {
   animation: none;
   filter: drop-shadow(0 0 8px var(--gold));
+}
+
+@media (max-width: 42rem) {
+  html[data-theme="default"] .home-hero {
+    min-height: 18rem;
+  }
+
+  html[data-theme="default"] #home-title {
+    max-width: 78%;
+  }
+
+  html[data-theme="default"] .home-game-pieces {
+    right: 0.2rem;
+    bottom: 0.5rem;
+    transform: scale(0.58);
+  }
 }
 
 /* Medieval skin */
