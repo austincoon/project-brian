@@ -2279,6 +2279,7 @@ html[data-theme="medieval"] .victory-confetti {
 /* Pixel skin */
 html[data-theme="pixel"] {
   --pixel-font: "Pixelify Sans", "Lucida Console", Monaco, "Courier New", ui-monospace, monospace;
+  --pixel-body: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --pixel-ink: #25251f;
   --pixel-bg: #79b9e8;
   --pixel-deep: #2b251b;
@@ -2294,7 +2295,7 @@ html[data-theme="pixel"] {
   --gold: var(--pixel-gold);
   --line: var(--pixel-ink);
   --paper: var(--pixel-paper);
-  font-family: var(--pixel-font);
+  font-family: var(--pixel-body);
   color: var(--ink);
   background: var(--pixel-bg);
   image-rendering: pixelated;
@@ -2302,21 +2303,20 @@ html[data-theme="pixel"] {
 }
 
 html[data-theme="pixel"] body {
+  font-family: var(--pixel-body);
   background:
-    linear-gradient(#eaf8ff 0 0) 9% 13% / 8rem 1.5rem no-repeat,
-    linear-gradient(#eaf8ff 0 0) 13% 10% / 3.5rem 1.5rem no-repeat,
-    linear-gradient(#eaf8ff 0 0) 82% 25% / 10rem 1.5rem no-repeat,
-    linear-gradient(#eaf8ff 0 0) 78% 22% / 4rem 1.5rem no-repeat,
-    var(--pixel-bg);
+    linear-gradient(rgba(255, 255, 255, 0.48) 0 0) 9% 13% / 8rem 1.25rem no-repeat,
+    linear-gradient(rgba(255, 255, 255, 0.48) 0 0) 13% 10% / 3.5rem 1.25rem no-repeat,
+    linear-gradient(rgba(255, 255, 255, 0.4) 0 0) 82% 25% / 10rem 1.25rem no-repeat,
+    #9dc9e5;
 }
 
 html[data-theme="pixel"] .app-shell:has([data-screen]:not([hidden])) {
   background:
-    linear-gradient(#eaf8ff 0 0) 9% 13% / 8rem 1.5rem no-repeat,
-    linear-gradient(#eaf8ff 0 0) 13% 10% / 3.5rem 1.5rem no-repeat,
-    linear-gradient(#eaf8ff 0 0) 82% 25% / 10rem 1.5rem no-repeat,
-    linear-gradient(#eaf8ff 0 0) 78% 22% / 4rem 1.5rem no-repeat,
-    var(--pixel-bg);
+    linear-gradient(rgba(255, 255, 255, 0.48) 0 0) 9% 13% / 8rem 1.25rem no-repeat,
+    linear-gradient(rgba(255, 255, 255, 0.48) 0 0) 13% 10% / 3.5rem 1.25rem no-repeat,
+    linear-gradient(rgba(255, 255, 255, 0.4) 0 0) 82% 25% / 10rem 1.25rem no-repeat,
+    #9dc9e5;
 }
 
 html[data-theme="pixel"] * {
@@ -2334,9 +2334,9 @@ html[data-theme="pixel"] .home-hero {
   border: 0.3rem solid var(--pixel-deep);
   color: var(--pixel-paper);
   background:
-    linear-gradient(90deg, transparent 70%, #76502f 70%) 0 0 / 2.5rem 2rem,
-    linear-gradient(#78b94c 0 14%, #4d8332 14% 21%, #87572f 21% 100%);
-  box-shadow: 0.5rem 0.5rem 0 var(--pixel-deep), -0.25rem -0.25rem 0 #a7d66f;
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 50%, transparent 50%) 0 0 / 3rem 3rem,
+    linear-gradient(145deg, #496d4d, #304b39);
+  box-shadow: 0.45rem 0.45rem 0 var(--pixel-deep), -0.18rem -0.18rem 0 #90b57a;
   transform: none;
 }
 
@@ -2344,25 +2344,12 @@ html[data-theme="pixel"] .home-hero::before {
   inset: auto 0 0;
   height: 1rem;
   border: 0;
-  background: repeating-linear-gradient(90deg, #624024 0 1rem, #9a6938 1rem 2rem, #76502f 2rem 3rem);
+  background: repeating-linear-gradient(90deg, #806347 0 1rem, #9c7b58 1rem 2rem);
   transform: none;
 }
 
 html[data-theme="pixel"] .home-hero::after {
-  top: 2.5rem;
-  right: 3rem;
-  width: 7rem;
-  height: 7rem;
-  border: 0.3rem solid var(--pixel-deep);
-  background:
-    linear-gradient(var(--pixel-deep) 0 0) 1rem 1.2rem / 1.5rem 1.5rem no-repeat,
-    linear-gradient(var(--pixel-deep) 0 0) 4.5rem 1.2rem / 1.5rem 1.5rem no-repeat,
-    linear-gradient(var(--pixel-deep) 0 0) 2.5rem 3rem / 2rem 1.5rem no-repeat,
-    linear-gradient(var(--pixel-deep) 0 0) 1.8rem 4.5rem / 3.4rem 1.5rem no-repeat,
-    linear-gradient(90deg, #79bd4d 50%, #5e9c3e 50%) 0 0 / 1rem 1rem;
-  box-shadow: 0.4rem 0.4rem 0 var(--pixel-deep);
-  content: "";
-  transform: none;
+  display: none;
 }
 
 html[data-theme="pixel"] .home-kicker,
@@ -2428,14 +2415,14 @@ html[data-theme="pixel"] :is(.panel.home-panel, [data-screen="local"] > .panel, 
 
 html[data-theme="pixel"] .home-panel.home-panel-create {
   background:
-    linear-gradient(90deg, transparent 0 48%, #704823 48% 52%, transparent 52%) 0 0 / 6rem 2rem,
-    repeating-linear-gradient(#c68a45 0 1.8rem, #9b6533 1.8rem 2rem);
+    linear-gradient(135deg, rgba(92, 65, 38, 0.07) 25%, transparent 25% 75%, rgba(92, 65, 38, 0.07) 75%) 0 0 / 2rem 2rem,
+    #d8bd8b;
 }
 
 html[data-theme="pixel"] .home-panel.home-panel-join {
   background:
-    linear-gradient(90deg, transparent 0 48%, #8d8e86 48% 52%, transparent 52%) 0 0 / 6rem 3rem,
-    repeating-linear-gradient(#c9c9bf 0 2.8rem, #999a91 2.8rem 3rem);
+    linear-gradient(135deg, rgba(54, 69, 58, 0.055) 25%, transparent 25% 75%, rgba(54, 69, 58, 0.055) 75%) 0 0 / 2rem 2rem,
+    #cbd2c8;
 }
 
 html[data-theme="pixel"] :is(.home-panel input, [data-screen="local"] input, [data-screen="lobby"] input) {
@@ -2462,8 +2449,8 @@ html[data-theme="pixel"] #room-code {
 
 html[data-theme="pixel"] :is([data-screen="local"] > .panel, [data-screen="lobby"] > .panel) {
   background:
-    linear-gradient(90deg, transparent 0 48%, #8d8e86 48% 52%, transparent 52%) 0 0 / 6rem 3rem,
-    repeating-linear-gradient(#c9c9bf 0 2.8rem, #999a91 2.8rem 3rem);
+    linear-gradient(135deg, rgba(54, 69, 58, 0.055) 25%, transparent 25% 75%, rgba(54, 69, 58, 0.055) 75%) 0 0 / 2rem 2rem,
+    #cbd2c8;
 }
 
 html[data-theme="pixel"] :is([data-screen="local"] legend, [data-screen="lobby"] #lobby-status, [data-screen="local"] > p:not(.eyebrow)) {
@@ -2483,10 +2470,8 @@ html[data-theme="pixel"] [data-screen="lobby"] .player-list li {
 
 html[data-theme="pixel"] :is([data-screen] button, .settings-panel button) {
   border: 0.22rem solid var(--pixel-deep);
-  color: var(--pixel-deep);
-  background:
-    linear-gradient(90deg, transparent 0 48%, #704823 48% 52%, transparent 52%) 0 0 / 4rem 100%,
-    #b9793a;
+  color: #fffdf2;
+  background: #8a633d;
   box-shadow: 0.3rem 0.3rem 0 var(--pixel-deep);
   font-family: var(--pixel-font);
   text-transform: uppercase;
@@ -2494,14 +2479,19 @@ html[data-theme="pixel"] :is([data-screen] button, .settings-panel button) {
 }
 
 html[data-theme="pixel"] [data-screen="home"] .home-actions .text-button {
-  color: var(--pixel-deep);
-  background: #b9793a;
+  color: #fffdf2;
+  background: #6a764f;
   box-shadow: 0.3rem 0.3rem 0 var(--pixel-deep);
 }
 
+html[data-theme="pixel"] [data-screen="home"] #settings-button {
+  color: #fffdf2;
+  background: #6a764f;
+}
+
 html[data-theme="pixel"] :is([data-screen] button, .settings-panel button):hover:not(:disabled) {
-  color: var(--pixel-deep);
-  background: #78b94c;
+  color: #fff;
+  background: #527548;
   box-shadow: 0.4rem 0.4rem 0 var(--pixel-deep);
   transform: translate(-0.08rem, -0.08rem);
 }
@@ -2510,9 +2500,9 @@ html[data-theme="pixel"] .game-header {
   border-color: var(--pixel-deep);
   color: var(--pixel-deep);
   background:
-    linear-gradient(90deg, transparent 70%, #76502f 70%) 0 0 / 2rem 1.5rem,
-    linear-gradient(#78b94c 0 26%, #4d8332 26% 36%, #87572f 36% 100%);
-  box-shadow: 0.45rem 0.45rem 0 var(--pixel-deep), -0.22rem -0.22rem 0 #a7d66f;
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 50%, transparent 50%) 0 0 / 2rem 2rem,
+    #5d7758;
+  box-shadow: 0.4rem 0.4rem 0 var(--pixel-deep), -0.16rem -0.16rem 0 #9fbc8d;
   transform: none;
 }
 
@@ -2525,15 +2515,16 @@ html[data-theme="pixel"] .game-header .eyebrow {
 }
 
 html[data-theme="pixel"] #game-title {
+  color: #fffdf2;
   -webkit-text-stroke: 0;
-  text-shadow: 0.07em 0.07em 0 #f4f3e7;
+  text-shadow: 0.08em 0.08em 0 var(--pixel-deep);
 }
 
 html[data-theme="pixel"] .board {
   border-color: var(--pixel-deep);
   background:
-    linear-gradient(90deg, #446d31 50%, #3a612b 50%) 0 0 / 2rem 2rem,
-    linear-gradient(#3a612b 50%, #446d31 50%) 1rem 1rem / 2rem 2rem;
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 50%, transparent 50%) 0 0 / 2rem 2rem,
+    #3e5942;
   box-shadow: 0.5rem 0.5rem 0 var(--pixel-deep), -0.25rem -0.25rem 0 #78b94c;
   transform: none;
 }
@@ -2554,8 +2545,8 @@ html[data-theme="pixel"] .game-controls {
   border-color: var(--pixel-deep);
   color: var(--pixel-deep);
   background:
-    linear-gradient(90deg, transparent 0 48%, #8d8e86 48% 52%, transparent 52%) 0 0 / 6rem 3rem,
-    repeating-linear-gradient(#c9c9bf 0 2.8rem, #999a91 2.8rem 3rem);
+    linear-gradient(135deg, rgba(54, 69, 58, 0.045) 25%, transparent 25% 75%, rgba(54, 69, 58, 0.045) 75%) 0 0 / 2rem 2rem,
+    #cbd2c8;
   box-shadow: 0.45rem 0.45rem 0 var(--pixel-deep), -0.22rem -0.22rem 0 #ecebe0;
   transform: none;
 }
@@ -2585,9 +2576,9 @@ html[data-theme="pixel"] .dice-roll-stage {
   border: 0.4rem solid var(--pixel-deep);
   color: #f4f3e7;
   background:
-    linear-gradient(90deg, transparent 0 48%, #704823 48% 52%, transparent 52%) 0 0 / 6rem 2rem,
-    repeating-linear-gradient(#a96f37 0 1.8rem, #815128 1.8rem 2rem);
-  box-shadow: 0.5rem 0.5rem 0 var(--pixel-deep), inset 0 0 0 0.2rem #d69b51;
+    linear-gradient(135deg, rgba(255, 255, 255, 0.055) 25%, transparent 25% 75%, rgba(255, 255, 255, 0.055) 75%) 0 0 / 2rem 2rem,
+    #806047;
+  box-shadow: 0.45rem 0.45rem 0 var(--pixel-deep), inset 0 0 0 0.18rem #aa8464;
 }
 
 html[data-theme="pixel"] .dice-roll-stage > strong {
@@ -2600,8 +2591,8 @@ html[data-theme="pixel"] .dice-roll-stage > strong {
 html[data-theme="pixel"] .dice-table-surface {
   border-color: var(--pixel-deep);
   background:
-    linear-gradient(90deg, #5f9f3f 50%, #568f38 50%) 0 0 / 2rem 2rem,
-    linear-gradient(#568f38 50%, #5f9f3f 50%) 1rem 1rem / 2rem 2rem;
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 50%, transparent 50%) 0 0 / 2rem 2rem,
+    #4d704f;
   box-shadow: inset 0 0 0 0.25rem #78b94c, 0.25rem 0.25rem 0 var(--pixel-deep);
 }
 
@@ -2609,9 +2600,9 @@ html[data-theme="pixel"] .settings-panel {
   border-color: var(--pixel-deep);
   color: var(--pixel-paper);
   background:
-    linear-gradient(90deg, transparent 0 48%, #704823 48% 52%, transparent 52%) 0 0 / 6rem 2rem,
-    repeating-linear-gradient(#a96f37 0 1.8rem, #815128 1.8rem 2rem);
-  box-shadow: 0.5rem 0.5rem 0 var(--pixel-deep), -0.25rem -0.25rem 0 #d69b51;
+    linear-gradient(135deg, rgba(255, 255, 255, 0.045) 25%, transparent 25% 75%, rgba(255, 255, 255, 0.045) 75%) 0 0 / 2rem 2rem,
+    #685a49;
+  box-shadow: 0.45rem 0.45rem 0 var(--pixel-deep), -0.18rem -0.18rem 0 #aa967c;
   transform: none;
 }
 
