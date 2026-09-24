@@ -1170,12 +1170,7 @@ legend {
   stroke: none;
 }
 
-.center-label {
-  fill: #111;
-}
-
-.base-label,
-.center-label {
+.base-label {
   font-size: 17px;
   font-weight: 850;
   letter-spacing: 0.1em;
@@ -3409,7 +3404,7 @@ html[data-theme="gothic"] .route-line--gambit {
   stroke: var(--gothic-blood);
 }
 
-html[data-theme="gothic"] :is(.base-label, .center-label) {
+html[data-theme="gothic"] .base-label {
   fill: var(--gothic-bone);
   stroke: #100c12;
   stroke-width: 4px;

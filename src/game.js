@@ -25,6 +25,7 @@ const EMPTY_STATS = {
   timesCaptured: 0,
   gambits: 0,
   blockedRolls: 0,
+  // Legacy field required by the deployed database rules; no action updates it.
   skippedTurns: 0,
 };
 
@@ -499,31 +500,5 @@ export function endGame(state, hostUid) {
   next.remainingDice = null;
   next.winnerUid = null;
   next.lastAction = { type: "ended", uid: hostUid };
-  return next;
-}
-
-export function skipTurn(state, hostUid) {
-  if (state.hostUid !== hostUid) throw new Error("Only the host can skip a turn.");
-  if (["waiting", "finished", "ended"].includes(state.phase)) {
-    throw new Error(`A turn cannot be skipped during the ${state.phase} phase.`);
-  }
-  if (!state.turnUid) throw new Error("There is no current player to skip.");
-  if (state.turnUid === hostUid) throw new Error("The host cannot skip their own turn.");
-
-  const next = copy(state);
-  const skippedUid = next.turnUid;
-  playerStats(next, skippedUid).skippedTurns += 1;
-
-  if (next.phase === "opening-roll") {
-    next.opening.rolls[skippedUid] = null;
-    next.lastAction = { type: "opening-skip", hostUid, skippedUid };
-    return resolveOpeningRound(next);
-  }
-
-  next.turnUid = nextPlayerUid(next, skippedUid);
-  next.phase = "roll";
-  next.dice = null;
-  next.remainingDice = null;
-  next.lastAction = { type: "skip", hostUid, skippedUid };
   return next;
 }

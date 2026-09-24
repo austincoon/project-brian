@@ -48,7 +48,7 @@ async function services() {
       auth: authApi.getAuth(app),
       authApi,
     };
-  });
+  }).catch((error) => { servicesPromise = null; throw error; });
 
   return servicesPromise;
 }
@@ -100,7 +100,7 @@ export async function signIn() {
   signInPromise ??= authApi.setPersistence(auth, authApi.browserLocalPersistence).then(async () => {
     if (auth.currentUser) return auth.currentUser;
     return (await authApi.signInAnonymously(auth)).user;
-  });
+  }).catch((error) => { signInPromise = null; throw error; });
   return signInPromise;
 }
 
@@ -204,9 +204,10 @@ export async function subscribeToRoom(code, onRoom, onError) {
     if (stopped || refreshing) return;
     refreshing = true;
     try {
-      onRoom(await readRoom(normalizedCode));
+      const room = await readRoom(normalizedCode);
+      if (!stopped) onRoom(room);
     } catch (error) {
-      onError?.(error);
+      if (!stopped) onError?.(error);
     } finally {
       refreshing = false;
     }

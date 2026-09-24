@@ -1,0 +1,207 @@
+/* Shared layout and interaction improvements; the five original skins remain available. */
+body { min-width: 0; }
+.site-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; max-width: 1440px; margin: auto; padding: 1.15rem 2rem; background: var(--paper); }
+.brand { display: flex; align-items: center; flex-wrap: wrap; gap: .55rem; color: var(--ink); text-decoration: none; font-size: .8rem; font-weight: 800; letter-spacing: .1em; }
+.brand-mark { display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%; color: #fff6df; background: #183e35; font-size: 1.3rem; }
+.brand-subtitle { font-weight: 400; letter-spacing: .06em; }
+.site-header nav { display: flex; gap: .35rem; }
+.site-header button { min-height: 2.65rem; font-size: .8rem; color: var(--ink); }
+.app-shell { min-height: calc(100dvh - 5rem); align-items: start; padding: 1rem 2rem 3rem; }
+[data-screen="home"] { max-width: 1200px; }
+[data-screen="home"]:not([hidden]) { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.3rem; }
+[data-screen="home"] > .home-panel-local { grid-column: auto; }
+[data-screen="home"] > .home-hero { margin-bottom: .5rem; }
+.home-board-preview { position: absolute; z-index: 1; width: 40%; right: 2.5%; top: 50%; aspect-ratio: 1; transform: translateY(-50%) rotate(-12deg); pointer-events: none; border-radius: 1.5rem; background: #ede3cd; box-shadow: 0 24px 0 -12px #99784f, 0 32px 60px #0005; }
+.home-board-preview .base-label { display: none; }
+.home-board-preview .board-surface { fill: #faf3df; stroke: #b3a383; stroke-width: 5; }
+.home-panel { display: flex; flex-direction: column; position: relative; }
+.home-panel > button { margin-top: auto; }
+.home-panel-local .local-card-art { display: flex; align-items: center; justify-content: center; gap: 1rem; min-height: 6.8rem; color: var(--green); font-size: 5rem; line-height: 1; }
+.local-card-art span:first-child { transform: rotate(-12deg); }
+.local-card-art span:last-child { transform: rotate(12deg); }
+.home-panel-copy { line-height: 1.55; }
+.home-actions { justify-content: space-between; align-items: center; flex-wrap: wrap; margin: 0; }
+.connection-status { color: var(--muted); font-size: .75rem; }
+.connection-status::before { content: ""; display: inline-block; width: .45rem; height: .45rem; border-radius: 50%; background: #a87622; margin-right: .5rem; }
+.connection-status[data-state="ready"]::before { background: #39835b; }
+#home-error:empty { display: none; }
+.resume-panel { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 1rem 1.4rem; color: var(--ink); border: 1px solid var(--line); border-left: 4px solid var(--green); border-radius: .8rem; background: var(--paper); }
+.resume-panel p { margin: .3rem 0 0; color: var(--muted); font-size: .85rem; }
+.setup-note, .settings-note { color: var(--muted); font-size: .8rem; line-height: 1.5; margin: .5rem 0; }
+.screen-wide { max-width: 1500px; min-height: 0; grid-template-areas: "dice board sidebar"; grid-template-columns: clamp(200px, 18vw, 270px) minmax(0, 1fr) 300px; grid-template-rows: auto; gap: 1.2rem; align-items: start; }
+.game-sidebar { display: grid; grid-template-rows: auto auto; gap: .85rem; align-self: start; align-content: start; }
+.game-header { padding: 1.1rem 1.3rem; }
+.game-controls { gap: 1.2rem; padding: 1.2rem; }
+.game-controls p { line-height: 1.5; }
+#turn-guide-title { font-size: 1.2rem; line-height: 1.25; }
+#turn-guide-copy { margin: .5rem 0 1rem; color: var(--muted); font-size: .85rem; }
+#turn-guide-copy:empty, .turn-status:empty { display: none; }
+#turn-guide-title { margin-bottom: .7rem; }
+#roll-button { width: 100%; min-height: 3.4rem; font-size: .95rem; position: static; }
+.turn-status { padding-top: .85rem; margin: .8rem 0 0; border-top: 1px solid var(--line); color: var(--muted); font-size: .78rem; }
+.move-choices { display: grid; gap: .5rem; margin-top: .8rem; }
+.marble-choices { display: flex; flex-wrap: wrap; gap: .45rem; }
+.move-choices .marble-choice { min-width: 44px; min-height: 44px; padding: .4rem; border-radius: 50%; }
+.move-choice { display: flex; align-items: center; gap: .7rem; text-align: left; width: 100%; font-size: .8rem; }
+.move-choice .move-die { display: grid; place-items: center; width: 1.8rem; height: 1.8rem; flex: none; background: var(--paper); color: var(--ink); border: 1px solid var(--line); border-radius: .35rem; font-weight: 800; }
+.progress-board { min-height: 0; padding: 0; border: 0; background: transparent; box-shadow: none; gap: .7rem; }
+.progress-board-heading { padding-bottom: .5rem; }
+.progress-board-heading > span { font-size: .65rem; letter-spacing: .1em; }
+.progress-board-list { gap: .5rem; }
+.progress-board-list li { min-height: 0; padding: .65rem .75rem; gap: .5rem; border-width: 1px; border-left-width: 3px; }
+.progress-player strong { font-size: .85rem; }
+.progress-player span, .progress-captures { font-size: .62rem; letter-spacing: 0; font-weight: 600; }
+.progress-marbles span { width: .7rem; border-width: 1.5px; }
+.progress-board-list li.is-current { outline: 1px solid var(--player-color); outline-offset: 1px; }
+.control-buttons { margin: 0; gap: .5rem; }
+.control-buttons button { min-height: 2.65rem; font-size: .75rem; }
+.activity-panel { border-block: 1px solid var(--line); padding: .7rem 0; font-size: .8rem; }
+summary { cursor: pointer; font-weight: 650; min-height: 24px; }
+.activity-panel ol { padding-left: 1.3rem; max-height: 12rem; overflow: auto; }
+.activity-panel li { padding: .35rem 0; color: var(--muted); font-size: .75rem; line-height: 1.5; }
+.save-status { margin: -.4rem 0 0; font-size: .65rem; color: var(--muted); text-align: center; }
+.board-stage { display: flex; flex-direction: column; gap: .8rem; width: 100%; max-width: clamp(460px, calc(100dvh - 19rem), 820px); aspect-ratio: auto; margin: 0; align-self: start; }
+.board { height: auto; aspect-ratio: 1; padding: .6rem; }
+.player-dice-grid { position: static; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; pointer-events: auto; }
+.player-dice-card, .player-dice-card.is-active { position: static; width: auto; opacity: 1; padding: .7rem; outline: 0; transform: none; filter: none; animation: none; }
+.player-dice-identity strong { font-size: .8rem; }
+.player-dice-status { display: block; font-size: .6rem; letter-spacing: .01em; }
+.dice.player-dice-set .die-button { width: 2rem; padding: .25rem; border-width: 1px; }
+.player-dice-set .die-pip { width: .27rem; }
+.marble .marble-disc, .marble:hover[aria-disabled="false"] .marble-disc, .marble.is-selected .marble-disc { r: 16px; filter: none; stroke-width: 2.5px; }
+.marble-shine { display: none; }
+.marble-active-ring { r: 20px; }
+.marble-focus { r: 23px; }
+.marble-number { fill: #fff; font: 800 18px system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; pointer-events: none; paint-order: stroke; stroke: var(--player-dark); stroke-width: 2px; }
+.marble-hit-area { fill: transparent; pointer-events: all; }
+.board-hole.is-legal-move { stroke-width: 12; }
+.dice-roll-stage { display: flex !important; height: clamp(440px, calc(100dvh - 12rem), 650px); width: 100%; padding: .6rem; justify-self: center; align-self: start; }
+.dice-roll-stage > strong { font-size: .75rem; }
+.dice-table-surface { min-height: 0; }
+.static-dice { align-items: center; height: 100%; padding: 1rem; }
+.help-dialog { width: min(760px, calc(100% - 2rem)); max-height: 90dvh; padding: 1.8rem; border: 1px solid var(--line); border-radius: 1.2rem; color: var(--ink); background: var(--paper); }
+.help-dialog::backdrop { background: #10251ddd; backdrop-filter: blur(4px); }
+.help-dialog p { line-height: 1.65; font-size: .9rem; }
+.help-dialog a { color: var(--green); }
+.help-dialog h2 { font-size: 2rem; }
+.rules-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin: 1.5rem 0; }
+.rules-grid section { border-top: 1px solid var(--line); padding-top: .75rem; }
+.rules-grid section > span { color: var(--muted); font-size: .7rem; }
+.rules-grid h3 { margin: .4rem 0; }
+.rules-grid p { margin: 0; color: var(--muted); }
+.settings-dialog { max-height: 90dvh; overflow: auto; }
+.preference-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+.preference-row small { display: block; font-weight: 400; color: var(--muted); margin-top: .3rem; }
+.preference-row input { width: 1.25rem; min-height: 1.25rem; accent-color: var(--green); }
+html[data-quick-play="true"] *, html[data-quick-play="true"] *::before, html[data-quick-play="true"] *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+html[data-quick-play="true"] .board-hole.is-replay-path { stroke: var(--gold); stroke-width: 7; }
+:where(a, summary, select):focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+/* The default table: warm paper, forest green, and a wooden board. */
+html[data-theme="default"] { --ink: #223d34; --muted: #647369; --green: #245b47; --green-dark: #183e35; --gold: #c19748; --line: #dedfd4; --paper: #fffefa; --shadow: 0 6px 24px #233d3410; background: #f5f4ed; }
+html[data-theme="default"] body, html[data-theme="default"] .app-shell:has([data-screen]:not([hidden])) { background: #f5f4ed; }
+html[data-theme="default"] .site-header { border-bottom: 1px solid var(--line); }
+html[data-theme="default"] .home-hero { min-height: 270px; padding: 2.7rem 3rem; border: 0; border-radius: 1rem; background: #183e35; box-shadow: none; }
+html[data-theme="default"] .home-hero::before { background: radial-gradient(ellipse at 85% 10%, #3c6755 0, transparent 65%); }
+html[data-theme="default"] .home-kicker { border: 0; padding: 0; margin-bottom: 1.2rem; color: #d1bb88; background: none; font-size: .6rem; letter-spacing: .2em; }
+html[data-theme="default"] #home-title { font-family: Georgia, "Times New Roman", serif; font-size: clamp(2.8rem, 5.5vw, 5rem); line-height: 1.03; font-weight: 400; letter-spacing: -.055em; max-width: 62%; }
+html[data-theme="default"] #home-title span { color: #f4ead6; font-family: inherit; font-size: .55em; letter-spacing: -.02em; margin-bottom: .2rem; }
+html[data-theme="default"] .hero-copy { color: #d3dfd5; font-size: 1rem; }
+html[data-theme="default"] .hero-meta { color: #c6d4c8; }
+html[data-theme="default"] :is(.panel.home-panel, [data-screen="local"] > .panel, [data-screen="lobby"] > .panel) { border: 1px solid var(--line); border-radius: .85rem; background: var(--paper); box-shadow: none; padding: 1.5rem; }
+html[data-theme="default"] .home-panel h2 { margin: .1rem 0; font-family: Georgia, serif; font-weight: 400; font-size: 1.8rem; }
+html[data-theme="default"] .home-panel-copy { font-size: .8rem; color: var(--muted); margin-bottom: .6rem; min-height: 2.5rem; }
+html[data-theme="default"] :is(.home-panel-create, .home-panel-join)::before { display: none; }
+html[data-theme="default"] :is([data-screen] button, .settings-panel button) { background: var(--green); border-color: var(--green); box-shadow: none; border-radius: .5rem; }
+html[data-theme="default"] :is([data-screen] button, .settings-panel button):hover:not(:disabled) { background: var(--green-dark); box-shadow: none; }
+html[data-theme="default"] :is([data-screen] .secondary, [data-screen] .text-button) { background: transparent; border-color: var(--line); color: var(--green); }
+html[data-theme="default"] :is(.home-panel input, [data-screen="local"] input, [data-screen="lobby"] input) { border-radius: .5rem; border-color: var(--line); background: #fff; box-shadow: none; font-size: .9rem; }
+html[data-theme="default"] .home-actions { padding: .5rem .15rem; }
+html[data-theme="default"] :is(#local-title, #lobby-title) { font: 400 clamp(2.2rem, 5vw, 3.5rem)/1.1 Georgia, serif; letter-spacing: -.04em; }
+html[data-theme="default"] #lobby-code { color: var(--green); font-family: ui-monospace, monospace; }
+html[data-theme="default"] .game-header { background: #183e35; border-radius: .8rem; box-shadow: none; }
+html[data-theme="default"] #game-title { font-family: Georgia, serif; font-weight: 400; font-size: 1.8rem; line-height: 1.15; }
+html[data-theme="default"] .game-header .eyebrow { border: 0; padding: 0; background: transparent; font-size: .6rem; }
+html[data-theme="default"] .game-controls { border-radius: .8rem; background: var(--paper); box-shadow: none; }
+html[data-theme="default"] .progress-board { border: 0; padding: 0; background: transparent; box-shadow: none; }
+html[data-theme="default"] .progress-board-list li { background: #f5f5ef; border-radius: .4rem; box-shadow: none; }
+html[data-theme="default"] .board { border: 1px solid #c9b796; border-radius: 1.2rem; background: repeating-linear-gradient(5deg, #e8ddc505 0 2px, #af8e5410 2px 3px), #ede3cd; box-shadow: 0 5px 0 #d0bf9e, 0 16px 30px #3f382617; }
+html[data-theme="default"] .board-surface { fill: #fcf6e8; stroke: #bbaa8b; stroke-width: 4; }
+html[data-theme="default"] .route-line { stroke-width: 4; }
+html[data-theme="default"] .board-hole { fill: #d7cbb3; stroke: #aa9879; stroke-width: 2; }
+html[data-theme="default"] .board-hole--player { stroke: var(--player-color); stroke-width: 4; }
+html[data-theme="default"] .board-hole.is-start { fill: var(--player-color); }
+html[data-theme="default"] .board-hole--center { fill: #245b47; stroke: #c19748; stroke-width: 5; }
+html[data-theme="default"] .board-hole.is-legal-move { fill: #f9d780; stroke: #b88520; stroke-width: 12; filter: none; }
+html[data-theme="default"] .board-hole.is-legal-move:focus-visible { stroke: #183e35; }
+html[data-theme="default"] .base-tray { fill-opacity: .08; stroke-width: 3; }
+html[data-theme="default"] .is-active-player .base-tray { fill-opacity: .18; stroke-width: 5; }
+html[data-theme="default"] .base-label { fill: #514c3d; font-size: 19px; font-weight: 600; letter-spacing: 0; }
+html[data-theme="default"] .player-dice-card { border-width: 1px; border-left-width: 4px; border-radius: .6rem; background: var(--paper); box-shadow: none; }
+html[data-theme="default"] .player-dice-card.is-active { background: #fff; box-shadow: 0 0 0 1px var(--player-color); }
+html[data-theme="default"] .player-dice-card.is-active .player-dice-status { color: var(--ink); }
+html[data-theme="default"] .dice-roll-stage { background: var(--paper); border-color: var(--line); box-shadow: none; }
+html[data-theme="default"] .dice-roll-stage > strong { background: transparent; border: 0; margin-bottom: .5rem; }
+html[data-theme="default"] .move-choices .marble-choice[aria-pressed="true"] { color: white; background: var(--green); }
+html[data-theme="default"] .settings-panel { background: var(--paper); border-radius: 1rem; }
+html[data-theme="default"] .theme-option { border-radius: .6rem; }
+html[data-theme="default"] .theme-option strong { font-size: .85rem; text-transform: none; }
+html[data-theme="gothic"] .brand, html[data-theme="gothic"] .site-header button { color: #e8d4d7; }
+html[data-theme="gothic"] #game-title { color: #f3dce5; text-shadow: 0 2px 4px #000; }
+html[data-theme="wacky"] .turn-guide { background: #fffdf0; }
+html[data-theme="wacky"] .turn-guide button { background: #ff2bd6; color: #111; border: 2px solid #111; border-radius: 0; }
+
+@media (max-width: 1050px) {
+  .screen-wide { grid-template-areas: "dice sidebar" "board sidebar"; grid-template-columns: minmax(0, 1fr) 280px; gap: 1rem; }
+  .dice-roll-stage { height: 260px; }
+  .home-board-preview { width: 36%; right: 3%; }
+  html[data-theme="default"] .home-hero { min-height: 230px; padding: 2rem; }
+  [data-screen="home"]:not([hidden]) { gap: .8rem; }
+  html[data-theme="default"] .panel.home-panel { padding: 1.1rem; }
+}
+@media (max-width: 760px) {
+  .site-header { padding: .8rem 1rem; }
+  .brand-subtitle { display: none; }
+  .site-header button { padding: .5rem .65rem; }
+  .app-shell { padding: .75rem 1rem 2rem; }
+  [data-screen="home"]:not([hidden]) { grid-template-columns: 1fr 1fr; }
+  [data-screen="home"] > .home-panel-local { grid-column: 1 / -1; }
+  .home-panel-local .local-card-art { display: none; }
+  html[data-theme="default"] .home-hero { min-height: 180px; padding: 1.5rem; }
+  html[data-theme="default"] #home-title { max-width: 100%; font-size: clamp(2.4rem, 7vw, 4rem); }
+  .home-board-preview { opacity: .35; right: -10%; width: 50%; top: 60%; }
+  .screen-wide { grid-template-areas: "header" "turn" "dice" "board" "progress" "activity" "actions" "save"; grid-template-columns: minmax(0, 1fr); }
+  .game-sidebar { display: contents; }
+  .game-header { grid-area: header; }
+  .game-controls { display: contents; }
+  .turn-guide { grid-area: turn; padding: 1rem; border: 1px solid var(--line); border-radius: .8rem; background: var(--paper); color: var(--ink); }
+  .progress-board { grid-area: progress; }
+  .activity-panel { grid-area: activity; background: var(--paper); padding: .8rem; color: var(--ink); }
+  .control-buttons { grid-area: actions; }
+  .save-status { grid-area: save; padding: .5rem; border-radius: .4rem; background: var(--paper); }
+  .board-stage { width: 100%; margin: 0; }
+  .board { padding: .2rem; }
+  .dice-roll-stage { height: 250px; }
+  #roll-button:not(:disabled) { position: static; width: 100%; margin: 0; }
+  .progress-board-list { display: grid; grid-template-columns: 1fr 1fr; }
+  .progress-player { flex-wrap: wrap; gap: .25rem; }
+  .rules-grid { gap: 1rem; }
+}
+@media (max-width: 460px) {
+  .site-header { padding-inline: .75rem; gap: .5rem; }
+  .brand { font-size: .7rem; gap: .35rem; flex-wrap: nowrap; }
+  .brand-mark { width: 1.65rem; height: 1.65rem; }
+  .site-header button { font-size: .72rem; white-space: nowrap; padding-inline: .45rem; }
+  [data-screen="home"]:not([hidden]) { grid-template-columns: 1fr; }
+  .home-actions { gap: .7rem; }
+  .home-board-preview { width: 65%; right: -28%; opacity: .2; }
+  .player-dice-card { padding: .5rem; gap: .2rem .35rem; }
+  .player-dice-identity strong { font-size: .7rem; }
+  .dice.player-dice-set .die-button { width: 1.6rem; padding: .2rem; }
+  .player-dice-set { gap: .2rem; }
+  .player-dice-set .die-pip { width: .2rem; }
+  .resume-panel { align-items: stretch; flex-direction: column; }
+  .rules-grid { grid-template-columns: 1fr; }
+  .help-dialog { padding: 1.2rem; }
+  .help-dialog h2 { font-size: 1.6rem; }
+}

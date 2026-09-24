@@ -227,9 +227,19 @@ function points(ids) {
 function accessibleHoleName(hole, playerNames = {}) {
   if (hole.kind === "center") return "Gambit center";
   if (hole.kind === "track") return hole.player
-    ? `${playerNames[hole.player] ?? PLAYERS[hole.player].label} Start, track ${hole.id.split(":")[1]}`
-    : `Track ${hole.id.split(":")[1]}`;
+    ? `${playerNames[hole.player] ?? PLAYERS[hole.player].label} Start`
+    : "the track";
   return `${playerNames[hole.player] ?? PLAYERS[hole.player].label} ${hole.kind} ${Number(hole.id.split(":")[2]) + 1}`;
+}
+
+export function describeMove(move) {
+  if (move.kind === "leave-base") return "Leave Base";
+  const hole = HOLES_BY_ID[move.destination];
+  if (move.kind === "exit-gambit") {
+    return `Leave Gambit → ${hole.y < CENTER ? "upper" : "lower"} ${hole.x < CENTER ? "left" : "right"}`;
+  }
+  const destination = hole?.kind === "center" ? " → Gambit" : hole?.kind === "home" ? " → Home" : "";
+  return `Move ${move.die} space${move.die === 1 ? "" : "s"}${destination}`;
 }
 
 function drawRoutes(svg) {
@@ -281,6 +291,10 @@ function drawPlayerZones(svg, state) {
     });
     const name = state.playerNames[color];
     label.textContent = name ? `${name}'s Base` : `${player.label} Base`;
+    if (label.textContent.length > 18) {
+      label.setAttribute("textLength", "200");
+      label.setAttribute("lengthAdjust", "spacingAndGlyphs");
+    }
     zone.append(label);
     zones.append(zone);
   }
@@ -303,7 +317,7 @@ function drawHoles(svg, state) {
     if (hole.id === state.replayMove?.destinationId) classes.push("is-replay-destination");
 
     const circle = svgElement("circle", {
-      id: hole.id,
+      id: `${state.idPrefix}${hole.id}`,
       class: classes.join(" "),
       cx: hole.x,
       cy: hole.y,
@@ -324,13 +338,13 @@ function drawHoles(svg, state) {
     if (styles.length) circle.setAttribute("style", styles.join("; "));
 
     const title = svgElement("title");
-    title.textContent = accessibleHoleName(hole, state.playerNames);
+    title.textContent = state.destinationLabels[hole.id] ?? accessibleHoleName(hole, state.playerNames);
     circle.append(title);
 
     if (legalDestination && state.onDestinationSelect) {
       circle.setAttribute("role", "button");
       circle.setAttribute("tabindex", "0");
-      circle.setAttribute("aria-label", `Move to ${accessibleHoleName(hole, state.playerNames)}`);
+      circle.setAttribute("aria-label", title.textContent);
       circle.addEventListener("click", () => state.onDestinationSelect(hole.id));
       circle.addEventListener("keydown", (event) => {
         if (event.key === "Enter" || event.key === " ") {
@@ -343,15 +357,6 @@ function drawHoles(svg, state) {
     holes.append(circle);
   }
 
-  const centerLabel = svgElement("text", {
-    class: "center-label",
-    x: CENTER,
-    y: CENTER + 38,
-    "text-anchor": "middle",
-    "aria-hidden": "true",
-  });
-  centerLabel.textContent = "";
-  holes.append(centerLabel);
   svg.append(holes);
 }
 
@@ -372,6 +377,7 @@ function drawMarbles(svg, marbles, state) {
     const replaying = replayFrom
       && replayDestination
       && replayFrom.id !== replayDestination.id
+      && !state.reducedMotion
       && (state.replayMove.forceMotion
         || !globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
     const position = replaying ? replayFrom : actualPosition;
@@ -405,11 +411,15 @@ function drawMarbles(svg, marbles, state) {
     });
 
     group.append(
+      svgElement("circle", { class: "marble-hit-area", r: 23 }),
       svgElement("circle", { class: "marble-focus", r: 18 }),
       svgElement("circle", { class: "marble-active-ring", r: 16 }),
       svgElement("circle", { class: "marble-disc", r: 13 }),
       svgElement("circle", { class: "marble-shine", cx: -4, cy: -5, r: 3.5 }),
     );
+    const number = svgElement("text", { class: "marble-number", "aria-hidden": "true", y: 1 });
+    number.textContent = marble.number;
+    group.append(number);
 
     if (replaying) {
       const path = movingReplay
@@ -448,9 +458,13 @@ function drawMarbles(svg, marbles, state) {
 }
 
 export function renderBoard(container, options = {}) {
+  const focusedMarble = document.activeElement?.getAttribute?.("data-marble-id");
+  const focusedHole = document.activeElement?.getAttribute?.("data-hole-id");
   const state = {
+    idPrefix: options.idPrefix ?? "",
     activePlayer: options.activePlayer ?? null,
     legalDestinationIds: new Set(options.legalDestinationIds ?? []),
+    destinationLabels: options.destinationLabels ?? {},
     legalMarbleIds: new Set(options.legalMarbleIds ?? []),
     selectableMarbleIds: new Set(options.selectableMarbleIds ?? []),
     selectedMarbleId: options.selectedMarbleId ?? null,
@@ -458,17 +472,18 @@ export function renderBoard(container, options = {}) {
     onDestinationSelect: options.onDestinationSelect ?? null,
     playerNames: options.playerNames ?? {},
     replayMove: options.replayMove ?? null,
+    reducedMotion: options.reducedMotion ?? false,
   };
 
   const svg = svgElement("svg", {
     class: "game-board",
     viewBox: "0 0 1000 1000",
     role: "group",
-    "aria-labelledby": "board-title board-description",
+    "aria-labelledby": `${state.idPrefix}board-title ${state.idPrefix}board-description`,
   });
-  const title = svgElement("title", { id: "board-title" });
-  title.textContent = "Project Brian game board";
-  const description = svgElement("desc", { id: "board-description" });
+  const title = svgElement("title", { id: `${state.idPrefix}board-title` });
+  title.textContent = "Brian's Aggravation game board";
+  const description = svgElement("desc", { id: `${state.idPrefix}board-description` });
   description.textContent = "A four-player board with five Base and Home positions per player, a shared track, and the center Gambit.";
   svg.append(
     title,
@@ -481,6 +496,12 @@ export function renderBoard(container, options = {}) {
   drawHoles(svg, state);
   const replayAnimations = drawMarbles(svg, options.marbles ?? [], state);
   container.replaceChildren(svg);
+  if (focusedMarble || focusedHole) {
+    const targets = container.querySelectorAll?.("[data-marble-id], [data-hole-id]") ?? [];
+    [...targets].find((element) => focusedMarble
+      ? element.getAttribute("data-marble-id") === focusedMarble
+      : element.getAttribute("data-hole-id") === focusedHole)?.focus();
+  }
   (globalThis.requestAnimationFrame ?? ((callback) => callback()))(() => {
     for (const { animation, delay } of replayAnimations) {
       if (delay) setTimeout(() => animation.beginElement(), delay);

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="A private online marble race for two to four players.">
-    <meta name="theme-color" content="#ff2bd6">
+    <meta name="theme-color" content="#183e35">
     <title>Brian's Aggravation</title>
     <link rel="icon" href="data:,">
     <script>
@@ -14,7 +14,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Pixelify+Sans:wght@400..700&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./styles.css?v=20260826-57">
+    <link rel="stylesheet" href="./styles.css?v=20260923-4">
+    <link rel="stylesheet" href="./polish.css?v=20260923-4">
     <script type="importmap">
       {
         "imports": {
@@ -25,42 +26,52 @@
     </script>
   </head>
   <body>
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="Brian's Aggravation home"><span class="brand-mark" aria-hidden="true">✦</span> BRIAN'S <span class="brand-subtitle">AGGRAVATION</span></a>
+      <nav aria-label="Game tools">
+        <button class="text-button" type="button" data-help>How to play</button>
+        <button id="settings-button" class="text-button" type="button">Settings</button>
+      </nav>
+    </header>
     <main class="app-shell">
       <section class="screen" data-screen="home" aria-labelledby="home-title">
         <header class="home-hero">
-          <p class="home-kicker">An extremely serious game</p>
           <h1 id="home-title"><span>Brian's</span> Aggravation</h1>
-          <div class="home-game-pieces" aria-hidden="true">
-            <span class="home-die">⚄</span>
-            <span class="home-die">⚅</span>
-            <span class="home-marble home-marble-red"></span>
-            <span class="home-marble home-marble-blue"></span>
-            <span class="home-marble home-marble-yellow"></span>
-          </div>
+          <div id="home-board-preview" class="home-board-preview" aria-hidden="true"></div>
         </header>
+
+        <div id="resume-panel" class="resume-panel" hidden>
+          <div><strong>Saved game</strong><p id="resume-description"></p></div>
+          <button id="resume-button" type="button">Resume game →</button>
+        </div>
+
+        <section class="panel home-panel home-panel-local" aria-labelledby="local-card-title">
+          <h2 id="local-card-title">Play here</h2>
+          <p class="home-panel-copy">Play with friends or computer players.</p>
+          <div class="local-card-art" aria-hidden="true"><span>⚄</span><span>⚂</span></div>
+          <button id="local-mode-button" type="button">Set up a local game →</button>
+        </section>
 
         <form id="create-room-form" class="panel home-panel home-panel-create">
           <h2>Create a room</h2>
-          <p class="home-panel-copy">Create a new game and share the invite code.</p>
           <label for="host-name">Your name</label>
-          <input id="host-name" name="playerName" maxlength="24" autocomplete="nickname" required>
+          <input id="host-name" name="playerName" maxlength="24" autocomplete="nickname" placeholder="Your name" required>
           <button type="submit">Create room</button>
         </form>
 
         <form id="join-room-form" class="panel home-panel home-panel-join">
           <h2>Join a room</h2>
-          <p class="home-panel-copy">Enter your name and invite code to join a game.</p>
           <label for="join-name">Your name</label>
-          <input id="join-name" name="playerName" maxlength="24" autocomplete="nickname" required>
+          <input id="join-name" name="playerName" maxlength="24" autocomplete="nickname" placeholder="Your name" required>
           <label for="room-code">Invite code</label>
-          <input id="room-code" name="roomCode" maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false" required>
+          <input id="room-code" name="roomCode" maxlength="6" minlength="6" pattern="[A-HJ-NP-Za-hj-np-z2-9]{6}" title="Six letters or numbers, without 0, O, 1, or I" placeholder="ABC234" autocomplete="off" autocapitalize="characters" spellcheck="false" required>
           <button type="submit">Join room</button>
         </form>
 
         <p id="home-error" class="error-message" aria-live="assertive"></p>
         <div class="home-actions">
-          <button id="local-mode-button" class="text-button" type="button">Play together on one device</button>
-          <button id="settings-button" class="text-button" type="button">Settings</button>
+          <span id="online-status" class="connection-status" role="status">Connecting to online rooms…</span>
+          <button id="retry-online-button" class="text-button" type="button" hidden>Retry connection</button>
         </div>
 
       </section>
@@ -68,7 +79,7 @@
       <section class="screen" data-screen="local" aria-labelledby="local-title" hidden>
         <p class="eyebrow">Local pass-and-play</p>
         <h1 id="local-title">Local game</h1>
-        <p>Enter two to four players. Bring all five marbles Home first to win.</p>
+        <p>Choose 2–4 players.</p>
 
         <form id="local-game-form" class="panel">
           <fieldset class="player-fields">
@@ -79,21 +90,22 @@
             <label for="player-2">Player 2</label>
             <div class="player-entry">
               <input id="player-2" name="playerName" maxlength="24" autocomplete="off">
-              <label class="bot-toggle"><input type="checkbox" data-bot-for="player-2"> NPC</label>
+              <label class="bot-toggle"><input type="checkbox" data-bot-for="player-2" aria-label="Computer player 2"> Computer</label>
             </div>
 
             <label for="player-3">Player 3 <span class="muted">(optional)</span></label>
             <div class="player-entry">
               <input id="player-3" name="playerName" maxlength="24" autocomplete="off">
-              <label class="bot-toggle"><input type="checkbox" data-bot-for="player-3"> NPC</label>
+              <label class="bot-toggle"><input type="checkbox" data-bot-for="player-3" aria-label="Computer player 3"> Computer</label>
             </div>
 
             <label for="player-4">Player 4 <span class="muted">(optional)</span></label>
             <div class="player-entry">
               <input id="player-4" name="playerName" maxlength="24" autocomplete="off">
-              <label class="bot-toggle"><input type="checkbox" data-bot-for="player-4"> NPC</label>
+              <label class="bot-toggle"><input type="checkbox" data-bot-for="player-4" aria-label="Computer player 4"> Computer</label>
             </div>
           </fieldset>
+          <p class="setup-note">Local games save automatically.</p>
           <button type="submit">Start local game</button>
           <button class="text-button" type="button" data-home>Back</button>
         </form>
@@ -130,6 +142,13 @@
           </header>
 
           <div class="game-controls panel">
+            <section class="turn-guide" aria-labelledby="turn-guide-title">
+              <h2 id="turn-guide-title">Roll to begin</h2>
+              <p id="turn-guide-copy"></p>
+              <button id="roll-button" type="button" aria-keyshortcuts="R">Roll dice</button>
+              <div id="move-choices" class="move-choices"></div>
+              <p id="turn-status" class="turn-status" aria-live="polite">Each player rolls both dice. Highest total goes first.</p>
+            </section>
             <section class="progress-board" aria-labelledby="progress-board-title">
               <div class="progress-board-heading">
                 <span id="progress-board-title">Player progress</span>
@@ -137,24 +156,24 @@
               </div>
               <ol id="progress-board-list" class="progress-board-list"></ol>
             </section>
-            <p id="turn-status" class="sr-only" aria-live="polite">Each player rolls both dice. Highest total goes first.</p>
+            <details class="activity-panel"><summary>Recent activity</summary><ol id="activity-list" reversed></ol></details>
             <div class="control-buttons">
-              <button id="roll-button" type="button">Roll dice</button>
               <button id="replay-move-button" class="secondary" type="button" hidden>Replay last move</button>
               <button id="end-game-button" class="secondary" type="button" hidden>End game</button>
               <button id="new-game-button" class="text-button" type="button">New game</button>
-              <button id="main-menu-button" class="text-button" type="button">Main menu</button>
+              <button id="main-menu-button" class="text-button" type="button">Save &amp; main menu</button>
             </div>
+            <p id="save-status" class="save-status" role="status"></p>
           </div>
         </aside>
 
         <aside id="dice-roll-stage" class="dice-roll-stage" role="status" aria-live="polite">
-          <strong>Dice tray · Waiting for a roll</strong>
+          <strong>Dice table</strong>
           <div class="dice-table-surface" aria-hidden="true"><span class="dice-table-ready">Roll 'em</span></div>
         </aside>
 
         <div class="board-stage">
-          <div id="board" class="board" aria-live="polite"></div>
+          <div id="board" class="board"></div>
           <div id="player-dice-grid" class="player-dice-grid" role="region" aria-label="Player dice"></div>
         </div>
 
@@ -188,8 +207,7 @@
       <form class="settings-panel" method="dialog">
         <header class="settings-header">
           <div>
-            <p class="eyebrow">Visual settings</p>
-            <h2 id="settings-title">Choose a skin</h2>
+            <h2 id="settings-title">Table settings</h2>
           </div>
           <button class="settings-close" type="submit" aria-label="Close settings">×</button>
         </header>
@@ -221,10 +239,29 @@
             <span><strong>Gothic</strong></span>
           </label>
         </fieldset>
+        <label class="preference-row"><span><strong>Quick play</strong><small>Skip 3D dice and move animations.</small></span><input id="quick-play" type="checkbox"></label>
+        <p class="settings-note"><kbd>R</kbd> to roll · <kbd>Esc</kbd> to deselect</p>
         <button class="settings-done" type="submit">Done</button>
       </form>
     </dialog>
 
-    <script type="module" src="./src/app.js?v=20260826-45"></script>
+    <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
+      <form method="dialog">
+        <header class="settings-header"><h2 id="help-title">How to play</h2><button type="submit" class="text-button" aria-label="Close how to play">×</button></header>
+        <p>Be the first to bring all <strong>five marbles Home</strong>. Everyone rolls two dice to begin; the highest total goes first. Tied leaders roll again.</p>
+        <div class="rules-grid">
+          <section><span>01</span><h3>Get out there</h3><p>A <strong>1 or 6</strong> brings a marble from Base to Start. Use the other die to keep moving or release another marble if Start is clear.</p></section>
+          <section><span>02</span><h3>Make every die count</h3><p>Use each die separately, in either order, on one or two marbles. <strong>Doubles earn another turn.</strong> Unusable dice are discarded automatically.</p></section>
+          <section><span>03</span><h3>A little aggravation</h3><p>Land on an opponent to send them back to Base. You can pass opponents, but <strong>cannot pass or land on your own marbles</strong>.</p></section>
+          <section><span>04</span><h3>Take a Gambit</h3><p>Land exactly on the center via a dashed route. On a later turn, a <strong>1 or 6</strong> exits to any corner access space. Opponents can capture you here, too.</p></section>
+          <section><span>05</span><h3>Bring it Home</h3><p>Travel counterclockwise to your Home entrance. Move into and along your lane with an <strong>exact die value</strong>. Home is safe from capture.</p></section>
+          <section><span>06</span><h3>Your move, your way</h3><p>Choose a ringed marble, then a highlighted destination. Or use the numbered marble and move buttons beside the board. Each move shows the die it uses.</p></section>
+        </div>
+        <p><a href="./RULES.md" target="_blank" rel="noopener">Read the complete rules ↗</a></p>
+        <button type="submit">Let's play</button>
+      </form>
+    </dialog>
+
+    <script type="module" src="./src/app.js?v=20260923-4"></script>
   </body>
 </html>

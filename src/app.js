@@ -1,5 +1,6 @@
-import { PLAYER_ORDER, PLAYERS, renderBoard } from "./board.js?v=20260825-23";
-import { chooseBotMove, getPlayerDiceRows, getPlayerProgress } from "./dice.js?v=20260826-32";
+import { HOLES_BY_ID, PLAYER_ORDER, PLAYERS, describeMove, renderBoard } from "./board.js?v=20260923-4";
+import { chooseBotMove, getPlayerDiceRows, getPlayerProgress, rollDice } from "./dice.js?v=20260826-32";
+import { LOCAL_GAME_KEY, loadLocalGame, readStored, writeStored } from "./session.js?v=20260923-1";
 import { loadTurnReplay, saveTurnReplay } from "./replay.js?v=20260823-19";
 import { applyTheme, loadTheme } from "./theme.js?v=20260826-3";
 import {
@@ -10,9 +11,8 @@ import {
   endGame,
   gameActionKey,
   getLegalMoves,
-  skipTurn,
   startGame,
-} from "./game.js?v=20260826-23";
+} from "./game.js?v=20260923-4";
 import {
   createRoom,
   joinRoom,
@@ -20,7 +20,7 @@ import {
   signIn,
   subscribeToRoom,
   updateRoomTransaction,
-} from "./firebase.js?v=20260823-14";
+} from "./firebase.js?v=20260923-1";
 
 const screens = [...document.querySelectorAll("[data-screen]")];
 const createRoomForm = document.querySelector("#create-room-form");
@@ -62,6 +62,20 @@ const victoryStats = document.querySelector("#victory-stats");
 const victoryRestartButton = document.querySelector("#victory-restart-button");
 const victoryMenuButton = document.querySelector("#victory-menu-button");
 const victoryStatus = document.querySelector("#victory-status");
+const helpDialog = document.querySelector("#help-dialog");
+const quickPlayInput = document.querySelector("#quick-play");
+const resumePanel = document.querySelector("#resume-panel");
+const moveChoices = document.querySelector("#move-choices");
+const onlineStatus = document.querySelector("#online-status");
+const retryOnlineButton = document.querySelector("#retry-online-button");
+const saveStatus = document.querySelector("#save-status");
+let storage;
+try { storage = window.localStorage; } catch { /* Play remains available without storage. */ }
+let savedLocalGame = loadLocalGame(storage);
+let savedState = null;
+let lastActivityKey = null;
+let activity = [];
+let roomWatchToken = 0;
 
 let firebaseUser = null;
 let onlineRoom = null;
@@ -86,17 +100,75 @@ let diceInMotion = false;
 let lastLocalPhysicalRoll = null;
 let moveUnlockDelayMs = 0;
 
-const activeTheme = applyTheme(document.documentElement, localStorage, loadTheme(localStorage));
+const activeTheme = applyTheme(document.documentElement, storage, loadTheme(storage));
 themeInputs.find(({ value }) => value === activeTheme).checked = true;
+quickPlayInput.checked = readStored(storage, "project-brian-quick-play", false) === true;
+document.documentElement.dataset.quickPlay = quickPlayInput.checked;
+const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+const quickMotion = () => quickPlayInput.checked || reducedMotion.matches;
+quickPlayInput.addEventListener("change", () => {
+  document.documentElement.dataset.quickPlay = quickPlayInput.checked;
+  writeStored(storage, "project-brian-quick-play", quickPlayInput.checked);
+});
+const rememberedName = readStored(storage, "project-brian-name", "");
+if (typeof rememberedName === "string") {
+  for (const input of [playerInputs[0], document.querySelector("#host-name"), document.querySelector("#join-name")]) input.value = rememberedName.slice(0, 24);
+}
+renderBoard(document.querySelector("#home-board-preview"), {
+  idPrefix: "preview-",
+  marbles: Object.values(createGame(PLAYER_ORDER.map((name) => ({ uid: name, name }))).pieces),
+});
+updateResume();
 
-settingsButton.addEventListener("click", () => settingsDialog.showModal());
+function openDialog(dialog) {
+  clearTimeout(botTimer);
+  dialog.showModal();
+}
+settingsButton.addEventListener("click", () => openDialog(settingsDialog));
+for (const button of document.querySelectorAll("[data-help]")) button.addEventListener("click", () => openDialog(helpDialog));
+for (const dialog of [settingsDialog, helpDialog]) dialog.addEventListener("close", scheduleBotTurn);
 settingsDialog.addEventListener("change", ({ target }) => {
-  if (target.matches("[name='theme']")) applyTheme(document.documentElement, localStorage, target.value);
+  if (target.matches("[name='theme']")) applyTheme(document.documentElement, storage, target.value);
 });
 
 function showScreen(name) {
+  const changed = screens.find((screen) => !screen.hidden)?.dataset.screen !== name;
   for (const screen of screens) screen.hidden = screen.dataset.screen !== name;
+  if (name === "home") updateResume();
+  if (changed) {
+    const heading = document.querySelector(`[data-screen="${name}"] h1`);
+    heading?.setAttribute("tabindex", "-1");
+    heading?.focus({ preventScroll: true });
+    window.scrollTo(0, 0);
+  }
 }
+
+function updateResume() {
+  savedLocalGame = loadLocalGame(storage);
+  resumePanel.hidden = !savedLocalGame;
+  if (savedLocalGame) document.querySelector("#resume-description").textContent = savedLocalGame.players.map(({ name }) => name).join(" · ");
+}
+
+document.querySelector("#resume-button").addEventListener("click", () => {
+  updateResume();
+  if (!savedLocalGame) return;
+  forgetOnlineRoom();
+  gameMode = "local";
+  gameState = savedLocalGame;
+  const dice = gameState.dice ?? gameState.lastAction?.dice;
+  const diceUid = gameState.dice ? gameState.turnUid : gameState.lastAction?.uid;
+  const roller = gameState.players.find(({ uid }) => uid === diceUid);
+  if (dice && roller) {
+    lastLocalPhysicalRoll = { uid: diceUid, dice: [...dice] };
+  }
+  selectedMarbleId = null;
+  activity = [];
+  lastActivityKey = null;
+  statusMessage = "Game resumed.";
+  showScreen("game");
+  if (dice && roller) animateDice(roller, dice, true).then(() => renderGame());
+  renderGame();
+});
 
 function resetDiceDisplays() {
   diceScene?.dispose();
@@ -109,7 +181,7 @@ function resetDiceDisplays() {
   lastDiceByUid = {};
   lastDiceRollKey = null;
   const label = document.createElement("strong");
-  label.textContent = "Dice tray · Waiting for a roll";
+  label.textContent = "Dice table";
   const table = document.createElement("div");
   table.className = "dice-table-surface";
   table.setAttribute("aria-hidden", "true");
@@ -191,6 +263,7 @@ function renderOnlineLobby() {
 }
 
 function forgetOnlineRoom() {
+  roomWatchToken += 1;
   unsubscribeRoom?.();
   unsubscribeRoom = null;
   onlineRoom = null;
@@ -208,6 +281,8 @@ function forgetOnlineRoom() {
 }
 
 function returnToMainMenu() {
+  clearTimeout(botTimer);
+  botTimer = null;
   if (gameMode === "online") forgetOnlineRoom();
   else {
     gameMode = null;
@@ -231,6 +306,7 @@ function formatRoll(dice) {
 }
 
 function moveAnimationDuration(path) {
+  if (quickMotion()) return 0;
   return Math.min(1200, 650 + Math.max(path?.length ?? 1, 1) * 80);
 }
 
@@ -246,7 +322,7 @@ function createMoveReplay(state, move) {
     destinationId: move.destination,
     path,
     durationMs: moveAnimationDuration(path),
-    forceMotion: true,
+    forceMotion: false,
     captureId: move.captureId ?? null,
     capturedFromPositionId: move.captureId ? state.pieces[move.captureId].positionId : null,
   };
@@ -264,23 +340,20 @@ function describeLastAction() {
 
   switch (action.type) {
     case "started":
-      return `${playerName(gameState.turnUid)} rolls first for the opening high score.`;
+      return `${playerName(gameState.turnUid)} rolls first.`;
     case "opening-roll":
-      return `${name} rolled ${formatRoll(action.dice)} for the opening high score.`;
+      return `${name} rolled ${formatRoll(action.dice)}.`;
     case "roll":
-      return `${name} rolled ${formatRoll(action.dice)}. Select a highlighted marble.`;
+      return `${name} rolled ${formatRoll(action.dice)}.`;
     case "no-move":
       return `${name} rolled ${formatRoll(action.dice)} with no legal move.${action.extraTurn ? " Doubles grant another roll." : " The turn advanced."}`;
     case "move": {
       const capture = action.captureId
         ? ` ${playerName(gameState.pieces[action.captureId].ownerUid)}'s marble returned to Base.`
         : "";
-      const remaining = gameState.remainingDice?.length
-        ? ` Die ${gameState.remainingDice.join(" and ")} remains.`
-        : "";
-      return `${name} used ${action.die} and moved to ${action.destination}.${capture}${remaining}`;
+      const extraTurn = gameState.phase === "roll" && gameState.turnUid === action.uid ? " Doubles — roll again!" : "";
+      return `${name}: ${describeMove(action)}.${capture}${extraTurn}`;
     }
-    case "opening-skip":
     case "ended":
       return `${name} ended the game.`;
     default:
@@ -290,8 +363,10 @@ function describeLastAction() {
 
 async function watchRoom(code) {
   unsubscribeRoom?.();
+  const watchToken = ++roomWatchToken;
   onlineRoomCode = code;
-  unsubscribeRoom = await subscribeToRoom(code, (room) => {
+  const stopWatching = await subscribeToRoom(code, (room) => {
+    if (watchToken !== roomWatchToken) return;
     if (!room) {
       const wasActive = Boolean(onlineRoom);
       forgetOnlineRoom();
@@ -319,10 +394,13 @@ async function watchRoom(code) {
         return;
       }
       const previousGame = gameMode === "online" ? gameState : null;
-      if (previousGame && JSON.stringify(previousGame) === JSON.stringify(room.game)) return;
+      if (previousGame && JSON.stringify(previousGame) === JSON.stringify(room.game)) {
+        if (statusMessage.startsWith("Connection lost")) { statusMessage = "Connection restored."; renderGame(); }
+        return;
+      }
       const action = room.game.lastAction;
       const gameId = room.restartedAt ?? room.startedAt;
-      if (!previousGame) lastTurnReplay = loadTurnReplay(localStorage, code, gameId);
+      if (!previousGame) lastTurnReplay = loadTurnReplay(storage, code, gameId);
       if (action?.type === "started") {
         lastTurnReplay = [];
         resetDiceDisplays();
@@ -353,7 +431,7 @@ async function watchRoom(code) {
           && previousGame.lastAction.uid === action.uid;
         lastTurnReplay = continuesRoll ? [...lastTurnReplay, replay] : [replay];
       }
-      saveTurnReplay(localStorage, code, gameId, lastTurnReplay);
+      saveTurnReplay(storage, code, gameId, lastTurnReplay);
       gameMode = "online";
       gameState = room.game;
       statusMessage = describeLastAction();
@@ -368,6 +446,7 @@ async function watchRoom(code) {
       showScreen("lobby");
     }
   }, () => {
+    if (watchToken !== roomWatchToken) return;
     statusMessage = "Connection lost. Check your network and retry the action.";
     if (gameState) renderGame();
     else {
@@ -375,6 +454,8 @@ async function watchRoom(code) {
       showScreen("home");
     }
   });
+  if (watchToken !== roomWatchToken) stopWatching();
+  else unsubscribeRoom = stopWatching;
 }
 
 async function runOnlineAction(action, errorTarget = homeError) {
@@ -396,6 +477,7 @@ async function runOnlineAction(action, errorTarget = homeError) {
 createRoomForm.addEventListener("submit", (event) => {
   event.preventDefault();
   if (!createRoomForm.reportValidity()) return;
+  writeStored(storage, "project-brian-name", document.querySelector("#host-name").value.trim());
   runOnlineAction(async () => {
     const result = await createRoom(new FormData(createRoomForm).get("playerName"));
     onlineRoom = result.room;
@@ -410,6 +492,7 @@ joinRoomForm.addEventListener("submit", (event) => {
   event.preventDefault();
   roomCodeInput.value = roomCodeInput.value.trim().toUpperCase();
   if (!joinRoomForm.reportValidity()) return;
+  writeStored(storage, "project-brian-name", document.querySelector("#join-name").value.trim());
   runOnlineAction(async () => {
     const result = await joinRoom(roomCodeInput.value, new FormData(joinRoomForm).get("playerName"));
     onlineRoom = result.room;
@@ -504,7 +587,7 @@ leaveButton.addEventListener("click", () => runOnlineAction(async () => {
   showScreen("home");
 }, lobbyStatus));
 
-localModeButton.addEventListener("click", () => showScreen("local"));
+localModeButton.addEventListener("click", () => { forgetOnlineRoom(); showScreen("local"); });
 for (const button of document.querySelectorAll("[data-home]")) {
   button.addEventListener("click", () => showScreen("home"));
 }
@@ -547,8 +630,7 @@ function stopPhysicalDiceRoll() {
   diceInMotion = false;
 }
 
-function physicalDiceRoll(player, seed, renderer = null) {
-  stopPhysicalDiceRoll();
+function physicalDiceRoll(player, seed, renderer = null, settled = false) {
   const token = diceRollToken;
   const label = document.createElement("strong");
   label.textContent = `${player.name} is rolling…`;
@@ -562,7 +644,7 @@ function physicalDiceRoll(player, seed, renderer = null) {
 
   return new Promise((resolve, reject) => {
     diceRollCancel = reject;
-    const loadRenderer = renderer ? Promise.resolve(renderer) : import("./dice-scene.js?v=20260826-4");
+    const loadRenderer = renderer ? Promise.resolve(renderer) : import("./dice-scene.js?v=20260923-2");
     loadRenderer.then(({ throwDice }) => {
       if (token !== diceRollToken) return;
       diceScene = throwDice(table, seed, (dice) => {
@@ -571,7 +653,7 @@ function physicalDiceRoll(player, seed, renderer = null) {
         diceInMotion = false;
         label.textContent = `${player.name} rolled ${formatRoll(dice)}`;
         resolve(dice);
-      });
+      }, settled);
     }).catch((error) => {
       if (token !== diceRollToken) return;
       diceRollCancel = null;
@@ -582,10 +664,44 @@ function physicalDiceRoll(player, seed, renderer = null) {
   });
 }
 
+function showStaticDice(player, dice) {
+  stopPhysicalDiceRoll();
+  const label = document.createElement("strong");
+  label.textContent = `${player.name} rolled ${formatRoll(dice)}`;
+  const tray = document.createElement("div");
+  tray.className = "dice-table-surface";
+  const faces = document.createElement("div");
+  faces.className = "dice static-dice";
+  faces.setAttribute("aria-hidden", "true");
+  for (const value of dice) {
+    const face = document.createElement("span");
+    face.className = "die-button";
+    drawDie(face, value);
+    faces.append(face);
+  }
+  tray.append(faces);
+  diceRollStage.replaceChildren(label, tray);
+}
+
+async function animateDice(player, dice, settled = false) {
+  stopPhysicalDiceRoll();
+  const token = diceRollToken;
+  if (quickPlayInput.checked) { showStaticDice(player, dice); return; }
+  diceInMotion = true;
+  try {
+    const renderer = await import("./dice-scene.js?v=20260923-2");
+    if (token !== diceRollToken) return;
+    await physicalDiceRoll(player, renderer.replaySeedFor(dice), renderer, settled);
+  } catch {
+    // Rendering is cosmetic: a lost WebGL context must never prevent a turn.
+    if (token === diceRollToken) showStaticDice(player, dice);
+  }
+}
+
 async function rollDiceFromPhysics(uid) {
   const player = gameState.players.find((candidate) => candidate.uid === uid);
-  const seed = crypto.getRandomValues(new Uint32Array(1))[0];
-  const dice = await physicalDiceRoll(player, seed);
+  const dice = rollDice();
+  await animateDice(player, dice);
   lastLocalPhysicalRoll = { uid, dice: [...dice] };
   return dice;
 }
@@ -606,15 +722,8 @@ function renderDiceRoll() {
     return;
   }
 
-  import("./dice-scene.js?v=20260826-4").then((renderer) => (
-    physicalDiceRoll(player, renderer.replaySeedFor(action.dice), renderer)
-  )).then(() => renderGame()).catch((error) => {
-    if (key !== lastDiceRollKey) return;
-    console.error("The 3D dice renderer failed to load.", error);
-    diceInMotion = false;
-    const label = diceRollStage.querySelector("strong");
-    if (label) label.textContent = `${player.name} rolled ${formatRoll(action.dice)} · 3D unavailable`;
-    renderGame();
+  animateDice(player, action.dice).then(() => {
+    if (key === lastDiceRollKey) renderGame();
   });
 }
 
@@ -659,11 +768,14 @@ function renderDice() {
     if (row.isActive && gameState.phase === "move" && row.dice) {
       const counts = new Map();
       for (const die of gameState.remainingDice ?? []) counts.set(die, (counts.get(die) ?? 0) + 1);
+      const availability = [];
       displays.forEach((display, index) => {
         const count = counts.get(row.dice[index]) ?? 0;
         display.classList.toggle("is-used", !count);
+        availability.push(`${row.dice[index]} ${count ? "available" : "used"}`);
         if (count) counts.set(row.dice[index], count - 1);
       });
+      dice.setAttribute("aria-label", `${row.name}: ${availability.join(", ")}`);
     }
 
     dice.append(...displays);
@@ -683,8 +795,9 @@ function scheduleBotTurn() {
   botTimer = null;
   const player = currentPlayer();
   const hostCanRunBot = gameMode === "local" || firebaseUser?.uid === onlineRoom?.hostUid;
+  if (settingsDialog.open || helpDialog.open) return;
   if (!player || !isBotUid(player.uid) || !hostCanRunBot || actionLocked || replayInProgress || diceInMotion) return;
-  const delay = gameState.lastAction?.type === "move" ? 1600 : 1300;
+  const delay = quickMotion() ? 350 : gameState.lastAction?.type === "move" ? 1600 : 1300;
   botTimer = setTimeout(() => runGameAction(playBotTurn), delay);
 }
 
@@ -755,7 +868,6 @@ function renderVictory() {
       ["Times captured", stats.timesCaptured ?? 0],
       ["Gambit visits", stats.gambits ?? 0],
       ["Blocked rolls", stats.blockedRolls ?? 0],
-      ["Skipped turns", stats.skippedTurns ?? 0],
     ];
     const card = document.createElement("article");
     card.className = `victory-player${player.uid === winner.uid ? " is-winner" : ""}`;
@@ -777,8 +889,90 @@ function renderVictory() {
   }));
 }
 
+function destinationName(id) {
+  const hole = HOLES_BY_ID[id];
+  if (!hole) return "the board";
+  if (hole.kind === "center") return "the Gambit";
+  if (hole.kind === "home") return `Home ${Number(id.split(":")[2]) + 1}`;
+  if (hole.kind === "base") return "Base";
+  return hole.player ? `${PLAYERS[hole.player].label} Start` : "the track";
+}
+
+function selectMarble(id) {
+  selectedMarbleId = selectedMarbleId === id ? null : id;
+  statusMessage = selectedMarbleId ? "" : describeLastAction();
+  renderGame();
+}
+
+function renderTurnGuide(legalMoves, canAct) {
+  const player = currentPlayer();
+  const busy = actionLocked || replayInProgress || diceInMotion;
+  const moving = gameState.phase === "move";
+  const opening = gameState.phase === "opening-roll";
+  document.querySelector("#turn-guide-title").textContent = replayInProgress ? "Replaying the last move"
+    : diceInMotion ? "Rolling…" : !canAct ? `Waiting for ${player.name}`
+    : moving ? selectedMarbleId ? "Choose a move" : "Choose a marble"
+    : opening ? "Opening roll" : "Roll dice";
+  document.querySelector("#turn-guide-copy").textContent = moving && canAct
+    ? `Dice: ${gameState.remainingDice.join(" & ")}`
+    : opening ? (gameState.opening.round > 1 ? "Tied players roll again." : "Highest total starts.") : "";
+  rollButton.hidden = moving;
+  moveChoices.replaceChildren();
+  if (!moving || !canAct) return;
+  const choices = document.createElement("div");
+  choices.className = "marble-choices";
+  choices.setAttribute("aria-label", "Playable marbles");
+  for (const id of new Set(legalMoves.map(({ pieceId }) => pieceId))) {
+    const piece = gameState.pieces[id];
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "secondary marble-choice";
+    button.textContent = piece.number;
+    button.setAttribute("aria-label", `Marble ${piece.number} at ${destinationName(piece.positionId)}`);
+    button.setAttribute("aria-pressed", String(id === selectedMarbleId));
+    button.disabled = busy;
+    button.addEventListener("click", (event) => {
+      selectMarble(id);
+      if (event.detail === 0) moveChoices.querySelector(".move-choice")?.focus();
+    });
+    choices.append(button);
+  }
+  moveChoices.append(choices);
+  for (const move of legalMoves.filter(({ pieceId }) => pieceId === selectedMarbleId)) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "secondary move-choice";
+    button.disabled = busy;
+    const die = document.createElement("span");
+    die.className = "move-die";
+    die.textContent = move.die;
+    die.setAttribute("aria-hidden", "true");
+    const description = `${describeMove(move)}${move.captureId ? " · Capture" : ""}`;
+    button.setAttribute("aria-label", `Use die ${move.die}: ${description}`);
+    button.append(die, document.createTextNode(description));
+    button.addEventListener("click", () => runGameAction(() => moveSelectedMarble(move.destination, move.die)));
+    moveChoices.append(button);
+  }
+}
+
 function renderGame() {
   if (!gameState) return;
+  if (gameMode === "local" && savedState !== gameState) {
+    const saved = writeStored(storage, LOCAL_GAME_KEY, gameState);
+    if (saved) savedState = gameState;
+    saveStatus.textContent = saved ? "Game saved" : "Storage unavailable — keep this page open to keep your game.";
+  } else if (gameMode === "online") saveStatus.textContent = `Room ${onlineRoomCode}`;
+  const activityKey = gameActionKey(gameState);
+  if (activityKey !== lastActivityKey) {
+    if (gameState.lastAction?.type === "started") activity = [];
+    lastActivityKey = activityKey;
+    activity = [describeLastAction(), ...activity].slice(0, 12);
+    document.querySelector("#activity-list").replaceChildren(...activity.map((message) => {
+      const item = document.createElement("li");
+      item.textContent = message;
+      return item;
+    }));
+  }
   if (gameState.phase === "finished") {
     showScreen("victory");
     renderVictory();
@@ -812,6 +1006,7 @@ function renderGame() {
   progressBoardList.replaceChildren(...getPlayerProgress(gameState).map((progress) => {
     const item = document.createElement("li");
     item.style.setProperty("--player-color", PLAYERS[progress.color].color);
+    item.classList.toggle("is-current", progress.uid === player.uid);
     const identity = document.createElement("div");
     identity.className = "progress-player";
     const name = document.createElement("strong");
@@ -843,23 +1038,25 @@ function renderGame() {
   rollButton.disabled = actionLocked || replayInProgress || diceInMotion || !canAct || !["opening-roll", "roll"].includes(gameState.phase);
   replayMoveButton.hidden = !lastTurnReplay.length;
   replayMoveButton.textContent = gameMode === "online" ? "Replay opponent move" : "Replay last move";
-  replayMoveButton.disabled = actionLocked || replayInProgress;
+  replayMoveButton.disabled = actionLocked || replayInProgress || diceInMotion;
   const hostUid = gameMode === "online" ? onlineRoom.hostUid : gameState.hostUid;
   const isHost = gameMode === "online" ? firebaseUser.uid === hostUid : true;
+  mainMenuButton.disabled = actionLocked || replayInProgress || diceInMotion;
+  mainMenuButton.textContent = gameMode === "local" ? "Save & main menu" : "Main menu";
 
   endGameButton.hidden = !isHost || !["opening-roll", "roll", "move"].includes(gameState.phase);
-  endGameButton.disabled = actionLocked || replayInProgress;
+  endGameButton.disabled = actionLocked || replayInProgress || diceInMotion;
   newGameButton.hidden = gameMode === "online" && (firebaseUser.uid !== hostUid || !["finished", "ended"].includes(gameState.phase));
   newGameButton.textContent = gameMode === "online" ? "Restart game" : "New game";
-  newGameButton.disabled = actionLocked || replayInProgress;
+  newGameButton.disabled = actionLocked || replayInProgress || diceInMotion;
   turnStatus.textContent = replayInProgress
-    ? "Replaying the last turn..."
+    ? "Replaying last move…"
     : actionLocked && gameMode === "online"
     ? "Saving action..."
     : statusMessage;
   const showError = /^(Action not saved|Connection lost)/.test(statusMessage);
-  turnStatus.classList.toggle("sr-only", !showError);
   turnStatus.classList.toggle("game-error", showError);
+  renderTurnGuide(legalMoves, canAct);
 
   const selectableMarbles = actionLocked || replayInProgress || diceInMotion || !canAct ? [] : movableMarbles;
   const replayMove = pendingMoveReplay;
@@ -872,14 +1069,12 @@ function renderGame() {
     selectableMarbleIds: selectableMarbles,
     legalMarbleIds: canAct && !replayInProgress && !diceInMotion ? movableMarbles : [],
     legalDestinationIds: actionLocked || replayInProgress || diceInMotion || !canAct ? [] : destinations,
-    replayMove,
+    destinationLabels: Object.fromEntries(legalMoves.filter(({ pieceId }) => pieceId === selectedMarbleId).map((move) => [move.destination, describeMove(move)])),
+    replayMove: quickMotion() && !replayInProgress ? null : replayMove,
+    reducedMotion: quickMotion(),
     onMarbleSelect(marbleId) {
       if (actionLocked || replayInProgress || diceInMotion || !canControlTurn() || gameState.phase !== "move") return;
-      selectedMarbleId = selectedMarbleId === marbleId ? null : marbleId;
-      statusMessage = selectedMarbleId
-        ? "Choose one of the highlighted destinations."
-        : describeLastAction();
-      renderGame();
+      selectMarble(marbleId);
     },
     onDestinationSelect(destination) {
       if (actionLocked || replayInProgress || diceInMotion || !selectedMarbleId || !canControlTurn() || gameState.phase !== "move") return;
@@ -929,7 +1124,7 @@ async function runGameAction(action) {
     moveUnlockDelayMs = 0;
     statusMessage = `Action not saved. ${error.message} The latest room state is shown; please retry.`;
   } finally {
-    const settleDelay = moveUnlockDelayMs || 300;
+    const settleDelay = quickMotion() ? 0 : moveUnlockDelayMs || 300;
     await new Promise((resolve) => setTimeout(resolve, settleDelay));
     moveUnlockDelayMs = 0;
     actionLocked = false;
@@ -952,12 +1147,13 @@ async function handleRoll() {
   else gameState = transition(gameState, uid);
 }
 
-async function moveSelectedMarble(destination) {
+async function moveSelectedMarble(destination, selectedDie = null) {
   const uid = gameMode === "online" ? firebaseUser.uid : currentPlayer().uid;
   const pieceId = selectedMarbleId;
-  // ponytail: if both dice reach the same hole, consume them in rolled order.
+  // Board clicks use rolled order for shared destinations; move buttons can choose either die.
   const move = getLegalMoves(gameState, uid).find((candidate) => (
     candidate.pieceId === pieceId && candidate.destination === destination
+    && (selectedDie === null || candidate.die === selectedDie)
   ));
   if (!move) throw new Error("That destination is no longer available.");
   const die = move.die;
@@ -978,13 +1174,13 @@ async function moveSelectedMarble(destination) {
 }
 
 async function replayLastTurn() {
-  if (replayInProgress || !lastTurnReplay.length) return;
+  if (actionLocked || diceInMotion || replayInProgress || !lastTurnReplay.length) return;
   replayInProgress = true;
   selectedMarbleId = null;
   try {
     for (const replay of [...lastTurnReplay]) {
-      const durationMs = moveAnimationDuration(replay.path);
-      pendingMoveReplay = { ...replay, durationMs, forceMotion: true };
+      const durationMs = quickMotion() ? 900 : moveAnimationDuration(replay.path);
+      pendingMoveReplay = { ...replay, durationMs, forceMotion: false };
       renderGame();
       await new Promise((resolve) => setTimeout(
         resolve,
@@ -1013,6 +1209,11 @@ setupForm.addEventListener("submit", (event) => {
   playerInputs[1].setCustomValidity(players.length >= 2 ? "" : "Add another person or select NPC.");
   if (!setupForm.reportValidity()) return;
 
+  if (loadLocalGame(storage) && !confirm("Replace the saved local game with a new game?")) return;
+  forgetOnlineRoom();
+  writeStored(storage, "project-brian-name", players[0].name);
+  activity = [];
+  lastActivityKey = null;
   gameMode = "local";
   gameState = createGame(players);
   gameState = startGame(gameState, gameState.hostUid);
@@ -1023,17 +1224,34 @@ setupForm.addEventListener("submit", (event) => {
   renderGame();
 });
 
-for (const input of playerInputs) input.addEventListener("input", () => input.setCustomValidity(""));
+for (const input of playerInputs) input.addEventListener("input", () => {
+  for (const field of playerInputs) field.setCustomValidity("");
+});
 for (const [index, checkbox] of botInputs.entries()) {
   checkbox.addEventListener("change", () => {
     const input = document.querySelector(`#${checkbox.dataset.botFor}`);
     input.disabled = checkbox.checked;
-    input.value = checkbox.checked ? `NPC ${index + 1}` : "";
+    input.value = checkbox.checked ? `Computer ${index + 1}` : "";
+    for (const field of playerInputs) field.setCustomValidity("");
     input.setCustomValidity("");
   });
 }
 rollButton.addEventListener("click", () => runGameAction(handleRoll));
 replayMoveButton.addEventListener("click", replayLastTurn);
+document.addEventListener("keydown", (event) => {
+  if (event.repeat || event.ctrlKey || event.metaKey || event.altKey || event.target.closest("input, textarea, select, [contenteditable], dialog") || settingsDialog.open || helpDialog.open) return;
+  if (gameState && !document.querySelector('[data-screen="game"]').hidden) {
+    if (event.key.toLowerCase() === "r" && !rollButton.disabled && !rollButton.hidden) { event.preventDefault(); rollButton.click(); }
+    if (event.key === "Escape" && selectedMarbleId) { selectedMarbleId = null; renderGame(); }
+  }
+});
+document.querySelector(".brand").addEventListener("click", (event) => {
+  event.preventDefault();
+  if (gameState?.phase === "finished") returnToMainMenu();
+  else if (gameState) mainMenuButton.click();
+  else if (onlineRoom) leaveButton.click();
+  else showScreen("home");
+});
 
 
 endGameButton.addEventListener("click", () => {
@@ -1042,7 +1260,10 @@ endGameButton.addEventListener("click", () => {
     if (gameMode === "online") {
       endGame(gameState, firebaseUser.uid);
       await commitOnlineGame((state, uid) => endGame(state, uid), false);
-    } else gameState = endGame(gameState, gameState.hostUid);
+    } else {
+      gameState = endGame(gameState, gameState.hostUid);
+      writeStored(storage, LOCAL_GAME_KEY, null);
+    }
     selectedMarbleId = null;
     returnToMainMenu();
   });
@@ -1052,14 +1273,19 @@ mainMenuButton.addEventListener("click", () => {
   const active = ["opening-roll", "roll", "move"].includes(gameState?.phase);
   const warning = gameMode === "online"
     ? "Return to the main menu? Your seat will remain in the online game."
-    : "Return to the main menu? The current local game will be closed.";
-  if (active && !confirm(warning)) return;
+    : "Return to the main menu? Your local game is saved on this browser.";
+  if (actionLocked || replayInProgress || diceInMotion) return;
+  if (active && gameMode === "online" && !confirm(warning)) return;
+  if (active && gameMode === "local" && savedState !== gameState && !confirm("This browser could not save your game. Leave anyway?")) return;
   returnToMainMenu();
 });
 
 function restartGame() {
   if (gameMode === "local") {
     if (!["finished", "ended"].includes(gameState.phase) && !confirm("Start a new game?")) return;
+    clearTimeout(botTimer);
+    resetDiceDisplays();
+    gameMode = null;
     gameState = null;
     selectedMarbleId = null;
     statusMessage = "";
@@ -1083,17 +1309,27 @@ victoryRestartButton.addEventListener("click", restartGame);
 victoryMenuButton.addEventListener("click", returnToMainMenu);
 
 async function initializeOnlinePlay() {
+  setOnlineBusy(true);
+  retryOnlineButton.hidden = true;
+  onlineStatus.textContent = "Connecting to online rooms…";
+  const initialWatchToken = roomWatchToken;
   const requestedCode = new URLSearchParams(location.search).get("room")?.trim().toUpperCase();
   if (requestedCode) roomCodeInput.value = requestedCode;
   try {
     firebaseUser = await signIn();
     setOnlineBusy(false);
+    onlineStatus.textContent = "Online rooms ready";
+    onlineStatus.dataset.state = "ready";
     if (requestedCode && !/^[A-HJ-NP-Z2-9]{6}$/.test(requestedCode)) {
       homeError.textContent = "That invite code is invalid.";
-    } else if (requestedCode) await watchRoom(requestedCode);
+    } else if (requestedCode && roomWatchToken === initialWatchToken) await watchRoom(requestedCode);
   } catch {
-    homeError.textContent = "Online rooms are unavailable. Check Firebase setup and your network.";
+    onlineStatus.textContent = "Online unavailable · Local play is ready";
+    onlineStatus.dataset.state = "offline";
+    retryOnlineButton.hidden = false;
+    setOnlineBusy(false);
   }
 }
 
+retryOnlineButton.addEventListener("click", initializeOnlinePlay);
 initializeOnlinePlay();

@@ -38,7 +38,7 @@ function faceTexture(value) {
   return texture;
 }
 
-export function throwDice(container, seed, onSettled) {
+export function throwDice(container, seed, onSettled, settled = false) {
   const width = container.clientWidth;
   const height = container.clientHeight;
   if (width < 100 || height < 100) {
@@ -50,7 +50,7 @@ export function throwDice(container, seed, onSettled) {
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.setSize(width, height, false);
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.type = THREE.PCFShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.08;
@@ -59,9 +59,24 @@ export function throwDice(container, seed, onSettled) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x185c39);
   const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 100);
-  const cameraDistance = (TRAY_DEPTH / 2) / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-  camera.position.set(0, cameraDistance * 1.1, cameraDistance * 0.51);
-  camera.lookAt(0, 0, 0);
+  const resize = () => {
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    if (!width || !height) return;
+    renderer.setSize(width, height, false);
+    camera.aspect = width / height;
+    const landscape = width > height;
+    const vertical = landscape ? TRAY_WIDTH : TRAY_DEPTH;
+    const horizontal = landscape ? TRAY_DEPTH : TRAY_WIDTH;
+    const distance = Math.max(vertical / 2, horizontal / (2 * camera.aspect)) / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    camera.position.set(landscape ? distance * 0.51 : 0, distance * 1.1, landscape ? 0 : distance * 0.51);
+    camera.lookAt(0, 0, 0);
+    camera.updateProjectionMatrix();
+    renderer.render(scene, camera);
+  };
+  resize();
+  const resizeObserver = new ResizeObserver(resize);
+  resizeObserver.observe(container);
   scene.add(new THREE.HemisphereLight(0xfff7dd, 0x102c1c, 2.1));
   const light = new THREE.DirectionalLight(0xffffff, 3.8);
   light.position.set(-5, 12, 7);
@@ -97,6 +112,7 @@ export function throwDice(container, seed, onSettled) {
     map: faceTexture(value), roughness: 0.48, metalness: 0.02,
   }));
   const simulation = createDiceSimulation(seed);
+  if (settled) while (!stepDiceSimulation(simulation)) { /* Restore the saved result without a new roll. */ }
   const meshes = simulation.bodies.map((body) => {
     const mesh = new THREE.Mesh(geometry, materials);
     mesh.castShadow = true;
@@ -131,11 +147,13 @@ export function throwDice(container, seed, onSettled) {
     }
     if (!disposed) animationFrame = requestAnimationFrame(frame);
   };
-  animationFrame = requestAnimationFrame(frame);
+  if (settled) onSettled(readDiceResults(simulation));
+  else animationFrame = requestAnimationFrame(frame);
 
   return {
     dispose() {
       disposed = true;
+      resizeObserver.disconnect();
       cancelAnimationFrame(animationFrame);
       geometry.dispose();
       for (const material of materials) {

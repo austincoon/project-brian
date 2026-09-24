@@ -13,6 +13,7 @@ import {
   ROUTE_CONNECTIONS,
   START_POSITIONS,
   TRACK_ORDER,
+  describeMove,
   renderBoard,
   validateBoardData,
 } from "../src/board.js";
@@ -24,7 +25,6 @@ import {
   endGame,
   gameActionKey,
   getLegalMoves,
-  skipTurn,
   startGame,
 } from "../src/game.js";
 import { chooseBotMove, getDicePresentation, getPlayerDiceRows, getPlayerProgress, randomIndex, rollDie } from "../src/dice.js";
@@ -36,6 +36,17 @@ const players = [
   { uid: "a", name: "Alex" },
   { uid: "b", name: "Blair" },
 ];
+
+test("move instructions use distances and distinguish special routes without track numbers", () => {
+  assert.equal(describeMove({ die: 2, destination: "track:9" }), "Move 2 spaces");
+  assert.equal(describeMove({ die: 1, destination: "track:14" }), "Move 1 space");
+  assert.equal(describeMove({ die: 6, kind: "leave-base", destination: "track:2" }), "Leave Base");
+  assert.equal(describeMove({ die: 2, destination: "center" }), "Move 2 spaces → Gambit");
+  assert.equal(describeMove({ die: 3, destination: "home:red:2" }), "Move 3 spaces → Home");
+  const exits = CENTER_SHORTCUT.access.map(({ exit }) => describeMove({ die: 6, kind: "exit-gambit", destination: exit }));
+  assert.equal(new Set(exits).size, 4);
+  assert.ok(exits.every((label) => /^Leave Gambit → (upper|lower) (left|right)$/.test(label)));
+});
 
 test("physical dice determine and naturally replay every possible result", () => {
   assert.deepEqual([...DIE_FACE_VALUES].sort(), [1, 2, 3, 4, 5, 6]);
@@ -189,7 +200,7 @@ test("NPC move selection is unbiased", () => {
 test("dice presentation identifies live, previous, and upcoming rollers", () => {
   let state = activeGame();
   assert.equal(getDicePresentation(state, "a").label, "Blair's opening roll");
-  state.lastAction = { type: "skip" };
+  state.lastAction = { type: "started" };
   assert.equal(getDicePresentation(state, "a").label, "Your next roll");
 
   state = applyRoll(state, "a", [6, 2]);
@@ -578,17 +589,15 @@ test("the fifth Home marble ends the game and cancels doubles", () => {
   assert.equal(state.dice, null);
 });
 
-test("the host can skip another player's opening or normal turn", () => {
+test("the host must wait for another player's opening or normal turn", () => {
   let opening = startGame(createGame(players), "a");
   opening = applyOpeningRoll(opening, "a", [2, 2]);
-  opening = skipTurn(opening, "a");
-  assert.equal(opening.phase, "roll");
-  assert.equal(opening.turnUid, "a");
-  assert.equal(opening.stats.b.skippedTurns, 1);
+  assert.throws(() => applyOpeningRoll(opening, "a", [6, 6]), /already rolled/);
+  assert.equal(opening.turnUid, "b");
 
-  let active = applyRoll(activeGame(), "a", [2, 3]);
-  active = skipTurn(active, "a");
-  assert.equal(active.turnUid, "a");
+  const active = applyRoll(activeGame(), "a", [2, 3]);
+  assert.throws(() => applyRoll(active, "a", [6, 6]), /not this player's turn/);
+  assert.equal(active.turnUid, "b");
 });
 
 test("only the host can end an active game", () => {

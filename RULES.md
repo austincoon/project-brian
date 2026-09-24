@@ -115,14 +115,8 @@ There is no separate star-to-star shortcut. Any marked access positions exist on
 - After both dice are used or discarded, doubles grant another turn; otherwise, play advances clockwise.
 - The game must not wait for a player to select a move when no unused die has a legal move.
 
-## 11. Host skip
+## 11. Ending a game
 
-- The host may skip the action currently owed by an abandoned or unavailable player.
-- Skipping requires confirmation in the user interface.
-- During the opening high-roll, a skip records no competitive roll for that player for the current opening round. That player cannot win that round but remains in the game.
-- During normal play, a skip discards any unresolved roll and any extra turn earned by doubles, then advances clockwise.
-- A skip never moves a marble and cannot declare a winner.
-- The host cannot skip after the game has finished.
 - The host may end an active game after confirmation. An ended game has no winner, accepts no further rolls or moves, and may be restarted by the host.
 
 ## 12. Winning
