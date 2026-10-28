@@ -1,5 +1,5 @@
-import { HOLES_BY_ID, HOME_POSITIONS, START_POSITIONS, TRACK_ORDER } from "./board.js?v=20260923-1";
-import { createGame, getLegalMoves } from "./game.js?v=20260826-23";
+import { HOLES_BY_ID, HOME_POSITIONS, START_POSITIONS, TRACK_ORDER } from "./board.js";
+import { createGame, getLegalMoves } from "./game.js";
 
 export const LOCAL_GAME_KEY = "project-brian-local-game";
 

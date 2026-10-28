@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "aggravation",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["scripts/serve.mjs", "8137"],
+      "port": 8137
+    }
+  ]
+}

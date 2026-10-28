@@ -27,8 +27,9 @@ import {
   getLegalMoves,
   startGame,
 } from "../src/game.js";
-import { chooseBotMove, getDicePresentation, getPlayerDiceRows, getPlayerProgress, randomIndex, rollDie } from "../src/dice.js";
-import { DIE_FACE_VALUES, replaySeedFor, simulateDice } from "../src/dice-physics.js";
+import { BOT_SKILLS, chooseBotMove, evaluatePosition, normalizeBotSkill } from "../src/bot.js";
+import { getDicePresentation, getPlayerDiceRows, getPlayerProgress, randomIndex, rollDie } from "../src/dice.js";
+import { DIE_FACE_VALUES, planDiceThrow, simulateDice, visibleDieValue } from "../src/dice-physics.js";
 import { loadTurnReplay, saveTurnReplay } from "../src/replay.js";
 import { applyTheme, loadTheme, normalizeTheme, THEME_STORAGE_KEY } from "../src/theme.js";
 
@@ -48,18 +49,28 @@ test("move instructions use distances and distinguish special routes without tra
   assert.ok(exits.every((label) => /^Leave Gambit → (upper|lower) (left|right)$/.test(label)));
 });
 
-test("physical dice determine and naturally replay every possible result", () => {
+test("every physical throw lands on the dice the game rolled", () => {
   assert.deepEqual([...DIE_FACE_VALUES].sort(), [1, 2, 3, 4, 5, 6]);
   assert.equal(DIE_FACE_VALUES[0] + DIE_FACE_VALUES[1], 7);
   assert.equal(DIE_FACE_VALUES[2] + DIE_FACE_VALUES[3], 7);
   assert.equal(DIE_FACE_VALUES[4] + DIE_FACE_VALUES[5], 7);
+  let seed = 7;
+  const throwLengths = new Set();
   for (let first = 1; first <= 6; first += 1) {
     for (let second = 1; second <= 6; second += 1) {
-      const expected = [first, second];
-      assert.deepEqual(simulateDice(replaySeedFor(expected)), expected);
+      seed = (seed * 1103515245 + 12345) >>> 0;
+      const plan = planDiceThrow([first, second], seed);
+      throwLengths.add(plan.steps);
+      assert.equal(plan.frames.length, (plan.steps + 1) * 2 * 7);
+      assert.ok(plan.steps <= 200);
+      assert.deepEqual(plan.finalQuaternions.map((quaternion, index) => visibleDieValue(quaternion, plan.turns[index])), [first, second]);
     }
   }
+  // Throws are not replayed from a fixed table, so repeated results still look different.
+  assert.ok(throwLengths.size > 5);
+  assert.deepEqual(planDiceThrow([3, 4], 99).steps, planDiceThrow([3, 4], 99).steps);
   assert.deepEqual(simulateDice(0x12345678), simulateDice(0x12345678));
+  assert.throws(() => planDiceThrow([0, 7], 1), RangeError);
 });
 
 test("visual themes persist and unknown values fall back to default", () => {
@@ -506,9 +517,69 @@ test("NPCs leave the Gambit through the corner closest to their Home", () => {
     state.dice = [1, 3];
     state.remainingDice = [1, 3];
     place(state, `${uid}:0`, CENTER_SHORTCUT.id, 6);
+    // With the rest of the marbles Home, the 1 must take the Gambit marble out.
+    for (let number = 1; number < 5; number += 1) place(state, `${uid}:${number}`, HOME_POSITIONS[color][number], 47 + number);
 
-    assert.equal(chooseBotMove(getLegalMoves(state, uid)).destination, nearestHome[color]);
+    assert.equal(chooseBotMove(state, uid).destination, nearestHome[color]);
   });
+});
+
+function botTurn(state, uid) {
+  let next = state;
+  while (next.phase === "move" && next.turnUid === uid) {
+    const move = chooseBotMove(next, uid, { random: () => 0.5 });
+    next = applyMove(next, uid, move.pieceId, move.destination, move.die);
+  }
+  return next;
+}
+
+test("computer players capture, head Home, and avoid needless danger", () => {
+  // A capture beats ordinary moves of the same dice.
+  let state = movePhase([3, 3]);
+  place(state, "a:0", "track:6", 4);
+  place(state, "a:1", "track:20", 18);
+  place(state, "b:0", "track:9", 19);
+  assert.match(botTurn(state, "a").pieces["b:0"].positionId, /^base:blue:/);
+
+  // A marble at its Home entrance takes the safe lane over a run elsewhere.
+  state = movePhase([2, 2]);
+  place(state, "a:0", "track:0", 46);
+  place(state, "a:1", "track:10", 8);
+  assert.match(botTurn(state, "a").pieces["a:0"].positionId, /^home:red:/);
+
+  // Sixes bring a waiting marble out instead of only pushing one marble along.
+  state = movePhase([6, 6]);
+  place(state, "a:0", "track:20", 18);
+  const released = Object.values(botTurn(state, "a").pieces).filter(({ ownerUid, positionId }) => (
+    ownerUid === "a" && !positionId.startsWith("base:")
+  ));
+  assert.equal(released.length, 2);
+
+  // Stopping right in front of an opponent is worse than stopping well clear of it.
+  state = movePhase([2, 2]);
+  place(state, "a:0", "track:10", 8);
+  place(state, "b:0", "track:9", 19);
+  const exposed = structuredClone(state);
+  place(exposed, "a:0", "track:12", 10);
+  const safe = structuredClone(state);
+  place(safe, "a:0", "track:30", 28);
+  assert.ok(evaluatePosition(safe, "a") - (12 + 28) > evaluatePosition(exposed, "a") - (12 + 10));
+});
+
+test("computer skill levels always choose legal moves", () => {
+  assert.deepEqual(BOT_SKILLS, ["easy", "normal", "hard"]);
+  assert.equal(normalizeBotSkill("expert"), "normal");
+  const state = movePhase([1, 6]);
+  place(state, "a:0", "track:20", 18);
+  const legal = getLegalMoves(state, "a");
+  for (const skill of BOT_SKILLS) {
+    for (let attempt = 0; attempt < 20; attempt += 1) {
+      const move = chooseBotMove(state, "a", { skill });
+      assert.ok(legal.some((candidate) => candidate.pieceId === move.pieceId
+        && candidate.destination === move.destination && candidate.die === move.die));
+    }
+  }
+  assert.equal(chooseBotMove(movePhase([2, 3]), "a"), null);
 });
 
 test("a 6 can leave Base and the remaining 5 can enter the Gambit", () => {

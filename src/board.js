@@ -302,6 +302,12 @@ function drawPlayerZones(svg, state) {
   svg.append(zones);
 }
 
+function setPathPreview(svg, path, active) {
+  for (const id of path ?? []) {
+    svg.querySelector?.(`[data-hole-id="${id}"]`)?.classList?.toggle("is-path-preview", active);
+  }
+}
+
 function drawHoles(svg, state) {
   const holes = svgElement("g", { class: "board-holes" });
 
@@ -352,12 +358,35 @@ function drawHoles(svg, state) {
           state.onDestinationSelect(hole.id);
         }
       });
+      const path = state.destinationPaths[hole.id];
+      for (const [type, active] of [["mouseenter", true], ["focus", true], ["mouseleave", false], ["blur", false]]) {
+        circle.addEventListener(type, () => setPathPreview(svg, path, active));
+      }
     }
 
     holes.append(circle);
   }
 
   svg.append(holes);
+}
+
+// Small die badges show which roll each highlighted destination spends.
+function drawDestinationBadges(svg, state) {
+  const badges = svgElement("g", { class: "destination-badges", "aria-hidden": "true" });
+  for (const id of state.legalDestinationIds) {
+    const hole = HOLES_BY_ID[id];
+    const dice = state.destinationDice[id];
+    if (!hole || !dice?.length) continue;
+    const x = hole.x + (hole.kind === "center" ? 22 : 17);
+    const y = hole.y - (hole.kind === "center" ? 22 : 17);
+    const badge = svgElement("g", { class: "destination-badge", transform: `translate(${x} ${y})` });
+    badge.append(svgElement("rect", { x: dice.length > 1 ? -17 : -11, y: -11, width: dice.length > 1 ? 34 : 22, height: 22, rx: 11 }));
+    const label = svgElement("text", { y: 1 });
+    label.textContent = dice.join("/");
+    badge.append(label);
+    badges.append(badge);
+  }
+  svg.append(badges);
 }
 
 function drawMarbles(svg, marbles, state) {
@@ -392,6 +421,7 @@ function drawMarbles(svg, marbles, state) {
     if (marble.color === state.activePlayer) classes.push("is-active-player");
     if (marble.id === state.selectedMarbleId) classes.push("is-selected");
     if (state.legalMarbleIds.has(marble.id)) classes.push("is-legal-move");
+    if (state.captureTargetIds.has(marble.id)) classes.push("is-capture-target");
     if (replaying) classes.push("is-replaying");
     if (movingReplay) classes.push("is-replay-piece");
     if (capturedReplay) classes.push("is-replay-capture");
@@ -465,6 +495,9 @@ export function renderBoard(container, options = {}) {
     activePlayer: options.activePlayer ?? null,
     legalDestinationIds: new Set(options.legalDestinationIds ?? []),
     destinationLabels: options.destinationLabels ?? {},
+    destinationDice: options.destinationDice ?? {},
+    destinationPaths: options.destinationPaths ?? {},
+    captureTargetIds: new Set(options.captureTargetIds ?? []),
     legalMarbleIds: new Set(options.legalMarbleIds ?? []),
     selectableMarbleIds: new Set(options.selectableMarbleIds ?? []),
     selectedMarbleId: options.selectedMarbleId ?? null,
@@ -481,6 +514,9 @@ export function renderBoard(container, options = {}) {
     role: "group",
     "aria-labelledby": `${state.idPrefix}board-title ${state.idPrefix}board-description`,
   });
+  if (PLAYERS[state.activePlayer]) {
+    svg.setAttribute("style", `--active-player-color: ${PLAYERS[state.activePlayer].color}; --active-player-dark: ${PLAYERS[state.activePlayer].darkColor}`);
+  }
   const title = svgElement("title", { id: `${state.idPrefix}board-title` });
   title.textContent = "Brian's Aggravation game board";
   const description = svgElement("desc", { id: `${state.idPrefix}board-description` });
@@ -495,12 +531,13 @@ export function renderBoard(container, options = {}) {
   drawPlayerZones(svg, state);
   drawHoles(svg, state);
   const replayAnimations = drawMarbles(svg, options.marbles ?? [], state);
+  drawDestinationBadges(svg, state);
   container.replaceChildren(svg);
   if (focusedMarble || focusedHole) {
     const targets = container.querySelectorAll?.("[data-marble-id], [data-hole-id]") ?? [];
     [...targets].find((element) => focusedMarble
       ? element.getAttribute("data-marble-id") === focusedMarble
-      : element.getAttribute("data-hole-id") === focusedHole)?.focus();
+      : element.getAttribute("data-hole-id") === focusedHole)?.focus({ preventScroll: true });
   }
   (globalThis.requestAnimationFrame ?? ((callback) => callback()))(() => {
     for (const { animation, delay } of replayAnimations) {

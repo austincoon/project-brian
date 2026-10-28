@@ -13,14 +13,27 @@
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Pixelify+Sans:wght@400..700&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./styles.css?v=20260923-4">
-    <link rel="stylesheet" href="./polish.css?v=20260923-4">
+    <!-- Skin fonts load without blocking the first paint; the default skin uses system fonts. -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Pixelify+Sans:wght@400..700&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="./styles.css?v=20261028-1">
+    <link rel="stylesheet" href="./polish.css?v=20261028-1">
+    <!-- Every app module shares one version so a release never mixes old and new code. Bump them together. -->
     <script type="importmap">
       {
         "imports": {
           "three": "./vendor/three.module.js",
-          "three/addons/geometries/": "./vendor/"
+          "three/addons/geometries/": "./vendor/",
+          "./src/board.js": "./src/board.js?v=20261028-1",
+          "./src/bot.js": "./src/bot.js?v=20261028-1",
+          "./src/dice.js": "./src/dice.js?v=20261028-1",
+          "./src/dice-physics.js": "./src/dice-physics.js?v=20261028-1",
+          "./src/dice-scene.js": "./src/dice-scene.js?v=20261028-1",
+          "./src/firebase.js": "./src/firebase.js?v=20261028-1",
+          "./src/game.js": "./src/game.js?v=20261028-1",
+          "./src/replay.js": "./src/replay.js?v=20261028-1",
+          "./src/session.js": "./src/session.js?v=20261028-1",
+          "./src/sound.js": "./src/sound.js?v=20261028-1",
+          "./src/theme.js": "./src/theme.js?v=20261028-1"
         }
       }
     </script>
@@ -105,7 +118,7 @@
               <label class="bot-toggle"><input type="checkbox" data-bot-for="player-4" aria-label="Computer player 4"> Computer</label>
             </div>
           </fieldset>
-          <p class="setup-note">Local games save automatically.</p>
+          <p class="setup-note">Local games save automatically. Computer skill is in Settings.</p>
           <button type="submit">Start local game</button>
           <button class="text-button" type="button" data-home>Back</button>
         </form>
@@ -145,6 +158,7 @@
             <section class="turn-guide" aria-labelledby="turn-guide-title">
               <h2 id="turn-guide-title">Roll to begin</h2>
               <p id="turn-guide-copy"></p>
+              <div id="turn-dice" class="dice turn-dice" role="img" hidden></div>
               <button id="roll-button" type="button" aria-keyshortcuts="R">Roll dice</button>
               <div id="move-choices" class="move-choices"></div>
               <p id="turn-status" class="turn-status" aria-live="polite">Each player rolls both dice. Highest total goes first.</p>
@@ -174,7 +188,6 @@
 
         <div class="board-stage">
           <div id="board" class="board"></div>
-          <div id="player-dice-grid" class="player-dice-grid" role="region" aria-label="Player dice"></div>
         </div>
 
       </section>
@@ -239,8 +252,17 @@
             <span><strong>Gothic</strong></span>
           </label>
         </fieldset>
+        <div class="preference-row" role="radiogroup" aria-labelledby="bot-skill-title">
+          <span><strong id="bot-skill-title">Computer skill</strong><small>How carefully computer players choose moves.</small></span>
+          <span class="segmented">
+            <label><input type="radio" name="bot-skill" value="easy"><span>Easy</span></label>
+            <label><input type="radio" name="bot-skill" value="normal"><span>Normal</span></label>
+            <label><input type="radio" name="bot-skill" value="hard"><span>Hard</span></label>
+          </span>
+        </div>
+        <label class="preference-row"><span><strong>Sound effects</strong><small>Dice, moves, captures, and wins.</small></span><input id="sound-effects" type="checkbox"></label>
         <label class="preference-row"><span><strong>Quick play</strong><small>Skip 3D dice and move animations.</small></span><input id="quick-play" type="checkbox"></label>
-        <p class="settings-note"><kbd>R</kbd> to roll · <kbd>Esc</kbd> to deselect</p>
+        <p class="settings-note"><kbd>R</kbd> to roll · <kbd>1</kbd>–<kbd>5</kbd> to pick a marble · <kbd>Esc</kbd> to deselect</p>
         <button class="settings-done" type="submit">Done</button>
       </form>
     </dialog>
@@ -255,13 +277,13 @@
           <section><span>03</span><h3>A little aggravation</h3><p>Land on an opponent to send them back to Base. You can pass opponents, but <strong>cannot pass or land on your own marbles</strong>.</p></section>
           <section><span>04</span><h3>Take a Gambit</h3><p>Land exactly on the center via a dashed route. On a later turn, a <strong>1 or 6</strong> exits to any corner access space. Opponents can capture you here, too.</p></section>
           <section><span>05</span><h3>Bring it Home</h3><p>Travel counterclockwise to your Home entrance. Move into and along your lane with an <strong>exact die value</strong>. Home is safe from capture.</p></section>
-          <section><span>06</span><h3>Your move, your way</h3><p>Choose a ringed marble, then a highlighted destination. Or use the numbered marble and move buttons beside the board. Each move shows the die it uses.</p></section>
+          <section><span>06</span><h3>Your move, your way</h3><p>Choose a ringed marble, then a highlighted destination; each badge shows the die it spends. Or use the marble and move buttons beside the board, or press <kbd>1</kbd>–<kbd>5</kbd>.</p></section>
         </div>
         <p><a href="./RULES.md" target="_blank" rel="noopener">Read the complete rules ↗</a></p>
         <button type="submit">Let's play</button>
       </form>
     </dialog>
 
-    <script type="module" src="./src/app.js?v=20260923-4"></script>
+    <script type="module" src="./src/app.js?v=20261028-1"></script>
   </body>
 </html>

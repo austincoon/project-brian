@@ -6,7 +6,7 @@ import {
   PLAYERS,
   START_POSITIONS,
   TRACK_ORDER,
-} from "./board.js?v=20260823-19";
+} from "./board.js";
 
 const TRACK_LENGTH = TRACK_ORDER.length;
 const HOME_START = TRACK_LENGTH - 1;

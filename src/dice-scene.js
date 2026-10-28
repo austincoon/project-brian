@@ -6,14 +6,12 @@ import {
   DIE_SIZE,
   TRAY_DEPTH,
   TRAY_WIDTH,
-  createDiceSimulation,
-  readDiceResults,
-  replaySeedFor,
-  simulateDice,
-  stepDiceSimulation,
-} from "./dice-physics.js?v=20260826-2";
+  planDiceThrow,
+} from "./dice-physics.js";
 
-export { replaySeedFor };
+const STEP_SECONDS = 1 / 60;
+// One renderer is shared by every throw so each roll avoids a new WebGL context and shader compile.
+let table = null;
 
 function faceTexture(value) {
   const canvas = document.createElement("canvas");
@@ -38,45 +36,18 @@ function faceTexture(value) {
   return texture;
 }
 
-export function throwDice(container, seed, onSettled, settled = false) {
-  const width = container.clientWidth;
-  const height = container.clientHeight;
-  if (width < 100 || height < 100) {
-    onSettled(simulateDice(seed));
-    return { dispose() {} };
-  }
-
+function createTable() {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-  renderer.setSize(width, height, false);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.08;
-  container.replaceChildren(renderer.domElement);
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x185c39);
-  const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 100);
-  const resize = () => {
-    const width = container.clientWidth;
-    const height = container.clientHeight;
-    if (!width || !height) return;
-    renderer.setSize(width, height, false);
-    camera.aspect = width / height;
-    const landscape = width > height;
-    const vertical = landscape ? TRAY_WIDTH : TRAY_DEPTH;
-    const horizontal = landscape ? TRAY_DEPTH : TRAY_WIDTH;
-    const distance = Math.max(vertical / 2, horizontal / (2 * camera.aspect)) / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-    camera.position.set(landscape ? distance * 0.51 : 0, distance * 1.1, landscape ? 0 : distance * 0.51);
-    camera.lookAt(0, 0, 0);
-    camera.updateProjectionMatrix();
-    renderer.render(scene, camera);
-  };
-  resize();
-  const resizeObserver = new ResizeObserver(resize);
-  resizeObserver.observe(container);
+  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
   scene.add(new THREE.HemisphereLight(0xfff7dd, 0x102c1c, 2.1));
   const light = new THREE.DirectionalLight(0xffffff, 3.8);
   light.position.set(-5, 12, 7);
@@ -92,11 +63,8 @@ export function throwDice(container, seed, onSettled, settled = false) {
   felt.receiveShadow = true;
   scene.add(felt);
   const railMaterial = new THREE.MeshStandardMaterial({ color: 0x4f2710, roughness: 0.72 });
-  const railGeometries = [];
   const addRail = (x, z, railWidth, railDepth) => {
-    const geometry = new THREE.BoxGeometry(railWidth, 0.55, railDepth);
-    railGeometries.push(geometry);
-    const rail = new THREE.Mesh(geometry, railMaterial);
+    const rail = new THREE.Mesh(new THREE.BoxGeometry(railWidth, 0.55, railDepth), railMaterial);
     rail.position.set(x, 0.22, z);
     rail.castShadow = true;
     rail.receiveShadow = true;
@@ -111,60 +79,125 @@ export function throwDice(container, seed, onSettled, settled = false) {
   const materials = DIE_FACE_VALUES.map((value) => new THREE.MeshStandardMaterial({
     map: faceTexture(value), roughness: 0.48, metalness: 0.02,
   }));
-  const simulation = createDiceSimulation(seed);
-  if (settled) while (!stepDiceSimulation(simulation)) { /* Restore the saved result without a new roll. */ }
-  const meshes = simulation.bodies.map((body) => {
+  const dice = [0, 1].map(() => {
     const mesh = new THREE.Mesh(geometry, materials);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
-    mesh.position.copy(body.position);
-    mesh.quaternion.copy(body.quaternion);
+    mesh.visible = false;
     scene.add(mesh);
     return mesh;
   });
-  renderer.render(scene, camera);
+
+  renderer.domElement.addEventListener("webglcontextlost", (event) => {
+    event.preventDefault();
+    if (table?.renderer === renderer) table = null;
+  });
+  return { renderer, scene, camera, dice };
+}
+
+function frameCamera({ renderer, camera }, width, height) {
+  renderer.setSize(width, height, false);
+  camera.aspect = width / height;
+  const landscape = width > height;
+  const vertical = landscape ? TRAY_WIDTH : TRAY_DEPTH;
+  const horizontal = landscape ? TRAY_DEPTH : TRAY_WIDTH;
+  const distance = Math.max(vertical / 2, horizontal / (2 * camera.aspect)) / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+  camera.position.set(landscape ? distance * 0.51 : 0, distance * 1.1, landscape ? 0 : distance * 0.51);
+  camera.lookAt(0, 0, 0);
+  camera.updateProjectionMatrix();
+}
+
+function randomSeed() {
+  return crypto.getRandomValues(new Uint32Array(1))[0];
+}
+
+// Animates a fresh throw that lands on `values`, which the game has already rolled.
+export function throwDice(container, values, onSettled, settled = false) {
+  const width = container.clientWidth;
+  const height = container.clientHeight;
+  if (width < 100 || height < 100) {
+    onSettled([...values]);
+    return { dispose() {} };
+  }
+
+  table ??= createTable();
+  const current = table;
+  const { renderer, scene, camera, dice } = current;
+  const plan = planDiceThrow(values, randomSeed());
+  const turns = plan.turns.map(({ x, y, z, w }) => new THREE.Quaternion(x, y, z, w));
+  const from = new THREE.Quaternion();
+  const to = new THREE.Quaternion();
+  const showFrame = (position) => {
+    const step = Math.min(Math.floor(position), plan.steps);
+    const next = Math.min(step + 1, plan.steps);
+    const blend = Math.min(position - step, 1);
+    dice.forEach((mesh, index) => {
+      const a = (step * 2 + index) * 7;
+      const b = (next * 2 + index) * 7;
+      mesh.position.set(
+        THREE.MathUtils.lerp(plan.frames[a], plan.frames[b], blend),
+        THREE.MathUtils.lerp(plan.frames[a + 1], plan.frames[b + 1], blend),
+        THREE.MathUtils.lerp(plan.frames[a + 2], plan.frames[b + 2], blend),
+      );
+      from.fromArray(plan.frames, a + 3);
+      to.fromArray(plan.frames, b + 3);
+      mesh.quaternion.slerpQuaternions(from, to, blend).multiply(turns[index]);
+      mesh.visible = true;
+    });
+    renderer.render(scene, camera);
+  };
+
+  container.replaceChildren(renderer.domElement);
+  let position = settled ? plan.steps : 0;
+  const resize = () => {
+    if (!container.clientWidth || !container.clientHeight) return;
+    frameCamera(current, container.clientWidth, container.clientHeight);
+    showFrame(position);
+  };
+  resize();
+  const resizeObserver = new ResizeObserver(resize);
+  resizeObserver.observe(container);
 
   let animationFrame;
+  let done = false;
   let previous = performance.now();
-  let accumulator = 0;
-  let disposed = false;
+  const stop = () => {
+    done = true;
+    cancelAnimationFrame(animationFrame);
+    document.removeEventListener("visibilitychange", skipWhenHidden);
+  };
+  const finish = () => {
+    if (done) return;
+    stop();
+    position = plan.steps;
+    showFrame(position);
+    onSettled([...values]);
+  };
+  // Hidden tabs pause animation frames, so a roll finishes at once rather than stalling the game.
+  function skipWhenHidden() {
+    if (document.hidden) finish();
+  }
   const frame = (now) => {
-    accumulator += Math.min((now - previous) / 1000, 0.1);
+    if (done) return;
+    position += Math.min((now - previous) / 1000, 0.1) / STEP_SECONDS;
     previous = now;
-    let finished = false;
-    while (accumulator >= 1 / 60 && !finished) {
-      finished = stepDiceSimulation(simulation);
-      accumulator -= 1 / 60;
-    }
-    for (const [index, body] of simulation.bodies.entries()) {
-      meshes[index].position.copy(body.position);
-      meshes[index].quaternion.copy(body.quaternion);
-    }
-    renderer.render(scene, camera);
-    if (finished) {
-      onSettled(readDiceResults(simulation));
+    if (position >= plan.steps) {
+      finish();
       return;
     }
-    if (!disposed) animationFrame = requestAnimationFrame(frame);
+    showFrame(position);
+    animationFrame = requestAnimationFrame(frame);
   };
-  if (settled) onSettled(readDiceResults(simulation));
-  else animationFrame = requestAnimationFrame(frame);
+  if (settled || document.hidden) finish();
+  else {
+    document.addEventListener("visibilitychange", skipWhenHidden);
+    animationFrame = requestAnimationFrame(frame);
+  }
 
   return {
     dispose() {
-      disposed = true;
+      stop();
       resizeObserver.disconnect();
-      cancelAnimationFrame(animationFrame);
-      geometry.dispose();
-      for (const material of materials) {
-        material.map.dispose();
-        material.dispose();
-      }
-      felt.geometry.dispose();
-      felt.material.dispose();
-      for (const railGeometry of railGeometries) railGeometry.dispose();
-      railMaterial.dispose();
-      renderer.dispose();
     },
   };
 }

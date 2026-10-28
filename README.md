@@ -8,7 +8,11 @@ Live site: <https://austincoon.github.io/project-brian/>
 
 The app uses native JavaScript modules, so serve it over HTTP rather than opening `index.html` directly.
 
-From this directory, run either:
+From this directory, run any of:
+
+```powershell
+node scripts/serve.mjs
+```
 
 ```powershell
 python -m http.server 8000
@@ -20,7 +24,7 @@ or, on Windows when `python` points somewhere else:
 py -m http.server 8000
 ```
 
-Then open <http://localhost:8000>.
+Then open <http://localhost:8000>. The Node server needs nothing beyond the Node.js already used for the tests.
 
 No npm install or build step is required.
 
@@ -64,3 +68,17 @@ See [RULES.md](./RULES.md) for the frozen game rules.
 There is still no build step or new dependency. `polish.css` contains the layout improvements and default-skin refinements; `styles.css` retains the original skins. Core movement rules remain unchanged; host turn skipping has been removed. Its legacy data field remains only for compatibility with existing online rooms and database rules.
 
 Validation: `node --test` covers the existing rules, physical dice replay, themes, database boundaries, and saved-game validation. Browser checks cover local setup, computer turns, both die actions, refresh/resume, keyboard movement and rolling, in-game help/settings, all five skins, and phone/desktop layouts. Multi-browser online play still needs a live multiplayer check; no database rules or Firebase configuration were changed.
+
+## October 2026 gameplay update
+
+- **Smarter computer players.** NPCs now look ahead across both dice and weigh progress, captures, Home, the Gambit, and the risk of being captured. **Settings → Computer skill** offers Easy (close to the old random play), Normal (default), and Hard. In simulation, Hard wins about 89% of two-player games against the old random bot. Online, the host's setting drives the room's NPCs.
+- **Fresh dice every roll.** Each roll is a new physical throw, rotated so the face the game rolled lands on top, instead of replaying one of 36 canned animations. Throws settle faster (about 1.8 s), one WebGL renderer is reused for the whole session, and a roll finishes instantly if the tab is hidden so games never stall in the background.
+- **Clearer moves.** Every destination carries a badge in the mover's colour with the die it spends, hovering one previews its path, and marbles that would be captured are marked. In the default skin, destinations are rings in the mover's colour instead of gold dots that looked like yellow marbles. Marbles waiting in Base share a single **Base** choice, the only movable marble is selected automatically, and <kbd>1</kbd>–<kbd>5</kbd> pick marbles. Capture moves name the player being sent back.
+- **Bigger board.** Each scoreboard row now shows that player's latest dice, replacing the separate dice cards, so the board fills the available height (521 px at 1366×657 and 891 px at 1920×1080). On tablets and phones the dice tray slides over the board while rolling, so the board and Roll button fit on one screen. Fixed: at about 760–830 px wide the turn header was hidden behind the controls and the Roll button floated over the page.
+- **Better endings.** The winning move plays on the board before the results appear, **Play again** starts a rematch with the same players, and won games are no longer offered under **Resume game**.
+- **Sound effects** for dice, moves, captures, Home, your turn, and wins, synthesized in the browser with no audio files. Turn them off in Settings.
+- **Faster pacing.** Computer turns wait less between actions, and moves animate a little quicker.
+
+Every module previously imported its neighbours with a different `?v=` string, so browsers downloaded and ran `board.js` three times and `game.js` twice. Internal imports now have no query strings; the import map in `index.html` gives every module one shared version. **When releasing, bump every `v=` value in `index.html` together.**
+
+Validation: `node --test` adds checks that every throw lands on the rolled dice and that computer players capture, head Home, release marbles, weigh danger, and always pick legal moves at every skill. Browser checks covered resume, Base release, Gambit entry, NPC captures, the winning-move flow, rematches, scripted full games, and layouts at 375×812, 768×1024, 1024×768, 1366×657, 1440×900, and 1920×1080. Online play was not tested live; no database rules, Firebase configuration, or saved-game shapes changed.

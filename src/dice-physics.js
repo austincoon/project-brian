@@ -4,16 +4,20 @@ export const DIE_FACE_VALUES = [3, 4, 2, 5, 1, 6];
 export const TRAY_WIDTH = 8;
 export const TRAY_DEPTH = 14;
 export const DIE_SIZE = 1.45;
-const MIN_STEPS = 110;
-const MAX_STEPS = 180;
-const REPLAY_SEEDS = {
-  "1-1": 26, "1-2": 10, "1-3": 4, "1-4": 23, "1-5": 8, "1-6": 64,
-  "2-1": 35, "2-2": 5, "2-3": 40, "2-4": 2, "2-5": 34, "2-6": 6,
-  "3-1": 22, "3-2": 43, "3-3": 19, "3-4": 44, "3-5": 11, "3-6": 66,
-  "4-1": 29, "4-2": 108, "4-3": 12, "4-4": 42, "4-5": 28, "4-6": 13,
-  "5-1": 30, "5-2": 16, "5-3": 3, "5-4": 39, "5-5": 18, "5-6": 51,
-  "6-1": 14, "6-2": 67, "6-3": 58, "6-4": 69, "6-5": 1, "6-6": 9,
-};
+const MIN_STEPS = 40;
+const MAX_STEPS = 200;
+// Below these squared speeds a lying die no longer looks like it is moving.
+const QUIET_SPEED = 0.06;
+const QUIET_SPIN = 0.12;
+const QUIET_HOLD_STEPS = 5;
+const FLAT = 0.99;
+const BRISK_STEPS = 130;
+const THROW_ATTEMPTS = 8;
+// Local face normals in the same order as DIE_FACE_VALUES (+x, -x, +y, -y, +z, -z).
+const FACE_NORMALS = [
+  [1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1],
+].map(([x, y, z]) => new CANNON.Vec3(x, y, z));
+const FRAME_SIZE = 14;
 
 function seededRandom(seed) {
   let state = seed >>> 0 || 0x6d2b79f5;
@@ -37,12 +41,29 @@ function randomQuaternion(random) {
   );
 }
 
+function topFaceIndex(quaternion) {
+  let best = 0;
+  let bestHeight = -Infinity;
+  FACE_NORMALS.forEach((normal, index) => {
+    const height = quaternion.vmult(normal).y;
+    if (height > bestHeight) {
+      best = index;
+      bestHeight = height;
+    }
+  });
+  return best;
+}
+
+function flatness(body) {
+  return body.quaternion.vmult(FACE_NORMALS[topFaceIndex(body.quaternion)]).y;
+}
+
 export function createDiceSimulation(seed) {
   const random = seededRandom(seed);
-  const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -18, 0) });
+  const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -26, 0) });
   world.allowSleep = true;
-  world.defaultContactMaterial.friction = 0.34;
-  world.defaultContactMaterial.restitution = 0.34;
+  world.defaultContactMaterial.friction = 0.45;
+  world.defaultContactMaterial.restitution = 0.28;
   const floor = new CANNON.Body({ type: CANNON.Body.STATIC, shape: new CANNON.Plane() });
   floor.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
   world.addBody(floor);
@@ -61,8 +82,8 @@ export function createDiceSimulation(seed) {
     const body = new CANNON.Body({
       mass: 1,
       shape: new CANNON.Box(new CANNON.Vec3(DIE_SIZE / 2, DIE_SIZE / 2, DIE_SIZE / 2)),
-      linearDamping: 0.18,
-      angularDamping: 0.3,
+      linearDamping: 0.35,
+      angularDamping: 0.55,
       sleepSpeedLimit: 0.12,
       sleepTimeLimit: 0.3,
     });
@@ -73,27 +94,24 @@ export function createDiceSimulation(seed) {
     world.addBody(body);
     return body;
   });
-  return { world, bodies, steps: 0 };
+  return { world, bodies, steps: 0, quietSteps: 0 };
 }
 
 export function stepDiceSimulation(simulation) {
   simulation.world.step(1 / 60);
   simulation.steps += 1;
   const quiet = simulation.bodies.every((body) => (
-    body.velocity.lengthSquared() < 0.025 && body.angularVelocity.lengthSquared() < 0.025
+    body.velocity.lengthSquared() < QUIET_SPEED
+    && body.angularVelocity.lengthSquared() < QUIET_SPIN
+    && flatness(body) > FLAT
   ));
-  return simulation.steps >= MAX_STEPS || (simulation.steps >= MIN_STEPS && quiet);
+  simulation.quietSteps = quiet ? simulation.quietSteps + 1 : 0;
+  return simulation.steps >= MAX_STEPS
+    || (simulation.steps >= MIN_STEPS && simulation.quietSteps >= QUIET_HOLD_STEPS);
 }
 
 export function readDiceResults(simulation) {
-  const faces = [
-    [3, new CANNON.Vec3(1, 0, 0)], [4, new CANNON.Vec3(-1, 0, 0)],
-    [2, new CANNON.Vec3(0, 1, 0)], [5, new CANNON.Vec3(0, -1, 0)],
-    [1, new CANNON.Vec3(0, 0, 1)], [6, new CANNON.Vec3(0, 0, -1)],
-  ];
-  return simulation.bodies.map((body) => faces.reduce((highest, face) => (
-    body.quaternion.vmult(face[1]).y > body.quaternion.vmult(highest[1]).y ? face : highest
-  ))[0]);
+  return simulation.bodies.map((body) => DIE_FACE_VALUES[topFaceIndex(body.quaternion)]);
 }
 
 export function simulateDice(seed) {
@@ -102,8 +120,59 @@ export function simulateDice(seed) {
   return readDiceResults(simulation);
 }
 
-export function replaySeedFor(dice) {
-  const seed = REPLAY_SEEDS[dice.join("-")];
-  if (!seed) throw new RangeError("A physical replay requires two die values from 1 through 6.");
-  return seed;
+// The cube turn that shows `value` on the face the physics left pointing up.
+function faceTurn(quaternion, value) {
+  const wanted = FACE_NORMALS[DIE_FACE_VALUES.indexOf(value)];
+  const up = FACE_NORMALS[topFaceIndex(quaternion)];
+  return new CANNON.Quaternion().setFromVectors(wanted, up);
+}
+
+export function visibleDieValue(quaternion, turn) {
+  return DIE_FACE_VALUES[topFaceIndex(quaternion.mult(turn))];
+}
+
+function recordThrow(seed) {
+  const simulation = createDiceSimulation(seed);
+  const frames = [];
+  const record = () => {
+    for (const { position, quaternion } of simulation.bodies) {
+      frames.push(position.x, position.y, position.z, quaternion.x, quaternion.y, quaternion.z, quaternion.w);
+    }
+  };
+  record();
+  let finished = false;
+  while (!finished) {
+    finished = stepDiceSimulation(simulation);
+    record();
+  }
+  return {
+    frames: Float32Array.from(frames),
+    steps: simulation.steps,
+    flat: simulation.bodies.every((body) => flatness(body) > FLAT),
+    finalQuaternions: simulation.bodies.map(({ quaternion }) => quaternion.clone()),
+  };
+}
+
+// Records a natural throw and the face turns that make it land on the dice the game already rolled.
+export function planDiceThrow(dice, seed) {
+  if (!Array.isArray(dice) || dice.length !== 2 || dice.some((value) => !DIE_FACE_VALUES.includes(value))) {
+    throw new RangeError("A dice throw requires two die values from 1 through 6.");
+  }
+  const random = seededRandom(seed);
+  let best = null;
+  for (let attempt = 0; attempt < THROW_ATTEMPTS; attempt += 1) {
+    const recorded = recordThrow(attempt ? Math.floor(random() * 0x100000000) : seed);
+    const better = !best
+      || (recorded.flat && !best.flat)
+      || (recorded.flat === best.flat && recorded.steps < best.steps);
+    if (better) best = recorded;
+    if (best.flat && best.steps <= BRISK_STEPS) break;
+  }
+  return {
+    frames: best.frames,
+    frameSize: FRAME_SIZE,
+    steps: best.steps,
+    finalQuaternions: best.finalQuaternions,
+    turns: best.finalQuaternions.map((quaternion, index) => faceTurn(quaternion, dice[index])),
+  };
 }

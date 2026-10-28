@@ -28,7 +28,7 @@ body { min-width: 0; }
 .resume-panel { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 1rem 1.4rem; color: var(--ink); border: 1px solid var(--line); border-left: 4px solid var(--green); border-radius: .8rem; background: var(--paper); }
 .resume-panel p { margin: .3rem 0 0; color: var(--muted); font-size: .85rem; }
 .setup-note, .settings-note { color: var(--muted); font-size: .8rem; line-height: 1.5; margin: .5rem 0; }
-.screen-wide { max-width: 1500px; min-height: 0; grid-template-areas: "dice board sidebar"; grid-template-columns: clamp(200px, 18vw, 270px) minmax(0, 1fr) 300px; grid-template-rows: auto; gap: 1.2rem; align-items: start; }
+.screen-wide { --board-size: clamp(420px, calc(100dvh - 8.5rem), 900px); max-width: 1500px; min-height: 0; grid-template-areas: "dice board sidebar"; grid-template-columns: clamp(200px, 18vw, 270px) minmax(0, 1fr) 300px; grid-template-rows: auto; gap: 1.2rem; align-items: start; }
 .game-sidebar { display: grid; grid-template-rows: auto auto; gap: .85rem; align-self: start; align-content: start; }
 .game-header { padding: 1.1rem 1.3rem; }
 .game-controls { gap: 1.2rem; padding: 1.2rem; }
@@ -60,14 +60,8 @@ summary { cursor: pointer; font-weight: 650; min-height: 24px; }
 .activity-panel ol { padding-left: 1.3rem; max-height: 12rem; overflow: auto; }
 .activity-panel li { padding: .35rem 0; color: var(--muted); font-size: .75rem; line-height: 1.5; }
 .save-status { margin: -.4rem 0 0; font-size: .65rem; color: var(--muted); text-align: center; }
-.board-stage { display: flex; flex-direction: column; gap: .8rem; width: 100%; max-width: clamp(460px, calc(100dvh - 19rem), 820px); aspect-ratio: auto; margin: 0; align-self: start; }
+.board-stage { display: flex; flex-direction: column; gap: .8rem; width: 100%; max-width: var(--board-size); aspect-ratio: auto; margin: 0; align-self: start; justify-self: center; }
 .board { height: auto; aspect-ratio: 1; padding: .6rem; }
-.player-dice-grid { position: static; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; pointer-events: auto; }
-.player-dice-card, .player-dice-card.is-active { position: static; width: auto; opacity: 1; padding: .7rem; outline: 0; transform: none; filter: none; animation: none; }
-.player-dice-identity strong { font-size: .8rem; }
-.player-dice-status { display: block; font-size: .6rem; letter-spacing: .01em; }
-.dice.player-dice-set .die-button { width: 2rem; padding: .25rem; border-width: 1px; }
-.player-dice-set .die-pip { width: .27rem; }
 .marble .marble-disc, .marble:hover[aria-disabled="false"] .marble-disc, .marble.is-selected .marble-disc { r: 16px; filter: none; stroke-width: 2.5px; }
 .marble-shine { display: none; }
 .marble-active-ring { r: 20px; }
@@ -75,7 +69,7 @@ summary { cursor: pointer; font-weight: 650; min-height: 24px; }
 .marble-number { fill: #fff; font: 800 18px system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; pointer-events: none; paint-order: stroke; stroke: var(--player-dark); stroke-width: 2px; }
 .marble-hit-area { fill: transparent; pointer-events: all; }
 .board-hole.is-legal-move { stroke-width: 12; }
-.dice-roll-stage { display: flex !important; height: clamp(440px, calc(100dvh - 12rem), 650px); width: 100%; padding: .6rem; justify-self: center; align-self: start; }
+.dice-roll-stage { display: flex !important; height: clamp(420px, var(--board-size), 760px); width: 100%; padding: .6rem; justify-self: center; align-self: start; }
 .dice-roll-stage > strong { font-size: .75rem; }
 .dice-table-surface { min-height: 0; }
 .static-dice { align-items: center; height: 100%; padding: 1rem; }
@@ -132,8 +126,6 @@ html[data-theme="default"] .board-hole { fill: #d7cbb3; stroke: #aa9879; stroke-
 html[data-theme="default"] .board-hole--player { stroke: var(--player-color); stroke-width: 4; }
 html[data-theme="default"] .board-hole.is-start { fill: var(--player-color); }
 html[data-theme="default"] .board-hole--center { fill: #245b47; stroke: #c19748; stroke-width: 5; }
-html[data-theme="default"] .board-hole.is-legal-move { fill: #f9d780; stroke: #b88520; stroke-width: 12; filter: none; }
-html[data-theme="default"] .board-hole.is-legal-move:focus-visible { stroke: #183e35; }
 html[data-theme="default"] .base-tray { fill-opacity: .08; stroke-width: 3; }
 html[data-theme="default"] .is-active-player .base-tray { fill-opacity: .18; stroke-width: 5; }
 html[data-theme="default"] .base-label { fill: #514c3d; font-size: 19px; font-weight: 600; letter-spacing: 0; }
@@ -151,9 +143,54 @@ html[data-theme="gothic"] #game-title { color: #f3dce5; text-shadow: 0 2px 4px #
 html[data-theme="wacky"] .turn-guide { background: #fffdf0; }
 html[data-theme="wacky"] .turn-guide button { background: #ff2bd6; color: #111; border: 2px solid #111; border-radius: 0; }
 
+/* Turn guide: the live roll, Base choice, and capture moves. */
+.dice.turn-dice { justify-content: flex-start; gap: .5rem; padding: 0 0 .9rem; }
+.dice.turn-dice .die-button { width: 2.6rem; padding: .32rem; border-width: 1px; transform: none; transition: opacity .2s ease; }
+.turn-dice .die-pip { width: .38rem; }
+.move-choices .marble-choice.is-base { width: auto; padding-inline: 1rem; border-radius: 999px; }
+.move-choice.is-capture { border-color: #c2414b; }
+.move-choice.is-capture .move-die { color: #fff; background: #c2414b; border-color: #c2414b; }
+
+/* Scoreboard rows carry each player's latest dice. */
+.progress-board-list li { grid-template-columns: minmax(0, 1fr) auto auto; }
+.progress-board-list .progress-player { grid-column: 1 / 3; }
+.progress-player small { margin-left: .35rem; color: var(--muted); font-size: .6rem; font-weight: 700; letter-spacing: .06em; }
+.progress-board-list .dice.progress-dice { grid-column: 3; grid-row: 1 / 3; align-self: center; gap: .25rem; padding: 0; }
+.progress-board-list .dice.progress-dice .die-button { width: 1.55rem; padding: .17rem; border-width: 1px; border-radius: .3rem; box-shadow: none; transform: none; font-size: .7rem; }
+.progress-dice .die-pip { width: .22rem; }
+.progress-dice .die-button.is-empty { color: var(--muted); }
+
+/* Board: destinations wear the mover's colour, show the die they spend, and preview their path. */
+.board-hole.is-path-preview { stroke: var(--active-player-color, var(--gold)); stroke-width: 7; }
+.destination-badge { pointer-events: none; }
+.destination-badge rect { fill: var(--active-player-dark, #1d2420); stroke: #fff; stroke-width: 3; }
+.destination-badge text { fill: #fff; font: 800 15px system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; }
+.marble.is-capture-target .marble-focus { stroke: #d42d3a; stroke-width: 4; stroke-dasharray: 7 5; animation: capture-target-spin 3s linear infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes capture-target-spin { to { transform: rotate(360deg); } }
+html[data-theme="default"] .board-hole.is-legal-move { fill: #fff; stroke: var(--active-player-color, #245b47); stroke-width: 7; filter: drop-shadow(0 0 6px color-mix(in srgb, var(--active-player-color, #245b47) 70%, transparent)); animation: destination-pulse 1.1s ease-in-out infinite alternate; }
+html[data-theme="default"] .board-hole.is-legal-move:is(:hover, :focus-visible) { fill: color-mix(in srgb, var(--active-player-color, #245b47) 28%, #fff); stroke-width: 9; outline: none; }
+html[data-theme="default"] .marble.is-legal-move:not(.is-selected) .marble-focus { animation: movable-pulse 1.2s ease-in-out infinite alternate; }
+@keyframes destination-pulse { from { stroke-width: 5; } to { stroke-width: 9; } }
+@keyframes movable-pulse { from { stroke-opacity: .35; } to { stroke-opacity: 1; } }
+
+/* Settings: computer skill chooser. */
+.segmented { display: inline-flex; flex: none; padding: .2rem; border: 1px solid var(--line); border-radius: 999px; background: color-mix(in srgb, var(--paper) 70%, var(--line)); }
+.segmented label { position: relative; cursor: pointer; }
+.segmented input { position: absolute; inset: 0; width: 100%; min-height: 0; margin: 0; opacity: 0; cursor: pointer; }
+.segmented span { display: block; padding: .4rem .75rem; border-radius: 999px; color: var(--ink); font-size: .8rem; font-weight: 700; }
+.segmented input:checked + span { color: #fff; background: var(--green); }
+.segmented input:focus-visible + span { outline: 3px solid var(--gold); outline-offset: 2px; }
+kbd { padding: .05rem .35rem; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: .3rem; background: var(--paper); font: 700 .8em ui-monospace, monospace; }
+
 @media (max-width: 1050px) {
-  .screen-wide { grid-template-areas: "dice sidebar" "board sidebar"; grid-template-columns: minmax(0, 1fr) 280px; gap: 1rem; }
-  .dice-roll-stage { height: 260px; }
+  /* Without room for a dice column, the dice table slides over the board while rolling. */
+  .screen-wide { --board-size: min(100%, calc(100dvh - 8.5rem), 900px); grid-template-areas: "board sidebar"; grid-template-columns: minmax(0, 1fr) 280px; gap: 1rem; }
+  .game-header, .game-controls { grid-area: auto; }
+  #roll-button:not(:disabled) { position: static; width: 100%; margin: 0; }
+  .board-stage { width: var(--board-size); max-width: 100%; }
+  .dice-roll-stage { grid-area: board; z-index: 6; width: var(--board-size); max-width: 100%; height: auto; aspect-ratio: 1; opacity: 0; visibility: hidden; pointer-events: none; transform: scale(.97); transition: opacity .18s ease, visibility .18s, transform .18s ease; }
+  .dice-roll-stage:is(.is-rolling, .is-settled) { opacity: 1; visibility: visible; pointer-events: auto; transform: none; }
+  .dice-roll-stage.is-settled { cursor: pointer; }
   .home-board-preview { width: 36%; right: 3%; }
   html[data-theme="default"] .home-hero { min-height: 230px; padding: 2rem; }
   [data-screen="home"]:not([hidden]) { gap: .8rem; }
@@ -170,7 +207,7 @@ html[data-theme="wacky"] .turn-guide button { background: #ff2bd6; color: #111; 
   html[data-theme="default"] .home-hero { min-height: 180px; padding: 1.5rem; }
   html[data-theme="default"] #home-title { max-width: 100%; font-size: clamp(2.4rem, 7vw, 4rem); }
   .home-board-preview { opacity: .35; right: -10%; width: 50%; top: 60%; }
-  .screen-wide { grid-template-areas: "header" "turn" "dice" "board" "progress" "activity" "actions" "save"; grid-template-columns: minmax(0, 1fr); }
+  .screen-wide { --board-size: 100%; grid-template-areas: "header" "board" "turn" "progress" "activity" "actions" "save"; grid-template-columns: minmax(0, 1fr); }
   .game-sidebar { display: contents; }
   .game-header { grid-area: header; }
   .game-controls { display: contents; }
@@ -181,10 +218,13 @@ html[data-theme="wacky"] .turn-guide button { background: #ff2bd6; color: #111; 
   .save-status { grid-area: save; padding: .5rem; border-radius: .4rem; background: var(--paper); }
   .board-stage { width: 100%; margin: 0; }
   .board { padding: .2rem; }
-  .dice-roll-stage { height: 250px; }
-  #roll-button:not(:disabled) { position: static; width: 100%; margin: 0; }
   .progress-board-list { display: grid; grid-template-columns: 1fr 1fr; }
   .progress-player { flex-wrap: wrap; gap: .25rem; }
+  .progress-board-list li { grid-template-columns: minmax(0, 1fr) auto; }
+  .progress-board-list .progress-player { grid-column: 1 / -1; }
+  .progress-board-list .progress-marbles { grid-column: 1; grid-row: 2; }
+  .progress-board-list .progress-captures { grid-column: 1; grid-row: 3; }
+  .progress-board-list .dice.progress-dice { grid-column: 2; grid-row: 2 / 4; }
   .rules-grid { gap: 1rem; }
 }
 @media (max-width: 460px) {
@@ -195,11 +235,6 @@ html[data-theme="wacky"] .turn-guide button { background: #ff2bd6; color: #111; 
   [data-screen="home"]:not([hidden]) { grid-template-columns: 1fr; }
   .home-actions { gap: .7rem; }
   .home-board-preview { width: 65%; right: -28%; opacity: .2; }
-  .player-dice-card { padding: .5rem; gap: .2rem .35rem; }
-  .player-dice-identity strong { font-size: .7rem; }
-  .dice.player-dice-set .die-button { width: 1.6rem; padding: .2rem; }
-  .player-dice-set { gap: .2rem; }
-  .player-dice-set .die-pip { width: .2rem; }
   .resume-panel { align-items: stretch; flex-direction: column; }
   .rules-grid { grid-template-columns: 1fr; }
   .help-dialog { padding: 1.2rem; }
