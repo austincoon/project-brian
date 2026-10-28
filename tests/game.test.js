@@ -87,7 +87,14 @@ test("visual themes persist and unknown values fall back to default", () => {
   assert.equal(values.get(THEME_STORAGE_KEY), "pixel");
   assert.equal(applyTheme(root, storage, "gothic"), "gothic");
   assert.equal(values.get(THEME_STORAGE_KEY), "gothic");
+  // Dark keeps the default skin's layout and adds a dark palette flag.
+  assert.equal(applyTheme(root, storage, "dark"), "dark");
+  assert.equal(root.dataset.theme, "default");
+  assert.equal(root.dataset.dark, "");
+  assert.equal(values.get(THEME_STORAGE_KEY), "dark");
+  assert.equal(loadTheme(storage), "dark");
   assert.equal(applyTheme(root, storage, "default"), "default");
+  assert.equal("dark" in root.dataset, false);
   assert.equal(normalizeTheme("unknown"), "default");
 });
 

@@ -8,32 +8,35 @@
     <title>Brian's Aggravation</title>
     <link rel="icon" href="data:,">
     <script>
-      try { document.documentElement.dataset.theme = localStorage.getItem("project-brian-theme") || "default"; }
-      catch { document.documentElement.dataset.theme = "default"; }
+      try {
+        const theme = localStorage.getItem("project-brian-theme") || "default";
+        document.documentElement.dataset.theme = theme === "dark" ? "default" : theme;
+        if (theme === "dark") document.documentElement.dataset.dark = "";
+      } catch { document.documentElement.dataset.theme = "default"; }
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- Skin fonts load without blocking the first paint; the default skin uses system fonts. -->
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Pixelify+Sans:wght@400..700&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="./styles.css?v=20261028-1">
-    <link rel="stylesheet" href="./polish.css?v=20261028-1">
+    <link rel="stylesheet" href="./styles.css?v=20261028-2">
+    <link rel="stylesheet" href="./polish.css?v=20261028-2">
     <!-- Every app module shares one version so a release never mixes old and new code. Bump them together. -->
     <script type="importmap">
       {
         "imports": {
           "three": "./vendor/three.module.js",
           "three/addons/geometries/": "./vendor/",
-          "./src/board.js": "./src/board.js?v=20261028-1",
-          "./src/bot.js": "./src/bot.js?v=20261028-1",
-          "./src/dice.js": "./src/dice.js?v=20261028-1",
-          "./src/dice-physics.js": "./src/dice-physics.js?v=20261028-1",
-          "./src/dice-scene.js": "./src/dice-scene.js?v=20261028-1",
-          "./src/firebase.js": "./src/firebase.js?v=20261028-1",
-          "./src/game.js": "./src/game.js?v=20261028-1",
-          "./src/replay.js": "./src/replay.js?v=20261028-1",
-          "./src/session.js": "./src/session.js?v=20261028-1",
-          "./src/sound.js": "./src/sound.js?v=20261028-1",
-          "./src/theme.js": "./src/theme.js?v=20261028-1"
+          "./src/board.js": "./src/board.js?v=20261028-2",
+          "./src/bot.js": "./src/bot.js?v=20261028-2",
+          "./src/dice.js": "./src/dice.js?v=20261028-2",
+          "./src/dice-physics.js": "./src/dice-physics.js?v=20261028-2",
+          "./src/dice-scene.js": "./src/dice-scene.js?v=20261028-2",
+          "./src/firebase.js": "./src/firebase.js?v=20261028-2",
+          "./src/game.js": "./src/game.js?v=20261028-2",
+          "./src/replay.js": "./src/replay.js?v=20261028-2",
+          "./src/session.js": "./src/session.js?v=20261028-2",
+          "./src/sound.js": "./src/sound.js?v=20261028-2",
+          "./src/theme.js": "./src/theme.js?v=20261028-2"
         }
       }
     </script>
@@ -232,6 +235,11 @@
             <span><strong>Default</strong></span>
           </label>
           <label class="theme-option">
+            <input type="radio" name="theme" value="dark">
+            <span class="theme-preview theme-preview-dark" aria-hidden="true"></span>
+            <span><strong>Dark</strong></span>
+          </label>
+          <label class="theme-option">
             <input type="radio" name="theme" value="wacky">
             <span class="theme-preview theme-preview-wacky" aria-hidden="true"></span>
             <span><strong>Wacky</strong></span>
@@ -284,6 +292,6 @@
       </form>
     </dialog>
 
-    <script type="module" src="./src/app.js?v=20261028-1"></script>
+    <script type="module" src="./src/app.js?v=20261028-2"></script>
   </body>
 </html>

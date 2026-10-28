@@ -240,3 +240,49 @@ kbd { padding: .05rem .35rem; border: 1px solid var(--line); border-bottom-width
   .help-dialog { padding: 1.2rem; }
   .help-dialog h2 { font-size: 1.6rem; }
 }
+
+/* Dark: the default skin with a night-table palette. Selectors outrank the default skin's own rules. */
+html[data-theme="default"][data-dark] { color-scheme: dark; --ink: #e4ece7; --muted: #9aaca3; --green: #1f7a64; --green-dark: #17614f; --gold: #e0a84a; --line: #2e3d37; --paper: #17211d; --shadow: 0 6px 24px #0006; color: var(--ink); background: #0e1512; }
+html[data-theme="default"][data-dark] body, html[data-theme="default"][data-dark] .app-shell:has([data-screen]:not([hidden])) { background: radial-gradient(circle at 10% 0%, #16241f 0, transparent 34rem), #0e1512; }
+html[data-theme="default"][data-dark] :is(label, legend) { color: var(--ink); }
+html[data-theme="default"][data-dark] .home-hero { background: #12302a; box-shadow: inset 0 0 0 1px #ffffff12; }
+html[data-theme="default"][data-dark] :is(.panel.home-panel, [data-screen="local"] > .panel, [data-screen="lobby"] > .panel, .home-panel.home-panel-create, .home-panel.home-panel-join) { border-color: var(--line); background: var(--paper); }
+html[data-theme="default"][data-dark] :is(.home-panel input, [data-screen="local"] input, [data-screen="lobby"] input) { border-color: #3a4c45; color: var(--ink); background: #0f1714; }
+html[data-theme="default"][data-dark] :is(.home-panel input, [data-screen="local"] input, [data-screen="lobby"] input):disabled { color: var(--muted); }
+html[data-theme="default"][data-dark] .bot-toggle { border-color: var(--line); color: var(--ink); background: #1d2924; }
+html[data-theme="default"][data-dark] :is([data-screen] .secondary, [data-screen] .text-button, [data-screen="home"] #settings-button, [data-screen="lobby"] #leave-room-button) { border-color: #3a4c45; color: #8fdcc4; background: #1b2723; box-shadow: none; }
+html[data-theme="default"][data-dark] :is([data-screen] .secondary, [data-screen] .text-button, [data-screen="home"] #settings-button, [data-screen="lobby"] #leave-room-button):hover:not(:disabled) { border-color: #57756a; color: #b5ecdb; background: #22322c; }
+html[data-theme="default"][data-dark] .site-header button { color: var(--ink); }
+html[data-theme="default"][data-dark] :is(.help-dialog a, #lobby-code, [data-screen="local"] > .eyebrow, [data-screen="lobby"] > .eyebrow) { color: #8fdcc4; }
+html[data-theme="default"][data-dark] [data-screen="lobby"] .player-list li { border-color: var(--line); background: #1d2924; }
+html[data-theme="default"][data-dark] .game-header { background: #12302a; }
+html[data-theme="default"][data-dark] .progress-board-list li { background: #1d2924; }
+html[data-theme="default"][data-dark] .move-choices .marble-choice[aria-pressed="true"] { color: #fff; background: var(--green); }
+html[data-theme="default"][data-dark] .board { border-color: #3d3326; background: repeating-linear-gradient(5deg, #ffffff03 0 2px, #00000014 2px 3px), #2e261c; box-shadow: 0 5px 0 #1d1811, 0 16px 30px #0008; }
+html[data-theme="default"][data-dark] .board-surface { fill: #1c2723; stroke: #4a5a52; }
+html[data-theme="default"][data-dark] .route-line { stroke: #3c4a44; }
+html[data-theme="default"][data-dark] .board-hole { fill: #34423c; stroke: #5d6e66; }
+html[data-theme="default"][data-dark] .board-hole--player { stroke: var(--player-color); }
+html[data-theme="default"][data-dark] .board-hole.is-start { fill: var(--player-color); }
+html[data-theme="default"][data-dark] .board-hole--center { fill: #1f7a64; stroke: #e0a84a; }
+html[data-theme="default"][data-dark] .board-hole.is-legal-move { fill: #f4f1e8; stroke: var(--active-player-color, #1f7a64); }
+html[data-theme="default"][data-dark] .base-tray { fill-opacity: .14; }
+html[data-theme="default"][data-dark] .base-label { fill: #c3d0c9; }
+html[data-theme="default"][data-dark] .home-board-preview { background: #2e261c; box-shadow: 0 24px 0 -12px #1d1811, 0 32px 60px #0008; }
+html[data-theme="default"][data-dark] .home-board-preview .board-surface { fill: #1c2723; stroke: #4a5a52; }
+html[data-theme="default"][data-dark] .dice-roll-stage { border-color: var(--line); background: var(--paper); }
+html[data-theme="default"][data-dark] .dice-roll-stage > strong { color: var(--ink); }
+html[data-theme="default"][data-dark] .dice .die-button { border-color: #c9c3b4; background: #f4f1e8; }
+html[data-theme="default"][data-dark] .progress-dice .die-button.is-empty { color: #6d6a62; }
+html[data-theme="default"][data-dark] .settings-dialog::backdrop { background: #000a; }
+html[data-theme="default"][data-dark] :is(.settings-panel, .help-dialog) { border-color: var(--line); color: var(--ink); background: var(--paper); }
+html[data-theme="default"][data-dark] .theme-option { border-color: var(--line); color: var(--ink); background: #1d2924; }
+html[data-theme="default"][data-dark] .theme-option:has(input:checked) { border-color: #3aa98c; background: #1c3a31; }
+html[data-theme="default"][data-dark] :is(.victory-hero, .victory-scoreboard, .victory-player) { border-color: var(--line); color: var(--ink); background: var(--paper); }
+html[data-theme="default"][data-dark] .victory-player.is-winner { background: #1c3a31; }
+html[data-theme="default"][data-dark] .victory-player dt { color: var(--muted); }
+html[data-theme="default"][data-dark] .victory-player dl div:nth-child(even) { background: #ffffff08; }
+html[data-theme="default"][data-dark] #victory-title { color: var(--ink); }
+html[data-theme="default"][data-dark] :is(.game-error, [data-screen="home"] #home-error:not(:empty)) { border-color: #6e2f33; color: #ffb4b4; background: #2a1517; }
+html[data-theme="default"][data-dark] :is(.theme-option input, .preference-row input) { accent-color: #3aa98c; }
+.theme-preview-dark { background: linear-gradient(145deg, transparent 52%, #1d2924 52%), linear-gradient(90deg, #12302a 38%, #2e261c 38%); }

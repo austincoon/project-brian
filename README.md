@@ -77,6 +77,7 @@ Validation: `node --test` covers the existing rules, physical dice replay, theme
 - **Bigger board.** Each scoreboard row now shows that player's latest dice, replacing the separate dice cards, so the board fills the available height (521 px at 1366×657 and 891 px at 1920×1080). On tablets and phones the dice tray slides over the board while rolling, so the board and Roll button fit on one screen. Fixed: at about 760–830 px wide the turn header was hidden behind the controls and the Roll button floated over the page.
 - **Better endings.** The winning move plays on the board before the results appear, **Play again** starts a rematch with the same players, and won games are no longer offered under **Resume game**.
 - **Sound effects** for dice, moves, captures, Home, your turn, and wins, synthesized in the browser with no audio files. Turn them off in Settings.
+- **Dark mode.** Settings now lists a **Dark** skin: the default layout on a dark table, remembered per browser like the other skins.
 - **Faster pacing.** Computer turns wait less between actions, and moves animate a little quicker.
 
 Every module previously imported its neighbours with a different `?v=` string, so browsers downloaded and ran `board.js` three times and `game.js` twice. Internal imports now have no query strings; the import map in `index.html` gives every module one shared version. **When releasing, bump every `v=` value in `index.html` together.**
