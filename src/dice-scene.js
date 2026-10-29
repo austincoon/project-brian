@@ -13,13 +13,31 @@ const STEP_SECONDS = 1 / 60;
 // One renderer is shared by every throw so each roll avoids a new WebGL context and shader compile.
 let table = null;
 
-function faceTexture(value) {
+// Skins restyle the tray through --dice-* custom properties on the dice table.
+const DEFAULT_LOOK = {
+  felt: "#1f7047",
+  rail: "#4f2710",
+  face: "#f7f4e9",
+  pip: "#171717",
+  ace: "#b51f2e",
+  "pixel-ratio": "",
+};
+
+function readLook(container) {
+  const style = getComputedStyle(container);
+  return Object.fromEntries(Object.entries(DEFAULT_LOOK).map(([key, fallback]) => [
+    key,
+    style.getPropertyValue(`--dice-${key}`).trim() || fallback,
+  ]));
+}
+
+function faceTexture(value, look) {
   const canvas = document.createElement("canvas");
   canvas.width = canvas.height = 192;
   const context = canvas.getContext("2d");
-  context.fillStyle = "#f7f4e9";
+  context.fillStyle = look.face;
   context.fillRect(0, 0, 192, 192);
-  context.fillStyle = value === 1 ? "#b51f2e" : "#171717";
+  context.fillStyle = value === 1 ? look.ace : look.pip;
   const positions = {
     1: [[1, 1]], 2: [[0, 0], [2, 2]], 3: [[0, 0], [1, 1], [2, 2]],
     4: [[0, 0], [2, 0], [0, 2], [2, 2]],
@@ -37,8 +55,9 @@ function faceTexture(value) {
 }
 
 function createTable() {
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  // Transparent, so the skin's CSS tabletop shows around the tray.
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setClearColor(0x000000, 0);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -46,7 +65,6 @@ function createTable() {
   renderer.toneMappingExposure = 1.08;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x185c39);
   const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
   scene.add(new THREE.HemisphereLight(0xfff7dd, 0x102c1c, 2.1));
   const light = new THREE.DirectionalLight(0xffffff, 3.8);
@@ -57,12 +75,12 @@ function createTable() {
 
   const felt = new THREE.Mesh(
     new THREE.PlaneGeometry(TRAY_WIDTH, TRAY_DEPTH),
-    new THREE.MeshStandardMaterial({ color: 0x1f7047, roughness: 0.96 }),
+    new THREE.MeshStandardMaterial({ roughness: 0.96 }),
   );
   felt.rotation.x = -Math.PI / 2;
   felt.receiveShadow = true;
   scene.add(felt);
-  const railMaterial = new THREE.MeshStandardMaterial({ color: 0x4f2710, roughness: 0.72 });
+  const railMaterial = new THREE.MeshStandardMaterial({ roughness: 0.72 });
   const addRail = (x, z, railWidth, railDepth) => {
     const rail = new THREE.Mesh(new THREE.BoxGeometry(railWidth, 0.55, railDepth), railMaterial);
     rail.position.set(x, 0.22, z);
@@ -76,9 +94,7 @@ function createTable() {
   addRail(0, TRAY_DEPTH / 2, TRAY_WIDTH, 0.34);
 
   const geometry = new RoundedBoxGeometry(DIE_SIZE, DIE_SIZE, DIE_SIZE, 5, 0.16);
-  const materials = DIE_FACE_VALUES.map((value) => new THREE.MeshStandardMaterial({
-    map: faceTexture(value), roughness: 0.48, metalness: 0.02,
-  }));
+  const materials = DIE_FACE_VALUES.map(() => new THREE.MeshStandardMaterial({ roughness: 0.48, metalness: 0.02 }));
   const dice = [0, 1].map(() => {
     const mesh = new THREE.Mesh(geometry, materials);
     mesh.castShadow = true;
@@ -92,7 +108,23 @@ function createTable() {
     event.preventDefault();
     if (table?.renderer === renderer) table = null;
   });
-  return { renderer, scene, camera, dice };
+  return { renderer, scene, camera, dice, felt, railMaterial, materials, lookKey: "" };
+}
+
+// Repaints the shared table only when the skin changed since the last throw.
+function applyLook(current, look) {
+  const key = Object.values(look).join("|");
+  if (current.lookKey === key) return;
+  current.lookKey = key;
+  current.felt.material.color.set(look.felt);
+  current.railMaterial.color.set(look.rail);
+  current.materials.forEach((material, index) => {
+    material.map?.dispose();
+    material.map = faceTexture(DIE_FACE_VALUES[index], look);
+    material.needsUpdate = true;
+  });
+  const ratio = Number.parseFloat(look["pixel-ratio"]);
+  current.renderer.setPixelRatio(ratio > 0 ? ratio : Math.min(devicePixelRatio, 2));
 }
 
 function frameCamera({ renderer, camera }, width, height) {
@@ -122,6 +154,7 @@ export function throwDice(container, values, onSettled, settled = false) {
 
   table ??= createTable();
   const current = table;
+  applyLook(current, readLook(container));
   const { renderer, scene, camera, dice } = current;
   const plan = planDiceThrow(values, randomSeed());
   const turns = plan.turns.map(({ x, y, z, w }) => new THREE.Quaternion(x, y, z, w));
@@ -157,6 +190,12 @@ export function throwDice(container, values, onSettled, settled = false) {
   resize();
   const resizeObserver = new ResizeObserver(resize);
   resizeObserver.observe(container);
+  // Switching skins mid-game repaints the dice already on the table.
+  const skinObserver = new MutationObserver(() => {
+    applyLook(current, readLook(container));
+    resize();
+  });
+  skinObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "data-dark"] });
 
   let animationFrame;
   let done = false;
@@ -198,6 +237,7 @@ export function throwDice(container, values, onSettled, settled = false) {
     dispose() {
       stop();
       resizeObserver.disconnect();
+      skinObserver.disconnect();
     },
   };
 }

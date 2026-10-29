@@ -514,9 +514,20 @@ export function renderBoard(container, options = {}) {
     role: "group",
     "aria-labelledby": `${state.idPrefix}board-title ${state.idPrefix}board-description`,
   });
+  // Skins can fill the surface with this gradient; its stop colours come from CSS.
+  const shadeId = `${state.idPrefix}board-surface-shade`;
+  const shade = svgElement("radialGradient", { id: shadeId, cx: "50%", cy: "45%", r: "62%" });
+  shade.append(
+    svgElement("stop", { class: "board-shade-light", offset: "0%" }),
+    svgElement("stop", { class: "board-shade-dark", offset: "100%" }),
+  );
+  const defs = svgElement("defs");
+  defs.append(shade);
+  const styles = [`--board-surface-shade: url(#${shadeId})`];
   if (PLAYERS[state.activePlayer]) {
-    svg.setAttribute("style", `--active-player-color: ${PLAYERS[state.activePlayer].color}; --active-player-dark: ${PLAYERS[state.activePlayer].darkColor}`);
+    styles.push(`--active-player-color: ${PLAYERS[state.activePlayer].color}`, `--active-player-dark: ${PLAYERS[state.activePlayer].darkColor}`);
   }
+  svg.setAttribute("style", styles.join("; "));
   const title = svgElement("title", { id: `${state.idPrefix}board-title` });
   title.textContent = "Brian's Aggravation game board";
   const description = svgElement("desc", { id: `${state.idPrefix}board-description` });
@@ -524,6 +535,7 @@ export function renderBoard(container, options = {}) {
   svg.append(
     title,
     description,
+    defs,
     svgElement("path", { class: "board-surface", d: BOARD_SURFACE_PATH }),
   );
 

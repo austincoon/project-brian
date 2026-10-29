@@ -1,0 +1,615 @@
+/*
+ * Skin finishing pass: textures, typography, the site header and the 3D dice
+ * tray for the Medieval, Gothic, Wacky and Pixel skins. Loaded after
+ * styles.css and polish.css so these rules win at equal specificity.
+ *
+ * The 3D tray reads --dice-felt, --dice-rail, --dice-face, --dice-pip,
+ * --dice-ace and --dice-pixel-ratio from .dice-table-surface (see dice-scene.js).
+ */
+
+/* ---------------------------------------------------------------- Medieval */
+
+html[data-theme="medieval"] {
+  --medieval-display: "Cinzel", Georgia, "Times New Roman", serif;
+  --medieval-flourish: "Cinzel Decorative", "Cinzel", Georgia, serif;
+  --medieval-body: "IM Fell English", Georgia, "Times New Roman", serif;
+  --medieval-oak: #3b2414;
+  --medieval-oak-dark: #24150b;
+  --medieval-gilt: #d3a63b;
+  --medieval-gilt-light: #f0cf75;
+  --medieval-wine: #6f1726;
+  --medieval-wine-dark: #3f0b15;
+  --medieval-vellum: #f1e4bf;
+  --medieval-ink: #2f2115;
+  --parchment-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .36 0 0 0 0 .23 0 0 0 0 .09 0 0 0 .5 -.17'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --parchment: var(--parchment-grain), radial-gradient(ellipse at 50% 40%, #f8efd2 0, #efe0b6 58%, #dcc38a 100%);
+  font-family: var(--medieval-body);
+  scrollbar-color: var(--medieval-gilt) var(--medieval-oak-dark);
+}
+
+html[data-theme="medieval"] ::selection {
+  color: #fff4d6;
+  background: var(--medieval-wine);
+}
+
+html[data-theme="medieval"] .app-shell:has([data-screen]:not([hidden])) {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(240, 190, 90, 0.2), transparent 38rem),
+    radial-gradient(ellipse at 50% 120%, rgba(0, 0, 0, 0.55), transparent 50rem),
+    repeating-linear-gradient(90deg, transparent 0 7.6rem, rgba(0, 0, 0, 0.28) 7.6rem 7.75rem),
+    repeating-linear-gradient(90deg, rgba(255, 220, 160, 0.035) 0 0.18rem, transparent 0.18rem 1.1rem),
+    linear-gradient(180deg, #4a2d18, #2c1a0e);
+}
+
+/* The site header becomes a carved oak lintel with a gilt rule. */
+html[data-theme="medieval"] .site-header {
+  max-width: none;
+  border-bottom: 0.2rem solid var(--medieval-gilt);
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 220, 160, 0.04) 0 0.15rem, transparent 0.15rem 0.9rem),
+    linear-gradient(180deg, #4a2d18, var(--medieval-oak-dark));
+  box-shadow: 0 0.25rem 0 var(--medieval-oak-dark), 0 0.6rem 1.4rem rgba(0, 0, 0, 0.45);
+}
+
+html[data-theme="medieval"] .brand {
+  color: var(--medieval-gilt-light);
+  font-family: var(--medieval-display);
+  letter-spacing: 0.14em;
+  text-shadow: 0 0.1rem 0 #000;
+}
+
+html[data-theme="medieval"] .brand-mark {
+  color: var(--medieval-gilt-light);
+  background: radial-gradient(circle at 35% 30%, #a12c3e, var(--medieval-wine) 55%, var(--medieval-wine-dark));
+  box-shadow: 0 0 0 0.14rem var(--medieval-gilt), 0 0.15rem 0.3rem #000a;
+  font-size: 1.05rem;
+}
+
+html[data-theme="medieval"] .site-header button {
+  border-color: transparent;
+  color: #f1e4bf;
+  background: transparent;
+  box-shadow: none;
+  font-family: var(--medieval-display);
+  letter-spacing: 0.06em;
+}
+
+html[data-theme="medieval"] .site-header button:hover:not(:disabled) {
+  color: var(--medieval-oak-dark);
+  background: var(--medieval-gilt);
+  box-shadow: none;
+}
+
+/* Lettering: Cinzel capitals with an illuminated first letter. */
+html[data-theme="medieval"] :is(#home-title, #local-title, #lobby-title, #game-title, .home-panel h2, [data-screen="local"] legend, [data-screen="lobby"] h2, #settings-title, #victory-title, .victory-scoreboard h2) {
+  font-family: var(--medieval-display);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+html[data-theme="medieval"] #home-title {
+  /* Cinzel Decorative runs wide, so it needs a smaller size to clear the board preview. */
+  font-family: var(--medieval-flourish);
+  font-size: clamp(2.1rem, 5.3vw, 4.4rem);
+  line-height: 1.12;
+  letter-spacing: 0;
+  text-shadow: 0.05em 0.05em 0 var(--medieval-gilt), 0.09em 0.1em 0.12em rgba(60, 30, 10, 0.45);
+}
+
+html[data-theme="medieval"] #home-title span {
+  margin-bottom: 0.45em;
+  font-family: var(--medieval-display);
+  letter-spacing: 0.2em;
+}
+
+html[data-theme="medieval"] :is(.home-panel h2, #settings-title, .victory-scoreboard h2)::first-letter {
+  color: var(--medieval-wine);
+  font-family: var(--medieval-flourish);
+  font-size: 1.3em;
+  text-shadow: 0.04em 0.04em 0 var(--medieval-gilt);
+}
+
+html[data-theme="medieval"] .home-hero {
+  background:
+    var(--parchment-grain),
+    radial-gradient(circle at 22% 18%, rgba(255, 255, 255, 0.5), transparent 18rem),
+    linear-gradient(135deg, #f3e6bd, #d4b66e);
+  box-shadow:
+    0 0 0 0.3rem var(--medieval-gilt),
+    0 0 0 0.55rem var(--medieval-oak),
+    0 1.2rem 2.4rem rgba(0, 0, 0, 0.55),
+    inset 0 0 3.5rem rgba(110, 70, 20, 0.35);
+}
+
+/* Parchment panels with a gilt inner rule and real depth instead of flat offsets. */
+html[data-theme="medieval"] :is(.panel.home-panel, [data-screen="local"] > .panel, [data-screen="lobby"] > .panel, .game-header, .settings-panel, .victory-hero, .victory-scoreboard) {
+  border-color: var(--medieval-oak);
+  background: var(--parchment);
+  box-shadow:
+    inset 0 0 0 0.2rem var(--medieval-gilt),
+    inset 0 0 0 0.32rem rgba(75, 46, 24, 0.35),
+    inset 0 0 2.6rem rgba(120, 78, 24, 0.32),
+    0 0.85rem 1.8rem rgba(0, 0, 0, 0.5);
+}
+
+
+html[data-theme="medieval"] .resume-panel {
+  background: var(--parchment);
+}
+
+html[data-theme="medieval"] :is(.home-panel input, [data-screen="local"] input, [data-screen="lobby"] input) {
+  font-family: var(--medieval-body);
+  background: var(--parchment-grain), #fff8e2;
+}
+
+/* Wax-seal buttons: wine red, gilt edge, pressed rather than floating. */
+html[data-theme="medieval"] :is([data-screen] button, .settings-panel button) {
+  border: 0.12rem solid var(--medieval-wine-dark);
+  color: #fbefd0;
+  background: linear-gradient(180deg, #8a2234, var(--medieval-wine) 55%, #5a1220);
+  box-shadow:
+    inset 0 0 0 0.1rem rgba(240, 207, 117, 0.55),
+    inset 0 0.08rem 0 rgba(255, 255, 255, 0.18),
+    0 0.22rem 0 var(--medieval-wine-dark),
+    0 0.45rem 0.9rem rgba(0, 0, 0, 0.35);
+  font-family: var(--medieval-display);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-shadow: 0 0.06rem 0 rgba(0, 0, 0, 0.45);
+}
+
+html[data-theme="medieval"] :is([data-screen] button, .settings-panel button):hover:not(:disabled) {
+  color: var(--medieval-oak-dark);
+  background: linear-gradient(180deg, var(--medieval-gilt-light), var(--medieval-gilt) 60%, #a97d24);
+  box-shadow:
+    inset 0 0 0 0.1rem rgba(255, 248, 220, 0.6),
+    0 0.22rem 0 #6c4d14,
+    0 0.55rem 1rem rgba(0, 0, 0, 0.35);
+  text-shadow: none;
+}
+
+html[data-theme="medieval"] :is([data-screen] button, .settings-panel button):active:not(:disabled) {
+  box-shadow: inset 0 0.15rem 0.3rem rgba(0, 0, 0, 0.35), 0 0.05rem 0 var(--medieval-wine-dark);
+  transform: translateY(0.12rem);
+}
+
+html[data-theme="medieval"] :is([data-screen] button, .settings-panel button):disabled {
+  border-color: #6e5a42;
+  color: #e6d7b2;
+  background: linear-gradient(180deg, #7d6a50, #65533c);
+  box-shadow: inset 0 0 0 0.1rem rgba(240, 220, 170, 0.18);
+  opacity: 0.7;
+  text-shadow: none;
+}
+
+html[data-theme="medieval"] :is([data-screen="home"] #settings-button, [data-screen="lobby"] #leave-room-button, .control-buttons .secondary, .control-buttons .text-button) {
+  border-color: var(--medieval-oak);
+  color: var(--medieval-ink);
+  background: linear-gradient(180deg, #f6eacb, #dcc48b);
+  box-shadow: inset 0 0 0 0.1rem rgba(139, 112, 76, 0.5), 0 0.22rem 0 var(--medieval-oak), 0 0.45rem 0.9rem rgba(0, 0, 0, 0.3);
+  text-shadow: none;
+}
+
+/* The board sits on an oak table inside a gilt frame. */
+html[data-theme="medieval"] .board {
+  border: 0.5rem solid var(--medieval-oak-dark);
+  background:
+    radial-gradient(ellipse at 50% 45%, rgba(255, 210, 140, 0.16), transparent 70%),
+    repeating-linear-gradient(92deg, rgba(0, 0, 0, 0.16) 0 0.12rem, transparent 0.12rem 0.7rem, rgba(255, 220, 160, 0.06) 0.7rem 0.82rem, transparent 0.82rem 1.6rem),
+    linear-gradient(180deg, #7a5230, #5a3a1f);
+  box-shadow:
+    0 0 0 0.3rem var(--medieval-gilt),
+    0 0 0 0.45rem var(--medieval-oak-dark),
+    inset 0 0 2.5rem rgba(0, 0, 0, 0.55),
+    0 1.3rem 2.6rem rgba(0, 0, 0, 0.6);
+}
+
+html[data-theme="medieval"] .board-surface {
+  fill: var(--board-surface-shade, #f5e9c8);
+  stroke: #3e2817;
+  stroke-width: 6;
+}
+
+html[data-theme="medieval"] .board-shade-light { stop-color: #fbf3da; }
+html[data-theme="medieval"] .board-shade-dark { stop-color: #dcc08a; }
+
+html[data-theme="medieval"] .route-line--track { stroke: #8a6a45; }
+html[data-theme="medieval"] .route-line--gambit { stroke: var(--medieval-wine); }
+
+html[data-theme="medieval"] .board-hole:not(.is-start, .is-legal-move, .board-hole--star, .board-hole--center) {
+  fill: #fdf6e1;
+}
+
+html[data-theme="medieval"] .board-hole:not(.board-hole--player, .is-legal-move, .board-hole--star, .board-hole--center) {
+  stroke: #5a3f25;
+}
+
+html[data-theme="medieval"] .board-hole--center {
+  fill: var(--medieval-wine);
+  stroke: var(--medieval-gilt);
+  stroke-width: 5;
+}
+
+html[data-theme="medieval"] .base-label {
+  font-family: var(--medieval-display);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* Sidebar: green baize with readable secondary text. */
+html[data-theme="medieval"] .game-controls {
+  --muted: #d9cda8;
+  border: 0.3rem solid #1c2b1b;
+  background:
+    var(--parchment-grain),
+    radial-gradient(ellipse at 50% 0%, #3f6140, #2c452b 60%, #1f321e);
+  box-shadow:
+    inset 0 0 0 0.18rem var(--medieval-gilt),
+    inset 0 0 2rem rgba(0, 0, 0, 0.4),
+    0 0.85rem 1.8rem rgba(0, 0, 0, 0.5);
+}
+
+html[data-theme="medieval"] .progress-board-heading {
+  color: var(--medieval-gilt-light);
+}
+
+html[data-theme="medieval"] .game-controls :is(h2, h3, summary) {
+  font-family: var(--medieval-display);
+  letter-spacing: 0.06em;
+}
+
+html[data-theme="medieval"] :is(.player-dice-card, .progress-board-list li) {
+  --muted: #6e5a42;
+  background: var(--parchment);
+  box-shadow: inset 0 0 1.2rem rgba(120, 78, 24, 0.25), 0 0.3rem 0.6rem rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme="medieval"] .player-dice-card.is-active {
+  background: var(--parchment-grain), linear-gradient(180deg, #f3dc95, #e1c072);
+  box-shadow: 0 0 0 0.18rem var(--player-color), 0 0 1.1rem rgba(240, 200, 110, 0.55), 0 0.3rem 0.6rem rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme="medieval"] .dice .die-button {
+  background: radial-gradient(circle at 35% 30%, #fffaf0, #ead8a8 70%, #cdb57c);
+}
+
+/* Dice table: oak box lined with tooled wine leather. */
+html[data-theme="medieval"] .dice-roll-stage {
+  border: 0.45rem solid var(--medieval-oak-dark);
+  background:
+    repeating-linear-gradient(92deg, rgba(0, 0, 0, 0.16) 0 0.12rem, transparent 0.12rem 0.7rem, rgba(255, 220, 160, 0.06) 0.7rem 0.82rem, transparent 0.82rem 1.6rem),
+    linear-gradient(180deg, #6e4828, #4a2f18);
+  box-shadow: 0 0 0 0.2rem var(--medieval-gilt), 0 1rem 2rem rgba(0, 0, 0, 0.55);
+}
+
+html[data-theme="medieval"] .dice-roll-stage > strong {
+  border-color: var(--medieval-oak-dark);
+  color: var(--medieval-gilt-light);
+  background: linear-gradient(180deg, #2c1a0e, #1d1109);
+  font-family: var(--medieval-display);
+  letter-spacing: 0.05em;
+}
+
+html[data-theme="medieval"] .dice-table-surface {
+  --dice-felt: #6a1a29;
+  --dice-rail: #4a2c14;
+  --dice-face: #f3e6c4;
+  --dice-pip: #2f2115;
+  --dice-ace: #7d1424;
+  border-color: var(--medieval-oak-dark);
+  background:
+    var(--parchment-grain),
+    radial-gradient(ellipse at 50% 45%, #872536 0, #5e1422 58%, #3a0a14 100%);
+  box-shadow:
+    inset 0 0 0 0.25rem rgba(211, 166, 59, 0.55),
+    inset 0 0 0 0.4rem rgba(0, 0, 0, 0.35),
+    inset 0 0 2.5rem rgba(0, 0, 0, 0.6);
+}
+
+html[data-theme="medieval"] .dice-table-ready {
+  color: var(--medieval-gilt-light);
+  font-family: var(--medieval-flourish);
+  opacity: 0.45;
+}
+
+html[data-theme="medieval"] .theme-option {
+  background: var(--parchment-grain), #fff4d2;
+}
+
+html[data-theme="medieval"] .theme-option:has(input:checked) {
+  background: var(--parchment-grain), linear-gradient(180deg, #ecd38a, #d8bc72);
+  box-shadow: 0 0 0 0.16rem var(--medieval-wine), 0.2rem 0.2rem 0 #6e522f;
+}
+
+/* ------------------------------------------------------------------ Gothic */
+
+html[data-theme="gothic"] {
+  --stone-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .75 0 0 0 0 .72 0 0 0 0 .78 0 0 0 .45 -.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --gothic-ember: #b72749;
+  scrollbar-color: var(--gothic-blood) var(--gothic-black);
+}
+
+html[data-theme="gothic"] ::selection {
+  color: #fff;
+  background: var(--gothic-blood);
+}
+
+html[data-theme="gothic"] .app-shell:has([data-screen]:not([hidden])) {
+  background:
+    radial-gradient(ellipse at 50% -10%, rgba(183, 39, 73, 0.32), transparent 34rem),
+    radial-gradient(circle at 12% 30%, rgba(124, 21, 48, 0.3), transparent 22rem),
+    radial-gradient(circle at 88% 80%, rgba(66, 24, 80, 0.38), transparent 26rem),
+    repeating-linear-gradient(90deg, transparent 0 6rem, rgba(188, 180, 191, 0.03) 6rem 6.1rem),
+    linear-gradient(180deg, #0b080e, #050407);
+}
+
+/* Header: a black iron gallery rail with a thin blood line beneath. */
+html[data-theme="gothic"] .site-header {
+  max-width: none;
+  border-bottom: 1px solid #4a3f4d;
+  background: var(--stone-grain), linear-gradient(180deg, #17121a, #09070b);
+  box-shadow: 0 1px 0 var(--gothic-blood), 0 0.2rem 0 #000, 0 0.7rem 1.6rem rgba(0, 0, 0, 0.7);
+}
+
+html[data-theme="gothic"] .brand {
+  color: var(--gothic-bone);
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.22em;
+}
+
+html[data-theme="gothic"] .brand-mark {
+  color: var(--gothic-bone);
+  background: radial-gradient(circle at 40% 35%, #a52648, var(--gothic-wine) 70%);
+  box-shadow: 0 0 0 0.12rem var(--gothic-silver), 0 0 0.9rem rgba(183, 39, 73, 0.6);
+  font-size: 1rem;
+}
+
+html[data-theme="gothic"] .site-header button {
+  border-color: transparent;
+  color: var(--gothic-silver);
+  background: transparent;
+  box-shadow: none;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+html[data-theme="gothic"] .site-header button:hover:not(:disabled) {
+  color: #fff;
+  background: transparent;
+  box-shadow: inset 0 -1px 0 var(--gothic-ember);
+  text-shadow: 0 0 0.6rem rgba(183, 39, 73, 0.9);
+}
+
+/* Carved stone panels: grain, an inner silver hairline and candle-warm vignette. */
+html[data-theme="gothic"] :is(.panel.home-panel, [data-screen="local"] > .panel, [data-screen="lobby"] > .panel, .game-header, .game-controls, .settings-panel, .victory-hero, .victory-scoreboard) {
+  background:
+    var(--stone-grain),
+    radial-gradient(ellipse at 50% 0%, rgba(124, 21, 48, 0.22), transparent 70%),
+    linear-gradient(180deg, #1b161f, #110d14);
+}
+
+html[data-theme="gothic"] :is(.home-panel h2, #settings-title, .victory-scoreboard h2)::after {
+  display: block;
+  width: min(100%, 12rem);
+  height: 0.6rem;
+  margin-top: 0.35rem;
+  background:
+    radial-gradient(circle, var(--gothic-ember) 0 0.18rem, transparent 0.2rem) center / 0.6rem 0.6rem no-repeat,
+    linear-gradient(90deg, transparent, var(--gothic-silver) 30%, var(--gothic-silver) 70%, transparent) center / 100% 1px no-repeat;
+  content: "";
+}
+
+html[data-theme="gothic"] :is([data-screen] button, .settings-panel button):disabled {
+  border-color: #4d424f;
+  color: #8f8592;
+  background: linear-gradient(#2a222c, #1a151c);
+  box-shadow: 0.2rem 0.22rem 0 #000;
+  opacity: 0.8;
+}
+
+html[data-theme="gothic"] :is([data-screen] button, .settings-panel button):active:not(:disabled) {
+  box-shadow: inset 0 0.15rem 0.4rem #000, 0.1rem 0.1rem 0 #000;
+  transform: translateY(0.12rem);
+}
+
+/* Board: a slab of ash-grey marble in an iron frame, lit from the centre. */
+html[data-theme="gothic"] .board {
+  background:
+    var(--stone-grain),
+    radial-gradient(ellipse at 50% 50%, rgba(124, 21, 48, 0.28), transparent 65%),
+    linear-gradient(145deg, #1a141c, #0b080d);
+  box-shadow:
+    0 0 0 0.22rem var(--gothic-wine),
+    0 0 2.6rem rgba(124, 21, 48, 0.35),
+    inset 0 0 3rem #000,
+    0.75rem 0.8rem 0 #000;
+}
+
+html[data-theme="gothic"] .board-surface {
+  fill: var(--board-surface-shade, #d8d0c5);
+  stroke: #2a2130;
+  stroke-width: 7;
+}
+
+html[data-theme="gothic"] .board-shade-light { stop-color: #e9e3da; }
+html[data-theme="gothic"] .board-shade-dark { stop-color: #a69ea4; }
+
+html[data-theme="gothic"] .route-line { stroke: #6f6573; }
+
+html[data-theme="gothic"] .board-hole:not(.is-start, .is-legal-move, .board-hole--star, .board-hole--center) {
+  fill: #f3eee7;
+}
+
+html[data-theme="gothic"] .board-hole:not(.board-hole--player, .is-legal-move, .board-hole--star, .board-hole--center) {
+  stroke: #2b2330;
+}
+
+html[data-theme="gothic"] .board-hole--center {
+  fill: #0d0a0f;
+  stroke: var(--gothic-ember);
+  stroke-width: 6;
+}
+
+html[data-theme="gothic"] .base-label {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+/* Candlelight: the active player's card glows and gently flickers. */
+html[data-theme="gothic"] .player-dice-card {
+  background: var(--stone-grain), linear-gradient(180deg, #1f1922, #151017);
+}
+
+html[data-theme="gothic"] .player-dice-card.is-active {
+  background:
+    var(--stone-grain),
+    radial-gradient(ellipse at 0% 50%, color-mix(in srgb, var(--player-color) 30%, transparent), transparent 70%),
+    linear-gradient(180deg, #2c2130, #1d161f);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-theme="gothic"] .player-dice-card.is-active {
+    animation: gothic-candle 3.2s ease-in-out infinite;
+  }
+}
+
+@keyframes gothic-candle {
+  0%, 100% { box-shadow: 0 0 1rem var(--player-color), 0.35rem 0.35rem 0 #000, 0 0 0 0.2rem var(--player-color); }
+  40% { box-shadow: 0 0 0.55rem var(--player-color), 0.35rem 0.35rem 0 #000, 0 0 0 0.2rem var(--player-color); }
+  55% { box-shadow: 0 0 1.35rem var(--player-color), 0.35rem 0.35rem 0 #000, 0 0 0 0.2rem var(--player-color); }
+}
+
+/* Dice table: an ebony coffer lined with crimson velvet. */
+html[data-theme="gothic"] .dice-roll-stage {
+  border: 0.4rem double var(--gothic-silver);
+  background: var(--stone-grain), linear-gradient(180deg, #19131b, #0b080d);
+  box-shadow: 0 0 0 0.18rem var(--gothic-wine), 0.65rem 0.7rem 1rem #000;
+}
+
+html[data-theme="gothic"] .dice-roll-stage > strong {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+}
+
+html[data-theme="gothic"] .dice-table-surface {
+  --dice-felt: #4a0c1d;
+  --dice-rail: #17111a;
+  --dice-face: #ebe4da;
+  --dice-pip: #120e14;
+  --dice-ace: #9d1c3a;
+  border-color: #050407;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(255, 255, 255, 0.06), transparent 55%),
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.18) 0 0.08rem, transparent 0.08rem 0.35rem),
+    radial-gradient(ellipse at 50% 45%, #5e1226 0, #3a0815 60%, #1c030b 100%);
+  box-shadow: inset 0 0 0 0.16rem #5a4d5c, inset 0 0 3rem #000;
+}
+
+html[data-theme="gothic"] .dice-table-ready {
+  color: var(--gothic-silver);
+  font-family: "UnifrakturCook", Georgia, serif;
+  font-size: 1.6rem;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  opacity: 0.4;
+}
+
+/* ------------------------------------------------------------------- Wacky */
+
+html[data-theme="wacky"] .site-header {
+  max-width: none;
+  border-bottom: 0.25rem solid #111;
+  background:
+    repeating-linear-gradient(-45deg, transparent 0 1.4rem, rgba(17, 17, 17, 0.06) 1.4rem 2.8rem),
+    #ffe600;
+}
+
+html[data-theme="wacky"] .brand { color: #111; }
+
+html[data-theme="wacky"] .brand-mark {
+  color: #ffe600;
+  background: #ff2bd6;
+  box-shadow: 0.15rem 0.15rem 0 #111;
+  border: 0.12rem solid #111;
+}
+
+html[data-theme="wacky"] .site-header button {
+  border: 0.15rem solid #111;
+  color: #111;
+  background: #fff;
+  box-shadow: 0.2rem 0.2rem 0 #111;
+}
+
+html[data-theme="wacky"] .site-header button:hover:not(:disabled) {
+  color: #111;
+  background: #00e5ff;
+  box-shadow: 0.28rem 0.28rem 0 #111;
+}
+
+html[data-theme="wacky"] .dice-table-surface {
+  --dice-felt: #7a2cff;
+  --dice-rail: #ffe600;
+  --dice-ace: #ff2bd6;
+  border-color: #111;
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, 0.16) 0.14rem, transparent 0.16rem) 0 0 / 1.1rem 1.1rem,
+    radial-gradient(ellipse at 50% 45%, #9b5cff, #5d16c9 75%);
+  box-shadow: inset 0 0 0 0.25rem #00e5ff, inset 0 0 2rem rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme="wacky"] .dice-table-ready { color: #ffe600; opacity: 0.6; }
+
+/* ------------------------------------------------------------------- Pixel */
+
+html[data-theme="pixel"] .site-header {
+  max-width: none;
+  border-bottom: 0.25rem solid var(--pixel-deep);
+  background: #5d9d3c;
+  box-shadow: 0 0.25rem 0 #3f6e28, 0 0.5rem 0 var(--pixel-deep);
+}
+
+html[data-theme="pixel"] .brand {
+  color: #fff;
+  font-family: var(--pixel-font);
+  letter-spacing: 0.08em;
+  text-shadow: 0.12rem 0.12rem 0 var(--pixel-deep);
+}
+
+html[data-theme="pixel"] .brand-mark {
+  color: var(--pixel-deep);
+  background: var(--pixel-gold);
+  box-shadow: 0 0 0 0.15rem var(--pixel-deep), 0.2rem 0.2rem 0 0.15rem var(--pixel-deep);
+}
+
+html[data-theme="pixel"] .site-header button {
+  border: 0.18rem solid var(--pixel-deep);
+  color: var(--pixel-deep);
+  background: #f4f0d8;
+  box-shadow: 0.2rem 0.2rem 0 var(--pixel-deep);
+  font-family: var(--pixel-font);
+}
+
+html[data-theme="pixel"] .site-header button:hover:not(:disabled) {
+  background: var(--pixel-gold);
+  box-shadow: 0.28rem 0.28rem 0 var(--pixel-deep);
+}
+
+/* The tray renders at low resolution and scales up crisp, like a sprite. */
+html[data-theme="pixel"] .dice-table-surface {
+  --dice-felt: #5f9f3f;
+  --dice-rail: #87572f;
+  --dice-face: #f4f0d8;
+  --dice-pip: #25251f;
+  --dice-ace: #c2414b;
+  --dice-pixel-ratio: 0.3;
+}
+
+html[data-theme="pixel"] .dice-table-surface canvas {
+  image-rendering: pixelated;
+}
