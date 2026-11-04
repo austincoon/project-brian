@@ -147,6 +147,11 @@ renderBoard(document.querySelector("#home-board-preview"), {
 });
 updateResume();
 
+// Bots get an NPC tag unless their name already says so.
+function needsNpcTag(player) {
+  return isBotUid(player.uid) && !/^NPC\b/i.test(player.name ?? "");
+}
+
 function openDialog(dialog) {
   clearTimeout(botTimer);
   dialog.showModal();
@@ -284,7 +289,7 @@ function renderOnlineLobby() {
     swatch.style.setProperty("--player-color", PLAYERS[player.color].color);
     swatch.setAttribute("aria-hidden", "true");
     row.append(swatch, document.createTextNode(player.name));
-    if (isBotUid(player.uid)) row.append(document.createTextNode(" (NPC)"));
+    if (needsNpcTag(player)) row.append(document.createTextNode(" (NPC)"));
     if (player.uid === onlineRoom.hostUid) row.append(document.createTextNode(" (host)"));
     return row;
   }));
@@ -834,7 +839,7 @@ function renderPlayers() {
     identity.className = "progress-player";
     const name = document.createElement("strong");
     name.textContent = row.name;
-    if (isBotUid(row.uid)) {
+    if (needsNpcTag(row)) {
       const tag = document.createElement("small");
       tag.textContent = "NPC";
       name.append(tag);
@@ -1354,7 +1359,7 @@ setupForm.addEventListener("submit", (event) => {
     };
   }).filter(Boolean);
   playerInputs[0].setCustomValidity(playerInputs[0].value.trim() ? "" : "Enter your name.");
-  playerInputs[1].setCustomValidity(players.length >= 2 ? "" : "Add another player or tick Computer.");
+  playerInputs[1].setCustomValidity(players.length >= 2 ? "" : "Add another player or tick NPC.");
   if (!setupForm.reportValidity()) return;
 
   if (resumableLocalGame() && !confirm("Replace the saved local game with a new game?")) return;
@@ -1386,7 +1391,7 @@ for (const [index, checkbox] of botInputs.entries()) {
   checkbox.addEventListener("change", () => {
     const input = document.querySelector(`#${checkbox.dataset.botFor}`);
     input.disabled = checkbox.checked;
-    input.value = checkbox.checked ? `Computer ${index + 1}` : "";
+    input.value = checkbox.checked ? `NPC ${index + 1}` : "";
     for (const field of playerInputs) field.setCustomValidity("");
     input.setCustomValidity("");
   });

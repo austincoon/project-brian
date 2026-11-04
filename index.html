@@ -18,26 +18,26 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- Skin fonts load without blocking the first paint; the default skin uses system fonts. -->
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Cinzel+Decorative:wght@700&family=Cormorant+Garamond:wght@500;600;700&family=IM+Fell+English:ital@0;1&family=Pixelify+Sans:wght@400..700&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="./styles.css?v=20261028-3">
-    <link rel="stylesheet" href="./polish.css?v=20261028-3">
-    <link rel="stylesheet" href="./skins.css?v=20261028-3">
+    <link rel="stylesheet" href="./styles.css?v=20261104-1">
+    <link rel="stylesheet" href="./polish.css?v=20261104-1">
+    <link rel="stylesheet" href="./skins.css?v=20261104-1">
     <!-- Every app module shares one version so a release never mixes old and new code. Bump them together. -->
     <script type="importmap">
       {
         "imports": {
           "three": "./vendor/three.module.js",
           "three/addons/geometries/": "./vendor/",
-          "./src/board.js": "./src/board.js?v=20261028-3",
-          "./src/bot.js": "./src/bot.js?v=20261028-3",
-          "./src/dice.js": "./src/dice.js?v=20261028-3",
-          "./src/dice-physics.js": "./src/dice-physics.js?v=20261028-3",
-          "./src/dice-scene.js": "./src/dice-scene.js?v=20261028-3",
-          "./src/firebase.js": "./src/firebase.js?v=20261028-3",
-          "./src/game.js": "./src/game.js?v=20261028-3",
-          "./src/replay.js": "./src/replay.js?v=20261028-3",
-          "./src/session.js": "./src/session.js?v=20261028-3",
-          "./src/sound.js": "./src/sound.js?v=20261028-3",
-          "./src/theme.js": "./src/theme.js?v=20261028-3"
+          "./src/board.js": "./src/board.js?v=20261104-1",
+          "./src/bot.js": "./src/bot.js?v=20261104-1",
+          "./src/dice.js": "./src/dice.js?v=20261104-1",
+          "./src/dice-physics.js": "./src/dice-physics.js?v=20261104-1",
+          "./src/dice-scene.js": "./src/dice-scene.js?v=20261104-1",
+          "./src/firebase.js": "./src/firebase.js?v=20261104-1",
+          "./src/game.js": "./src/game.js?v=20261104-1",
+          "./src/replay.js": "./src/replay.js?v=20261104-1",
+          "./src/session.js": "./src/session.js?v=20261104-1",
+          "./src/sound.js": "./src/sound.js?v=20261104-1",
+          "./src/theme.js": "./src/theme.js?v=20261104-1"
         }
       }
     </script>
@@ -64,7 +64,7 @@
 
         <section class="panel home-panel home-panel-local" aria-labelledby="local-card-title">
           <h2 id="local-card-title">Play here</h2>
-          <p class="home-panel-copy">Play with friends or computer players.</p>
+          <p class="home-panel-copy">Play with friends or NPCs.</p>
           <div class="local-card-art" aria-hidden="true"><span>⚄</span><span>⚂</span></div>
           <button id="local-mode-button" type="button">Set up a local game →</button>
         </section>
@@ -107,22 +107,22 @@
             <label for="player-2">Player 2</label>
             <div class="player-entry">
               <input id="player-2" name="playerName" maxlength="24" autocomplete="off">
-              <label class="bot-toggle"><input type="checkbox" data-bot-for="player-2" aria-label="Computer player 2"> Computer</label>
+              <label class="bot-toggle"><input type="checkbox" data-bot-for="player-2" aria-label="Player 2 is an NPC"> NPC</label>
             </div>
 
             <label for="player-3">Player 3 <span class="muted">(optional)</span></label>
             <div class="player-entry">
               <input id="player-3" name="playerName" maxlength="24" autocomplete="off">
-              <label class="bot-toggle"><input type="checkbox" data-bot-for="player-3" aria-label="Computer player 3"> Computer</label>
+              <label class="bot-toggle"><input type="checkbox" data-bot-for="player-3" aria-label="Player 3 is an NPC"> NPC</label>
             </div>
 
             <label for="player-4">Player 4 <span class="muted">(optional)</span></label>
             <div class="player-entry">
               <input id="player-4" name="playerName" maxlength="24" autocomplete="off">
-              <label class="bot-toggle"><input type="checkbox" data-bot-for="player-4" aria-label="Computer player 4"> Computer</label>
+              <label class="bot-toggle"><input type="checkbox" data-bot-for="player-4" aria-label="Player 4 is an NPC"> NPC</label>
             </div>
           </fieldset>
-          <p class="setup-note">Local games save automatically. Computer skill is in Settings.</p>
+          <p class="setup-note">Local games save automatically. NPC skill is in Settings.</p>
           <button type="submit">Start local game</button>
           <button class="text-button" type="button" data-home>Back</button>
         </form>
@@ -262,7 +262,7 @@
           </label>
         </fieldset>
         <div class="preference-row" role="radiogroup" aria-labelledby="bot-skill-title">
-          <span><strong id="bot-skill-title">Computer skill</strong><small>How carefully computer players choose moves.</small></span>
+          <span><strong id="bot-skill-title">NPC skill</strong><small>How carefully NPCs choose moves.</small></span>
           <span class="segmented">
             <label><input type="radio" name="bot-skill" value="easy"><span>Easy</span></label>
             <label><input type="radio" name="bot-skill" value="normal"><span>Normal</span></label>
@@ -293,6 +293,6 @@
       </form>
     </dialog>
 
-    <script type="module" src="./src/app.js?v=20261028-3"></script>
+    <script type="module" src="./src/app.js?v=20261104-1"></script>
   </body>
 </html>
