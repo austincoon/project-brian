@@ -152,10 +152,15 @@ html[data-theme="wacky"] .turn-guide button { background: #ff2bd6; color: #111; 
 .move-choice.is-capture .move-die { color: #fff; background: #c2414b; border-color: #c2414b; }
 
 /* Scoreboard rows carry each player's latest dice. */
-.progress-board-list li { grid-template-columns: minmax(0, 1fr) auto auto; }
-.progress-board-list .progress-player { grid-column: 1 / 3; }
+/* The name gets the whole top line; the Home count sits beside the captures below it. */
+.progress-board-list li { grid-template-columns: auto minmax(0, 1fr) auto; row-gap: .3rem; }
+.progress-board-list .progress-player { display: contents; }
+.progress-board-list .progress-player strong { grid-column: 1 / -1; grid-row: 1; min-width: 0; }
+.progress-board-list .progress-marbles { grid-column: 1 / 3; grid-row: 2; }
+.progress-board-list .progress-player > span { grid-column: 1; grid-row: 3; white-space: nowrap; }
+.progress-board-list .progress-captures { grid-column: 2; grid-row: 3; }
 .progress-player small { margin-left: .35rem; color: var(--muted); font-size: .6rem; font-weight: 700; letter-spacing: .06em; }
-.progress-board-list .dice.progress-dice { grid-column: 3; grid-row: 1 / 3; align-self: center; gap: .25rem; padding: 0; }
+.progress-board-list .dice.progress-dice { grid-column: 3; grid-row: 2 / 4; align-self: center; gap: .25rem; padding: 0; }
 .progress-board-list .dice.progress-dice .die-button { width: 1.55rem; padding: .17rem; border-width: 1px; border-radius: .3rem; box-shadow: none; transform: none; font-size: .7rem; }
 .progress-dice .die-pip { width: .22rem; }
 .progress-dice .die-button.is-empty { color: var(--muted); }
@@ -219,12 +224,11 @@ kbd { padding: .05rem .35rem; border: 1px solid var(--line); border-bottom-width
   .board-stage { width: 100%; margin: 0; }
   .board { padding: .2rem; }
   .progress-board-list { display: grid; grid-template-columns: 1fr 1fr; }
-  .progress-player { flex-wrap: wrap; gap: .25rem; }
-  .progress-board-list li { grid-template-columns: minmax(0, 1fr) auto; }
-  .progress-board-list .progress-player { grid-column: 1 / -1; }
+  .progress-board-list li { grid-template-columns: minmax(0, 1fr) auto; row-gap: .25rem; }
   .progress-board-list .progress-marbles { grid-column: 1; grid-row: 2; }
-  .progress-board-list .progress-captures { grid-column: 1; grid-row: 3; }
-  .progress-board-list .dice.progress-dice { grid-column: 2; grid-row: 2 / 4; }
+  .progress-board-list .progress-player > span { grid-column: 1; grid-row: 3; }
+  .progress-board-list .progress-captures { grid-column: 1; grid-row: 4; }
+  .progress-board-list .dice.progress-dice { grid-column: 2; grid-row: 2 / 5; }
   .rules-grid { gap: 1rem; }
 }
 @media (max-width: 460px) {
@@ -239,6 +243,12 @@ kbd { padding: .05rem .35rem; border: 1px solid var(--line); border-bottom-width
   .rules-grid { grid-template-columns: 1fr; }
   .help-dialog { padding: 1.2rem; }
   .help-dialog h2 { font-size: 1.6rem; }
+  /* Half-width cards cut long names, so phones stack the scoreboard one player per row. */
+  .progress-board-list { grid-template-columns: minmax(0, 1fr); }
+  .progress-board-list li { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .progress-board-list .progress-marbles { grid-column: 1 / 3; }
+  .progress-board-list .progress-captures { grid-column: 2; grid-row: 3; }
+  .progress-board-list .dice.progress-dice { grid-column: 3; grid-row: 2 / 4; }
 }
 
 /* Dark: the default skin with a night-table palette. Selectors outrank the default skin's own rules. */

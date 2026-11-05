@@ -839,6 +839,7 @@ function renderPlayers() {
     identity.className = "progress-player";
     const name = document.createElement("strong");
     name.textContent = row.name;
+    name.title = row.name;
     if (needsNpcTag(row)) {
       const tag = document.createElement("small");
       tag.textContent = "NPC";
